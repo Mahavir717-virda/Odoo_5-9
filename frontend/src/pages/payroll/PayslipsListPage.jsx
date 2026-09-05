@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   FileText,
   Search,
@@ -17,6 +18,25 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { listPayslips, listPayruns } from "../../services/payrollManagerService";
+import DataTable from "../../components/common/DataTable";
+
+const STAGGER_CONTAINER_VARIANTS = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.06,
+    },
+  },
+};
+
+const CARD_ANIMATION_VARIANTS = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.25, ease: "easeOut" },
+  },
+};
 
 export default function PayslipsListPage() {
   const navigate = useNavigate();
@@ -152,8 +172,13 @@ export default function PayslipsListPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+      <motion.div
+        variants={STAGGER_CONTAINER_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      >
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Total Net Payout
@@ -166,9 +191,9 @@ export default function PayslipsListPage() {
           <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <DollarSign className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Total Gross Wages
@@ -181,9 +206,9 @@ export default function PayslipsListPage() {
           <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
             <TrendingUp className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Paid Slips
@@ -196,9 +221,9 @@ export default function PayslipsListPage() {
           <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <CheckCircle2 className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Draft / Pending
@@ -211,8 +236,8 @@ export default function PayslipsListPage() {
           <div className="p-3 bg-amber-50 rounded-xl text-amber-600">
             <Clock className="w-6 h-6" />
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Error Alert */}
       {error && (
@@ -266,136 +291,157 @@ export default function PayslipsListPage() {
         </div>
       </div>
 
-      {/* Table Container */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="p-12 text-center">
-            <RefreshCw className="w-8 h-8 animate-spin text-[#7743db] mx-auto mb-3" />
-            <p className="text-sm text-slate-500">Loading employee payslips...</p>
-          </div>
-        ) : filteredPayslips.length === 0 ? (
-          <div className="p-12 text-center">
-            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-900">No payslips found</h3>
-            <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
-              {search || payrunFilter !== "all" || statusFilter !== "all"
-                ? "Try adjusting your search criteria or active filters."
-                : "Generate payslips by computing a payrun batch."}
-            </p>
-            {payrunFilter === "all" && (
-              <div className="mt-4">
-                <Link
-                  to="/payroll/payruns"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white transition shadow-sm"
-                >
-                  <Layers className="w-4 h-4" />
-                  View Payruns
-                </Link>
+      {/* Table Section */}
+      <DataTable
+        columns={[
+          {
+            key: "number",
+            header: "Reference / Slip",
+            sortable: true,
+            render: (slip) => {
+              const refCode = slip.number || slip.reference || `SLIP-#${slip.id}`;
+              return (
+                <span className="font-mono text-xs font-semibold text-[#7743db]">
+                  {refCode}
+                </span>
+              );
+            },
+          },
+          {
+            key: "employee",
+            header: "Employee",
+            sortable: true,
+            render: (slip) => {
+              const empName = `${slip.employee_first_name || slip.first_name || "Employee"} ${
+                slip.employee_last_name || slip.last_name || ""
+              }`.trim();
+              const empCode = slip.employee_code || slip.emp_code || `EMP-${slip.employee_id}`;
+              const jobTitle = slip.employee_job_title || slip.job_title || "Staff Member";
+              return (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#ede5fb] text-[#7743db] font-semibold text-xs flex items-center justify-center flex-shrink-0">
+                    {empName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900 group-hover:text-[#7743db] transition">
+                      {empName}
+                    </p>
+                    <p className="text-xs text-slate-400">{jobTitle} • {empCode}</p>
+                  </div>
+                </div>
+              );
+            },
+          },
+          {
+            key: "payrun",
+            header: "Payrun / Period",
+            sortable: true,
+            render: (slip) => (
+              <div className="flex flex-col">
+                <span className="font-semibold text-xs text-slate-900">
+                  {slip.payrun_name || `Batch #${slip.payrun_id}`}
+                </span>
+                <span className="text-[11px] text-slate-400">
+                  {slip.period_start ? `${slip.period_start} → ${slip.period_end}` : "Monthly Cycle"}
+                </span>
               </div>
-            )}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  <th className="py-3.5 px-4 pl-6">Reference / Slip</th>
-                  <th className="py-3.5 px-4">Employee</th>
-                  <th className="py-3.5 px-4">Payrun / Period</th>
-                  <th className="py-3.5 px-4 text-right">Basic Wage</th>
-                  <th className="py-3.5 px-4 text-right">Gross Pay</th>
-                  <th className="py-3.5 px-4 text-right">Deductions</th>
-                  <th className="py-3.5 px-4 text-right">Net Wage</th>
-                  <th className="py-3.5 px-4 text-center">Status</th>
-                  <th className="py-3.5 px-4 pr-6 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
-                {filteredPayslips.map((slip) => {
-                  const empName = `${slip.employee_first_name || slip.first_name || "Employee"} ${
-                    slip.employee_last_name || slip.last_name || ""
-                  }`.trim();
-                  const empCode = slip.employee_code || slip.emp_code || `EMP-${slip.employee_id}`;
-                  const jobTitle = slip.employee_job_title || slip.job_title || "Staff Member";
-                  const refCode = slip.number || slip.reference || `SLIP-#${slip.id}`;
-                  const basicWage = parseFloat(slip.basic_wage || slip.basic_salary || 0);
-                  const grossWage = parseFloat(slip.gross_wage || slip.gross_salary || 0);
-                  const netWage = parseFloat(slip.net_wage || slip.net_salary || slip.net_amount || 0);
-                  const totalDeductions = grossWage > netWage ? grossWage - netWage : 0;
-
-                  return (
-                    <tr
-                      key={slip.id}
-                      className="hover:bg-slate-50/80 transition group cursor-pointer"
-                      onClick={() => navigate(`/payroll/payslips/${slip.id}`)}
-                    >
-                      <td className="py-3.5 px-4 pl-6 font-mono text-xs font-medium text-[#7743db]">
-                        {refCode}
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#ede5fb] text-[#7743db] font-semibold text-xs flex items-center justify-center flex-shrink-0">
-                            {empName.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-900 group-hover:text-[#7743db] transition">
-                              {empName}
-                            </p>
-                            <p className="text-xs text-slate-400">{jobTitle} â€¢ {empCode}</p>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-slate-600">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-xs text-slate-900">
-                            {slip.payrun_name || `Batch #${slip.payrun_id}`}
-                          </span>
-                          <span className="text-[11px] text-slate-400">
-                            {slip.period_start ? `${slip.period_start} â†’ ${slip.period_end}` : "Monthly Cycle"}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right font-medium text-slate-600">
-                        ${basicWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right font-medium text-slate-900">
-                        ${grossWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right font-medium text-rose-600">
-                        -${totalDeductions.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right font-bold text-emerald-600">
-                        ${netWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        {getStatusBadge(slip.status || slip.state)}
-                      </td>
-
-                      <td className="py-3.5 px-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
-                        <Link
-                          to={`/payroll/payslips/${slip.id}`}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:text-[#7743db] hover:bg-slate-100 transition"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          Details
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+            ),
+          },
+          {
+            key: "basic_wage",
+            header: "Basic Wage",
+            sortable: true,
+            align: "right",
+            render: (slip) => {
+              const basicWage = parseFloat(slip.basic_wage || slip.basic_salary || 0);
+              return (
+                <span className="font-medium text-slate-600">
+                  ${basicWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </span>
+              );
+            },
+          },
+          {
+            key: "gross_wage",
+            header: "Gross Pay",
+            sortable: true,
+            align: "right",
+            render: (slip) => {
+              const grossWage = parseFloat(slip.gross_wage || slip.gross_salary || 0);
+              return (
+                <span className="font-bold text-slate-900">
+                  ${grossWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </span>
+              );
+            },
+          },
+          {
+            key: "deductions",
+            header: "Deductions",
+            align: "right",
+            render: (slip) => {
+              const grossWage = parseFloat(slip.gross_wage || slip.gross_salary || 0);
+              const netWage = parseFloat(slip.net_wage || slip.net_salary || slip.net_amount || 0);
+              const totalDeductions = grossWage > netWage ? grossWage - netWage : 0;
+              return (
+                <span className="font-semibold text-rose-500">
+                  -${totalDeductions.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </span>
+              );
+            },
+          },
+          {
+            key: "net_wage",
+            header: "Net Wage",
+            sortable: true,
+            align: "right",
+            render: (slip) => {
+              const netWage = parseFloat(slip.net_wage || slip.net_salary || slip.net_amount || 0);
+              return (
+                <span className="font-bold text-emerald-600">
+                  ${netWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </span>
+              );
+            },
+          },
+          {
+            key: "status",
+            header: "Status",
+            align: "center",
+            render: (slip) => getStatusBadge(slip.status || slip.state),
+          },
+          {
+            key: "actions",
+            header: "Action",
+            align: "right",
+            render: (slip) => (
+              <Link
+                to={`/payroll/payslips/${slip.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:text-[#7743db] hover:bg-slate-100 transition"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                Details
+              </Link>
+            ),
+          },
+        ]}
+        data={filteredPayslips}
+        loading={loading}
+        error={error}
+        onRetry={fetchData}
+        onRowClick={(slip) => navigate(`/payroll/payslips/${slip.id}`)}
+        emptyState={{
+          icon: FileText,
+          title: "No payslips found",
+          description:
+            search || payrunFilter !== "all" || statusFilter !== "all"
+              ? "Try adjusting your search criteria or active filters."
+              : "Generate payslips by computing a payrun batch.",
+          actionLabel: payrunFilter === "all" ? "View Payruns" : undefined,
+          onAction: payrunFilter === "all" ? () => navigate("/payroll/payruns") : undefined,
+        }}
+      />
     </div>
   );
 }
-

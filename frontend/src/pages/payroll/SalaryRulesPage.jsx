@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   FileText,
   Plus,
@@ -22,6 +23,25 @@ import {
   updateSalaryRule,
   deleteSalaryRule,
 } from "../../services/payrollManagerService";
+import DataTable from "../../components/common/DataTable";
+
+const STAGGER_CONTAINER_VARIANTS = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.06,
+    },
+  },
+};
+
+const CARD_ANIMATION_VARIANTS = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.25, ease: "easeOut" },
+  },
+};
 
 export default function SalaryRulesPage() {
   const [rules, setRules] = useState([]);
@@ -270,8 +290,13 @@ export default function SalaryRulesPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+      <motion.div
+        variants={STAGGER_CONTAINER_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      >
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Rules</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalCount}</h3>
@@ -280,9 +305,9 @@ export default function SalaryRulesPage() {
           <div className="p-3 bg-[#f6f2fd] rounded-xl text-[#7743db]">
             <Layers className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Allowances (+)</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">{allowanceCount}</h3>
@@ -291,9 +316,9 @@ export default function SalaryRulesPage() {
           <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <Plus className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Deductions (-)</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">{deductionCount}</h3>
@@ -302,9 +327,9 @@ export default function SalaryRulesPage() {
           <div className="p-3 bg-rose-50 rounded-xl text-rose-600">
             <Percent className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Base & Totals</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">{basicGrossCount}</h3>
@@ -313,8 +338,8 @@ export default function SalaryRulesPage() {
           <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
             <Calculator className="w-6 h-6" />
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Error Alert */}
       {error && (
@@ -365,113 +390,107 @@ export default function SalaryRulesPage() {
       </div>
 
       {/* Rules Table */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="p-12 text-center">
-            <RefreshCw className="w-8 h-8 animate-spin text-[#7743db] mx-auto mb-3" />
-            <p className="text-sm text-slate-500">Loading salary rules...</p>
-          </div>
-        ) : filteredRules.length === 0 ? (
-          <div className="p-12 text-center">
-            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-900">No salary rules found</h3>
-            <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
-              {search || categoryFilter !== "all" || typeFilter !== "all"
-                ? "Try adjusting your search criteria or active filters."
-                : "Create rules to calculate allowances, deductions, and gross/net pay."}
-            </p>
-            {!search && (
-              <button
-                onClick={openCreateModal}
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white transition shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Add Salary Rule
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  <th className="py-3.5 px-4 pl-6 w-16">Seq</th>
-                  <th className="py-3.5 px-4">Code & Name</th>
-                  <th className="py-3.5 px-4">Category</th>
-                  <th className="py-3.5 px-4">Computation Type</th>
-                  <th className="py-3.5 px-4">Value / Formula</th>
-                  <th className="py-3.5 px-4">Description</th>
-                  <th className="py-3.5 px-4 pr-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
-                {filteredRules.map((rule) => (
-                  <tr
-                    key={rule.id}
-                    className="hover:bg-slate-50/80 transition group"
-                  >
-                    <td className="py-3.5 px-4 pl-6 font-mono text-xs text-slate-400">
-                      {rule.sequence || 10}
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-slate-900">
-                            {rule.name}
-                          </span>
-                          <span className="font-mono text-xs font-semibold text-[#7743db] bg-[#f6f2fd] px-1.5 py-0.5 rounded border border-indigo-100">
-                            {rule.code}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      {getCategoryBadge(rule.category)}
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      {getTypeBadge(rule.type)}
-                    </td>
-
-                    <td className="py-3.5 px-4 font-mono text-xs font-medium text-slate-700">
-                      {rule.type === "percent"
-                        ? `${rule.value ?? rule.amount}%`
-                        : rule.type === "formula"
-                        ? `${rule.value || "BASIC * 0.1"}`
-                        : `$${parseFloat(rule.value ?? rule.amount ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-xs text-slate-500 max-w-xs truncate">
-                      {rule.description || "-"}
-                    </td>
-
-                    <td className="py-3.5 px-4 pr-6 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => openEditModal(rule)}
-                          className="p-1.5 rounded-lg text-slate-600 hover:text-[#7743db] hover:bg-slate-100 transition"
-                          title="Edit Rule"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(rule.id, rule.name)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
-                          title="Delete Rule"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <DataTable
+        columns={[
+          {
+            key: "sequence",
+            header: "Seq",
+            sortable: true,
+            width: "70px",
+            render: (rule) => (
+              <span className="font-mono text-xs text-slate-400">
+                {rule.sequence || 10}
+              </span>
+            ),
+          },
+          {
+            key: "name",
+            header: "Code & Name",
+            sortable: true,
+            render: (rule) => (
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-slate-900">
+                  {rule.name}
+                </span>
+                <span className="font-mono text-xs font-semibold text-[#7743db] bg-[#f6f2fd] px-1.5 py-0.5 rounded border border-indigo-100">
+                  {rule.code}
+                </span>
+              </div>
+            ),
+          },
+          {
+            key: "category",
+            header: "Category",
+            sortable: true,
+            render: (rule) => getCategoryBadge(rule.category),
+          },
+          {
+            key: "type",
+            header: "Computation Type",
+            sortable: true,
+            render: (rule) => getTypeBadge(rule.type),
+          },
+          {
+            key: "amount",
+            header: "Value / Formula",
+            render: (rule) => (
+              <span className="font-mono text-xs font-medium text-slate-700 bg-slate-100/70 px-2 py-1 rounded">
+                {rule.type === "percent"
+                  ? `${rule.value ?? rule.amount}%`
+                  : rule.type === "formula"
+                  ? `${rule.value || "BASIC * 0.1"}`
+                  : `$${parseFloat(rule.value ?? rule.amount ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
+              </span>
+            ),
+          },
+          {
+            key: "description",
+            header: "Description",
+            render: (rule) => (
+              <span className="text-xs text-slate-500 max-w-xs truncate block">
+                {rule.description || "—"}
+              </span>
+            ),
+          },
+          {
+            key: "actions",
+            header: "Actions",
+            align: "right",
+            render: (rule) => (
+              <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => openEditModal(rule)}
+                  className="p-1.5 rounded-lg text-slate-600 hover:text-[#7743db] hover:bg-slate-100 transition"
+                  title="Edit Rule"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDelete(rule.id, rule.name)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                  title="Delete Rule"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ),
+          },
+        ]}
+        data={filteredRules}
+        loading={loading}
+        error={error}
+        onRetry={fetchRules}
+        emptyState={{
+          icon: FileText,
+          title: "No salary rules found",
+          description:
+            search || categoryFilter !== "all" || typeFilter !== "all"
+              ? "Try adjusting your search criteria or active filters."
+              : "Create rules to calculate allowances, deductions, and gross/net pay.",
+          actionLabel: !search ? "Add Salary Rule" : undefined,
+          onAction: !search ? openCreateModal : undefined,
+        }}
+      />
 
       {/* Create / Edit Rule Modal */}
       {isModalOpen && (

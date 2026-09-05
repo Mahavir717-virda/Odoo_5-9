@@ -25,6 +25,7 @@
  */
 
 import { useState, useMemo, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   Table,
   TableHeader,
@@ -55,6 +56,40 @@ import {
   MoreVertical,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
+
+/**
+ * Optimized Framer Motion Stagger Animation Variants for Table Rows
+ * Fast, buttery-smooth opacity fade & subtle rise for seamless row loading.
+ */
+const TABLE_CONTAINER_VARIANTS = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.035,
+      delayChildren: 0.01,
+    },
+  },
+};
+
+const TABLE_ROW_VARIANTS = {
+  hidden: {
+    opacity: 0,
+    y: 6,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.16,
+      ease: [0.25, 0.1, 0.25, 1],
+    },
+  },
+};
+
+// Motion-enhanced table primitives for smooth row stagger animations
+const MotionTableBody = motion(TableBody);
+const MotionTableRow = motion(TableRow);
 
 /**
  * Reusable RowActionsMenu sub-component for generic action menus
@@ -175,6 +210,10 @@ export default function DataTable({
   const startRecord = sortedData.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endRecord = Math.min(currentPage * pageSize, sortedData.length);
 
+  // Robust animation key that detects page, sorting, searching, data length, AND dataset changes
+  const firstRowId = paginatedData[0]?.id || "empty";
+  const tableAnimationKey = `table-rows-${currentPage}-${sortConfig.key || "none"}-${sortConfig.direction || "none"}-${searchValue}-${data.length}-${firstRowId}`;
+
   return (
     <div className={cn("w-full space-y-4", className)}>
       {/* Optional Search Bar */}
@@ -193,11 +232,11 @@ export default function DataTable({
       )}
 
       {/* Table Container */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
         <div className="overflow-auto max-h-[650px] relative">
           <Table className="w-full">
-            <TableHeader className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
-              <TableRow className="hover:bg-transparent">
+            <TableHeader className="sticky top-0 z-10 bg-[#f8fafc] border-b border-slate-200/80">
+              <TableRow className="hover:bg-transparent border-b border-slate-200/80">
                 {columns.map((col) => {
                   const isSortable = Boolean(col.sortable);
                   const isSorted = sortConfig.key === col.key;
@@ -207,12 +246,12 @@ export default function DataTable({
                       key={col.key}
                       style={{ width: col.width }}
                       className={cn(
-                        "font-semibold text-[11px] uppercase tracking-wider text-slate-700 select-none py-3 px-4 bg-[#f7efe5]/70 border-b border-[#eae0d5]",
+                        "font-bold text-[11px] uppercase tracking-wider text-slate-500 select-none py-3.5 px-4 bg-[#f8fafc]",
                         isSortable && "cursor-pointer hover:text-[#7743db] transition-colors"
                       )}
                       onClick={() => isSortable && handleSort(col.key)}
                     >
-                      <div className="flex items-center gap-1.5">
+                      <div className={cn("flex items-center gap-1.5", col.align === "right" && "justify-end", col.align === "center" && "justify-center")}>
                         <span>{col.header}</span>
                         {isSortable && (
                           <span className="inline-flex shrink-0">
@@ -232,10 +271,10 @@ export default function DataTable({
               </TableRow>
             </TableHeader>
 
-            <TableBody>
-              {/* Loading State: 5 skeleton rows */}
-              {loading &&
-                Array.from({ length: 5 }).map((_, rIndex) => (
+            {/* Loading State: Skeleton Rows */}
+            {loading && (
+              <TableBody>
+                {Array.from({ length: 5 }).map((_, rIndex) => (
                   <TableRow key={`skeleton-row-${rIndex}`}>
                     {columns.map((col, cIndex) => (
                       <TableCell key={`skeleton-cell-${rIndex}-${cIndex}`} className="py-3.5 px-4">
@@ -244,9 +283,12 @@ export default function DataTable({
                     ))}
                   </TableRow>
                 ))}
+              </TableBody>
+            )}
 
-              {/* Error State */}
-              {!loading && error && (
+            {/* Error State */}
+            {!loading && error && (
+              <TableBody>
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-64 text-center">
                     <div className="flex flex-col items-center justify-center p-6 space-y-3">
@@ -266,7 +308,7 @@ export default function DataTable({
                           variant="outline"
                           size="sm"
                           onClick={onRetry}
-                          className="mt-2 text-xs flex items-center gap-1.5 border-[#eae0d5] hover:bg-[#f7efe5]"
+                          className="mt-2 text-xs flex items-center gap-1.5 border-slate-200 hover:bg-slate-50"
                         >
                           <RefreshCw className="w-3.5 h-3.5" />
                           Retry
@@ -275,10 +317,12 @@ export default function DataTable({
                     </div>
                   </TableCell>
                 </TableRow>
-              )}
+              </TableBody>
+            )}
 
-              {/* Empty State */}
-              {!loading && !error && paginatedData.length === 0 && (
+            {/* Empty State */}
+            {!loading && !error && paginatedData.length === 0 && (
+              <TableBody>
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-72 text-center p-6">
                     {emptyState ? (
@@ -296,48 +340,60 @@ export default function DataTable({
                     )}
                   </TableCell>
                 </TableRow>
-              )}
+              </TableBody>
+            )}
 
-              {/* Data Rows */}
-              {!loading &&
-                !error &&
-                paginatedData.map((row) => (
-                  <TableRow
+            {/* Data Rows with Staggered Entrance Animation */}
+            {!loading && !error && paginatedData.length > 0 && (
+              <MotionTableBody
+                key={tableAnimationKey}
+                variants={TABLE_CONTAINER_VARIANTS}
+                initial="hidden"
+                animate="visible"
+              >
+                {paginatedData.map((row) => (
+                  <MotionTableRow
                     key={row.id}
+                    variants={TABLE_ROW_VARIANTS}
                     onClick={() => onRowClick && onRowClick(row)}
                     className={cn(
-                      "transition-colors border-b border-[#eae0d5]/60 last:border-0",
-                      onRowClick && "cursor-pointer hover:bg-[#f7efe5]/50"
+                      "transition-colors border-b border-slate-100 last:border-0 hover:bg-slate-50/80 group",
+                      onRowClick && "cursor-pointer"
                     )}
                   >
                     {columns.map((col) => (
                       <TableCell
                         key={`${row.id}-${col.key}`}
-                        className="py-3 px-4 text-sm text-[#1e1b24] align-middle"
+                        className={cn(
+                          "py-3.5 px-4 text-sm text-slate-800 align-middle",
+                          col.align === "right" && "text-right",
+                          col.align === "center" && "text-center"
+                        )}
                       >
                         {col.render ? col.render(row) : row[col.key] ?? "—"}
                       </TableCell>
                     ))}
-                  </TableRow>
+                  </MotionTableRow>
                 ))}
-            </TableBody>
+              </MotionTableBody>
+            )}
           </Table>
         </div>
 
         {/* Pagination Footer */}
         {!loading && !error && sortedData.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-[#eae0d5] bg-[#f7efe5]/50 text-xs text-slate-500">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200/80 bg-[#f8fafc] text-xs text-slate-500">
             <div>
-              Showing <span className="font-semibold text-[#1e1b24]">{startRecord}</span> to{" "}
-              <span className="font-semibold text-[#1e1b24]">{endRecord}</span> of{" "}
-              <span className="font-semibold text-[#1e1b24]">{sortedData.length}</span> records
+              Showing <span className="font-semibold text-slate-900">{startRecord}</span> to{" "}
+              <span className="font-semibold text-slate-900">{endRecord}</span> of{" "}
+              <span className="font-semibold text-slate-900">{sortedData.length}</span> records
             </div>
 
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 px-2.5 text-xs border-[#eae0d5] bg-white hover:bg-[#f7efe5]"
+                className="h-8 px-2.5 text-xs border-slate-200 bg-white hover:bg-slate-50"
                 disabled={currentPage <= 1}
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               >
@@ -345,14 +401,14 @@ export default function DataTable({
                 Previous
               </Button>
 
-              <span className="px-2 text-xs font-medium text-foreground">
+              <span className="px-2 text-xs font-medium text-slate-700">
                 Page {currentPage} of {totalPages}
               </span>
 
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 px-2.5 text-xs border-[#eae0d5] bg-white hover:bg-[#f7efe5]"
+                className="h-8 px-2.5 text-xs border-slate-200 bg-white hover:bg-slate-50"
                 disabled={currentPage >= totalPages}
                 onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               >

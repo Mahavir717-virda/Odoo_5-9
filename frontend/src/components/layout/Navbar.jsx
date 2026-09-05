@@ -132,17 +132,17 @@ export default function Navbar({ onMobileMenuClick }) {
   };
 
   return (
-    <header className="h-16 bg-[#fffbf5] border-b border-[#eae0d5] px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_3px_0_rgb(0_0_0/0.03)]">
+    <header className="h-16 bg-white/75 backdrop-blur-md border-b border-slate-200/60 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
       {/* Left side: Hamburger + Page Title */}
       <div className="flex items-center gap-3">
         <button
           onClick={onMobileMenuClick}
-          className="md:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-[#f7efe5] transition-colors"
+          className="md:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           aria-label="Open sidebar"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-semibold text-[#1e1b24]">
+        <h1 className="text-lg font-bold text-slate-800">
           {pageTitle}
         </h1>
       </div>
@@ -155,7 +155,7 @@ export default function Navbar({ onMobileMenuClick }) {
           <input
             type="text"
             placeholder="Search..."
-            className="w-full pl-9 pr-3 py-1.5 text-sm bg-[#f7efe5]/70 border border-[#eae0d5] rounded-lg focus:bg-white focus:border-[#7743db] focus:ring-2 focus:ring-[#7743db]/15 text-[#1e1b24] placeholder-slate-400 focus:outline-none transition-all"
+            className="w-full pl-9 pr-3 py-1.5 text-sm bg-slate-100/80 border border-slate-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 text-slate-800 placeholder-slate-400 focus:outline-none transition-all"
           />
         </div>
 
@@ -166,21 +166,21 @@ export default function Navbar({ onMobileMenuClick }) {
               setShowNotifications(!showNotifications);
               setShowProfileMenu(false);
             }}
-            className="relative p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-[#f7efe5] transition-colors"
+            className="relative p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
             aria-label="Notifications"
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 text-[9px] font-bold bg-[#7743db] text-white rounded-full flex items-center justify-center leading-none shadow-sm">
+              <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 text-[9px] font-bold bg-blue-600 text-white rounded-full flex items-center justify-center leading-none shadow-xs">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-[#eae0d5] py-0 z-50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-[#eae0d5] flex justify-between items-center bg-[#f7efe5]/80">
-                <span className="font-semibold text-sm text-[#1e1b24]">Notifications</span>
+            <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-0 z-50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-200/80 flex justify-between items-center bg-slate-50/80">
+                <span className="font-semibold text-sm text-slate-800">Notifications</span>
                 {unreadCount > 0 ? (
                   <button
                     onClick={handleMarkAllRead}
