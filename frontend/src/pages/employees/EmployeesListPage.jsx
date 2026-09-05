@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users,
@@ -254,7 +254,7 @@ export default function EmployeesListPage() {
         key: "managerName",
         header: "Manager",
         sortable: true,
-        render: (row) => row.managerName || <span className="text-muted-foreground">—</span>,
+        render: (row) => row.managerName || <span className="text-muted-foreground">â€”</span>,
       },
       {
         key: "workSchedule",
@@ -364,7 +364,7 @@ export default function EmployeesListPage() {
               <Button
                 size="sm"
                 onClick={() => navigate("/employees/new")}
-                className="text-xs gap-1.5 shadow-xs"
+                className="text-xs gap-1.5 shadow-sm"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 Add Employee
@@ -548,3 +548,4 @@ export default function EmployeesListPage() {
     </div>
   );
 }
+

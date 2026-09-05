@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   DollarSign,
@@ -208,7 +208,7 @@ export default function PayrunWizardPage() {
       />
 
       {/* Progress Steps Header */}
-      <div className="flex items-center justify-between p-4 bg-card border border-border rounded-xl shadow-xs">
+      <div className="flex items-center justify-between p-4 bg-card border border-border rounded-xl shadow-sm">
         <div className="flex items-center gap-3">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
@@ -255,7 +255,7 @@ export default function PayrunWizardPage() {
 
       {/* STEP 1: CONFIGURATION */}
       {step === 1 && (
-        <Card className="border-border bg-card shadow-xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
               <DollarSign className="w-4 h-4 text-primary" />
@@ -309,7 +309,7 @@ export default function PayrunWizardPage() {
                 </Select>
               </FormField>
 
-              <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-800/40 text-xs text-blue-900 dark:text-blue-200 space-y-1">
+              <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-200/60 text-xs text-blue-900 space-y-1">
                 <p className="font-semibold flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-blue-600" />
                   Two-Step Workflow Note
@@ -330,7 +330,7 @@ export default function PayrunWizardPage() {
               >
                 Cancel
               </Button>
-              <Button type="submit" size="sm" className="text-xs gap-1.5 shadow-xs">
+              <Button type="submit" size="sm" className="text-xs gap-1.5 shadow-sm">
                 Continue to Select Employees
                 <ArrowRight className="w-3.5 h-3.5" />
               </Button>
@@ -341,7 +341,7 @@ export default function PayrunWizardPage() {
 
       {/* STEP 2: EMPLOYEE SELECTION */}
       {step === 2 && (
-        <Card className="border-border bg-card shadow-xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
@@ -419,7 +419,7 @@ export default function PayrunWizardPage() {
                       onClick={() => toggleEmployee(emp.id)}
                       className={`p-3.5 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
                         isSelected
-                          ? "bg-primary/5 dark:bg-primary/10 hover:bg-primary/10"
+                          ? "bg-primary/5 hover:bg-primary/10"
                           : "hover:bg-muted/40"
                       }`}
                     >
@@ -489,7 +489,7 @@ export default function PayrunWizardPage() {
               size="sm"
               disabled={submitting || selectedEmpIds.size === 0}
               onClick={handleFinalSubmit}
-              className="text-xs gap-1.5 shadow-xs"
+              className="text-xs gap-1.5 shadow-sm"
             >
               {submitting ? "Processing & Computing..." : `Initialize & Compute (${selectedEmpIds.size})`}
             </Button>
@@ -499,3 +499,4 @@ export default function PayrunWizardPage() {
     </div>
   );
 }
+

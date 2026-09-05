@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 
@@ -71,12 +71,12 @@ function ChangePassword() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@company.com"
-                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7743db] focus:bg-white transition-colors"
               />
             </div>
             <button
               type="submit"
-              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
+              className="w-full py-2.5 px-4 bg-[#7743db] hover:bg-[#6334b8] text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
             >
               Send OTP
             </button>
@@ -95,7 +95,7 @@ function ChangePassword() {
                 onChange={(e) => setOtp(e.target.value)}
                 placeholder="Demo OTP: 123456"
                 required
-                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors text-center tracking-widest font-mono text-base"
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7743db] focus:bg-white transition-colors text-center tracking-widest font-mono text-base"
               />
             </div>
             <div className="flex gap-2">
@@ -108,7 +108,7 @@ function ChangePassword() {
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
+                className="flex-1 py-2.5 px-4 bg-[#7743db] hover:bg-[#6334b8] text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
               >
                 Verify OTP
               </button>
@@ -127,8 +127,8 @@ function ChangePassword() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
-                placeholder="••••••••"
-                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7743db] focus:bg-white transition-colors"
               />
             </div>
             <button
@@ -163,3 +163,4 @@ function ChangePassword() {
 }
 
 export default ChangePassword;
+

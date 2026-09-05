@@ -1,6 +1,12 @@
 /**
  * Mock Employees Dataset
  * Realistic records across 5 core departments: Engineering, HR, Finance, Sales, Marketing.
+ *
+ * NOTE: This file is actively imported by:
+ *   - services/employeeService.js (as local in-memory store)
+ *   - services/contractService.js (for employee name lookup)
+ *   - data/mockContracts.js (for building contract fixtures)
+ * TODO: Replace with live API calls when backend seeding is complete.
  */
 
 export const mockEmployees = [

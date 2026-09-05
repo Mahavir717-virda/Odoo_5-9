@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -57,7 +57,7 @@ export default function EmployeeCard({ employee, onClick }) {
           {/* Top Row: Avatar + Name/Role + StatusBadge */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <Avatar className="h-11 w-11 border border-border/80 shadow-2xs shrink-0">
+              <Avatar className="h-11 w-11 border border-border/80 shadow-sm shrink-0">
                 <AvatarImage src={avatarUrl} alt={fullName} />
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
                   {initials}
@@ -114,3 +114,4 @@ export default function EmployeeCard({ employee, onClick }) {
     </motion.div>
   );
 }
+

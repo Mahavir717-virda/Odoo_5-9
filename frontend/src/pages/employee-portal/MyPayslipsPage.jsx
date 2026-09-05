@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import {
   FileText,
   Download,
@@ -24,7 +24,7 @@ import { useAuth } from "../../context/AuthContext";
 import * as portalService from "../../services/employeePortalService";
 
 function formatCurrency(amount) {
-  if (amount == null) return "—";
+  if (amount == null) return "â€”";
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -131,7 +131,7 @@ export default function MyPayslipsPage() {
         header: "Deductions",
         sortable: true,
         render: (row) => (
-          <span className="text-xs font-mono text-rose-600 dark:text-rose-400">
+          <span className="text-xs font-mono text-rose-600">
             -{formatCurrency(row.totalDeductions)}
           </span>
         ),
@@ -141,7 +141,7 @@ export default function MyPayslipsPage() {
         header: "Net Disbursed",
         sortable: true,
         render: (row) => (
-          <span className="font-bold text-xs text-emerald-600 dark:text-emerald-400 font-mono">
+          <span className="font-bold text-xs text-emerald-600 font-mono">
             {formatCurrency(row.netPay)}
           </span>
         ),
@@ -191,7 +191,7 @@ export default function MyPayslipsPage() {
       />
 
       {downloadToast && (
-        <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
+        <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>Generating PDF payslip download... Your file will be saved shortly.</span>
         </div>
@@ -199,7 +199,7 @@ export default function MyPayslipsPage() {
 
       {/* YTD Metrics Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Gross Earnings YTD</p>
@@ -210,47 +210,47 @@ export default function MyPayslipsPage() {
                 Across {summary?.totalPayslips || 0} pay cycles
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600">
+            <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600">
               <DollarSign className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Total Deductions YTD</p>
-              <p className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-1 font-mono">
+              <p className="text-xl font-bold text-rose-600 mt-1 font-mono">
                 {formatCurrency(summary?.deductionsYTD || 0)}
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
                 PF, TDS & Professional Tax
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600">
+            <div className="p-2.5 rounded-lg bg-rose-50 text-rose-600">
               <TrendingUp className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Net Disbursed YTD</p>
-              <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
+              <p className="text-xl font-bold text-emerald-600 mt-1 font-mono">
                 {formatCurrency(summary?.netYTD || 0)}
               </p>
               <p className="text-[11px] text-emerald-600 mt-0.5 font-medium">
                 {summary?.totalPayslips > 0 ? "100% On-time delivery" : "No records yet"}
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
+            <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600">
               <CreditCard className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Salary Bank Account</p>
@@ -259,7 +259,7 @@ export default function MyPayslipsPage() {
                 A/C: XXXX-4819
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600">
+            <div className="p-2.5 rounded-lg bg-purple-50 text-purple-600">
               <Building className="w-5 h-5" />
             </div>
           </CardContent>
@@ -267,7 +267,7 @@ export default function MyPayslipsPage() {
       </div>
 
       {/* Payslips DataTable */}
-      <Card className="border-border bg-card shadow-xs">
+      <Card className="border-border bg-card shadow-sm">
         <CardHeader className="pb-3 border-b border-border/40">
           <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
             <FileText className="w-4 h-4 text-blue-600" />
@@ -299,7 +299,7 @@ export default function MyPayslipsPage() {
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-primary" />
                 <CardTitle className="text-base font-bold text-foreground">
-                  Salary Payslip — {selectedSlip.period}
+                  Salary Payslip â€” {selectedSlip.period}
                 </CardTitle>
               </div>
               <button
@@ -318,7 +318,7 @@ export default function MyPayslipsPage() {
                     PeoplePay360 Technologies Pvt Ltd
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    Payroll Reference: {selectedSlip.payrunId} • Paid on: {selectedSlip.paymentDate}
+                    Payroll Reference: {selectedSlip.payrunId} â€¢ Paid on: {selectedSlip.paymentDate}
                   </p>
                 </div>
                 <StatusBadge status={selectedSlip.status} />
@@ -347,7 +347,7 @@ export default function MyPayslipsPage() {
                 <div>
                   <span className="text-muted-foreground block">Bank Account:</span>
                   <span className="font-semibold text-foreground font-mono">
-                    •••• •••• •••• 4892
+                    â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 4892
                   </span>
                 </div>
                 <div>
@@ -370,7 +370,7 @@ export default function MyPayslipsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
                 {/* Earnings */}
                 <div className="space-y-2">
-                  <h4 className="font-bold text-foreground text-xs uppercase tracking-wider text-emerald-600 dark:text-emerald-400 pb-1 border-b border-border">
+                  <h4 className="font-bold text-foreground text-xs uppercase tracking-wider text-emerald-600 pb-1 border-b border-border">
                     Earnings
                   </h4>
                   {Array.isArray(selectedSlip.lines) && selectedSlip.lines.filter(l => l.category === 'basic' || l.category === 'allowance').length > 0 ? (
@@ -403,7 +403,7 @@ export default function MyPayslipsPage() {
 
                 {/* Deductions */}
                 <div className="space-y-2">
-                  <h4 className="font-bold text-foreground text-xs uppercase tracking-wider text-rose-600 dark:text-rose-400 pb-1 border-b border-border">
+                  <h4 className="font-bold text-foreground text-xs uppercase tracking-wider text-rose-600 pb-1 border-b border-border">
                     Deductions
                   </h4>
                   {Array.isArray(selectedSlip.lines) && selectedSlip.lines.filter(l => l.category === 'deduction').length > 0 ? (
@@ -428,7 +428,7 @@ export default function MyPayslipsPage() {
                     </>
                   )}
                   <Separator className="my-1" />
-                  <div className="flex justify-between py-1 font-bold text-rose-600 dark:text-rose-400">
+                  <div className="flex justify-between py-1 font-bold text-rose-600">
                     <span>Total Deductions</span>
                     <span className="font-mono">-{formatCurrency(selectedSlip.totalDeductions)}</span>
                   </div>
@@ -436,16 +436,16 @@ export default function MyPayslipsPage() {
               </div>
 
               {/* Net Pay Highlight Banner */}
-              <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block">
+                  <span className="text-xs font-semibold text-emerald-800 uppercase tracking-wider block">
                     Total Net Payable
                   </span>
                   <p className="text-xs text-muted-foreground">
                     Disbursed for {selectedSlip.period}
                   </p>
                 </div>
-                <span className="text-2xl font-bold font-mono text-emerald-700 dark:text-emerald-300">
+                <span className="text-2xl font-bold font-mono text-emerald-700">
                   {formatCurrency(selectedSlip.netPay)}
                 </span>
               </div>
@@ -476,3 +476,4 @@ export default function MyPayslipsPage() {
     </div>
   );
 }
+

@@ -97,16 +97,19 @@ export const createRequest = async ({ employee_id, time_off_type_id, start_date,
 
 export const approveRequest = async (id) => {
   const response = await api.patch(`/time-off/requests/${id}/approve`);
+  window.dispatchEvent(new Event("notifications-refresh"));
   return response.data?.data;
 };
 
 export const rejectRequest = async (id, reason) => {
   const response = await api.patch(`/time-off/requests/${id}/reject`, { reason });
+  window.dispatchEvent(new Event("notifications-refresh"));
   return response.data?.data;
 };
 
 export const cancelRequest = async (id) => {
   const response = await api.patch(`/time-off/requests/${id}/cancel`);
+  window.dispatchEvent(new Event("notifications-refresh"));
   return response.data?.data;
 };
 

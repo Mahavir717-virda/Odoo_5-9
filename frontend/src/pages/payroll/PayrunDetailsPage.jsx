@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   DollarSign,
@@ -26,7 +26,7 @@ import { Separator } from "../../components/ui/separator";
 import * as payrollManagerService from "../../services/payrollManagerService";
 
 function formatCurrency(amount) {
-  if (amount == null) return "—";
+  if (amount == null) return "â€”";
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -185,7 +185,7 @@ export default function PayrunDetailsPage() {
         header: "Total Deductions",
         sortable: true,
         render: (row) => (
-          <span className="text-xs font-mono text-rose-600 dark:text-rose-400">
+          <span className="text-xs font-mono text-rose-600">
             -{formatCurrency(row.total_deductions)}
           </span>
         ),
@@ -195,7 +195,7 @@ export default function PayrunDetailsPage() {
         header: "Net Disbursed",
         sortable: true,
         render: (row) => (
-          <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+          <span className="text-xs font-mono font-bold text-emerald-600">
             {formatCurrency(row.net_salary)}
           </span>
         ),
@@ -269,7 +269,7 @@ export default function PayrunDetailsPage() {
               size="sm"
               disabled={actionLoading}
               onClick={handleCompute}
-              className="text-xs gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
+              className="text-xs gap-1.5 bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm"
             >
               <Play className="w-3.5 h-3.5 fill-white" />
               {actionLoading ? "Computing..." : "Compute Payroll"}
@@ -292,7 +292,7 @@ export default function PayrunDetailsPage() {
                 size="sm"
                 disabled={actionLoading}
                 onClick={handleValidate}
-                className="text-xs gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
+                className="text-xs gap-1.5 bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Validate Payrun
@@ -305,7 +305,7 @@ export default function PayrunDetailsPage() {
               size="sm"
               disabled={actionLoading}
               onClick={handleMarkPaid}
-              className="text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+              className="text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
             >
               <DollarSign className="w-3.5 h-3.5" />
               Mark as Paid & Disbursed
@@ -313,7 +313,7 @@ export default function PayrunDetailsPage() {
           )}
 
           {status === "paid" && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 text-xs font-semibold">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
               <CheckCircle2 className="w-4 h-4" />
               <span>Payment Disbursed</span>
             </div>
@@ -322,14 +322,14 @@ export default function PayrunDetailsPage() {
       </div>
 
       {toastMessage && (
-        <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
+        <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Payrun Info Header Card */}
-      <Card className="border-border bg-card shadow-xs">
+      <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
@@ -345,14 +345,14 @@ export default function PayrunDetailsPage() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-3">
                   <span className="font-mono">PR-{String(payrun.id).padStart(4, "0")}</span>
-                  <span>•</span>
+                  <span>â€¢</span>
                   <span>Structure: <strong className="text-foreground">{payrun.structure_name || "Standard Structure"}</strong></span>
-                  <span>•</span>
+                  <span>â€¢</span>
                   <span>
                     Period:{" "}
                     <strong className="text-foreground">
-                      {payrun.period_start ? payrun.period_start.split("T")[0] : "—"} to{" "}
-                      {payrun.period_end ? payrun.period_end.split("T")[0] : "—"}
+                      {payrun.period_start ? payrun.period_start.split("T")[0] : "â€”"} to{" "}
+                      {payrun.period_end ? payrun.period_end.split("T")[0] : "â€”"}
                     </strong>
                   </span>
                 </p>
@@ -364,19 +364,19 @@ export default function PayrunDetailsPage() {
 
       {/* Financial Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Generated Slips</p>
               <p className="text-2xl font-bold text-foreground mt-0.5">{totals.count}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600">
+            <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600">
               <FileText className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Gross Salary</p>
@@ -384,35 +384,35 @@ export default function PayrunDetailsPage() {
                 {formatCurrency(totals.gross)}
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600">
+            <div className="p-2.5 rounded-lg bg-[#f6f2fd] text-[#7743db]">
               <DollarSign className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Total Deductions</p>
-              <p className="text-xl font-bold font-mono text-rose-600 dark:text-rose-400 mt-0.5">
+              <p className="text-xl font-bold font-mono text-rose-600 mt-0.5">
                 -{formatCurrency(totals.deductions)}
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600">
+            <div className="p-2.5 rounded-lg bg-rose-50 text-rose-600">
               <CreditCard className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Net Disbursement</p>
-              <p className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <p className="text-xl font-bold font-mono text-emerald-600 mt-0.5">
                 {formatCurrency(totals.net)}
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
+            <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </CardContent>
@@ -420,7 +420,7 @@ export default function PayrunDetailsPage() {
       </div>
 
       {/* Payslips Table */}
-      <Card className="border-border bg-card shadow-xs">
+      <Card className="border-border bg-card shadow-sm">
         <CardHeader className="border-b border-border/40 pb-3 flex flex-row items-center justify-between">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <FileText className="w-4 h-4 text-primary" />
@@ -449,3 +449,4 @@ export default function PayrunDetailsPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { Skeleton } from "../ui/skeleton";
+﻿import { Skeleton } from "../ui/skeleton";
 import { Card, CardContent } from "../ui/card";
 import { cn } from "../../lib/utils";
 
@@ -27,7 +27,7 @@ export default function SmartButton({
       onClick={onClick}
       className={cn(
         "cursor-pointer border border-border bg-card transition-all duration-200",
-        "hover:border-primary/50 hover:bg-primary/5 hover:shadow-xs",
+        "hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm",
         "min-w-[130px] flex-1 select-none",
         className
       )}
@@ -56,3 +56,4 @@ export default function SmartButton({
     </Card>
   );
 }
+

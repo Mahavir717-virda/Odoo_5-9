@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -53,7 +53,7 @@ import api from "../../services/api";
  * Format ISO date string into readable format (e.g. "Jan 15, 2024")
  */
 function formatDate(dateString) {
-  if (!dateString) return "—";
+  if (!dateString) return "â€”";
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
@@ -92,7 +92,7 @@ function InfoItem({ label, value, icon: Icon }) {
           {label}
         </span>
         <div className="text-sm font-medium text-foreground mt-0.5 truncate">
-          {value || "—"}
+          {value || "â€”"}
         </div>
       </div>
     </div>
@@ -349,12 +349,12 @@ export default function EmployeeDetailsPage() {
       </div>
 
       {/* Profile Header Card */}
-      <Card className="border border-border bg-card shadow-xs">
+      <Card className="border border-border bg-card shadow-sm">
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             {/* Left: Avatar & Identity */}
             <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-xs shrink-0">
+              <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-sm shrink-0">
                 <AvatarImage src={employee.avatarUrl} alt={fullName} />
                 <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
                   {initials}
@@ -370,7 +370,7 @@ export default function EmployeeDetailsPage() {
                 </div>
 
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  {employee.jobPosition} •{" "}
+                  {employee.jobPosition} â€¢{" "}
                   <span className="font-medium text-foreground/80">
                     {employee.department}
                   </span>
@@ -389,7 +389,7 @@ export default function EmployeeDetailsPage() {
                   variant="default"
                   size="sm"
                   onClick={() => navigate(`/employees/${id}/edit`)}
-                  className="text-xs gap-1.5 shadow-xs"
+                  className="text-xs gap-1.5 shadow-sm"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   Edit
@@ -661,7 +661,7 @@ export default function EmployeeDetailsPage() {
                         <Card
                           key={c.id}
                           onClick={() => navigate(`/contracts/${c.id}`)}
-                          className="p-4 border border-border/80 bg-card hover:border-primary/50 hover:shadow-xs transition-all cursor-pointer"
+                          className="p-4 border border-border/80 bg-card hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer"
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="space-y-1">
@@ -684,7 +684,7 @@ export default function EmployeeDetailsPage() {
                                 )}
                               </div>
                               <p className="text-xs text-muted-foreground">
-                                {c.jobPosition} • {c.department}
+                                {c.jobPosition} â€¢ {c.department}
                               </p>
                             </div>
 
@@ -700,7 +700,7 @@ export default function EmployeeDetailsPage() {
                                 </span>
                               </div>
                               <div className="text-xs text-muted-foreground font-medium">
-                                {formatDate(c.startDate)} –{" "}
+                                {formatDate(c.startDate)} â€“{" "}
                                 {c.endDate ? formatDate(c.endDate) : "Ongoing"}
                               </div>
                             </div>
@@ -717,7 +717,7 @@ export default function EmployeeDetailsPage() {
             {activeTab === "attendance" && (
               <Card className="border-border bg-card">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold">Attendance Records — {fullName}</CardTitle>
+                  <CardTitle className="text-sm font-semibold">Attendance Records â€” {fullName}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {attendanceLoading ? (
@@ -739,16 +739,16 @@ export default function EmployeeDetailsPage() {
                         <tbody className="divide-y divide-border/40">
                           {attendance.map((a) => (
                             <tr key={a.id} className="hover:bg-muted/30">
-                              <td className="py-2 px-3 font-mono">{a.date ? new Date(a.date).toLocaleDateString() : "—"}</td>
-                              <td className="py-2 px-3">{a.check_in ? new Date(a.check_in).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</td>
-                              <td className="py-2 px-3">{a.check_out ? new Date(a.check_out).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</td>
-                              <td className="py-2 px-3 font-mono">{a.worked_hours ? `${Number(a.worked_hours).toFixed(1)}h` : "—"}</td>
+                              <td className="py-2 px-3 font-mono">{a.date ? new Date(a.date).toLocaleDateString() : "â€”"}</td>
+                              <td className="py-2 px-3">{a.check_in ? new Date(a.check_in).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "â€”"}</td>
+                              <td className="py-2 px-3">{a.check_out ? new Date(a.check_out).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "â€”"}</td>
+                              <td className="py-2 px-3 font-mono">{a.worked_hours ? `${Number(a.worked_hours).toFixed(1)}h` : "â€”"}</td>
                               <td className="py-2 px-3">
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                   a.status === "present" ? "bg-emerald-100 text-emerald-700" :
                                   a.status === "absent" ? "bg-rose-100 text-rose-700" :
                                   "bg-amber-100 text-amber-700"
-                                }`}>{a.status || "—"}</span>
+                                }`}>{a.status || "â€”"}</span>
                               </td>
                             </tr>
                           ))}
@@ -764,7 +764,7 @@ export default function EmployeeDetailsPage() {
             {activeTab === "timeoff" && (
               <Card className="border-border bg-card">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold">Time Off Requests — {fullName}</CardTitle>
+                  <CardTitle className="text-sm font-semibold">Time Off Requests â€” {fullName}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {timeOffLoading ? (
@@ -787,9 +787,9 @@ export default function EmployeeDetailsPage() {
                           {timeOffRequests.map((r) => (
                             <tr key={r.id} className="hover:bg-muted/30">
                               <td className="py-2 px-3 font-medium">{r.time_off_type_name || r.type_name || "Leave"}</td>
-                              <td className="py-2 px-3 font-mono">{r.start_date ? formatDate(r.start_date) : "—"}</td>
-                              <td className="py-2 px-3 font-mono">{r.end_date ? formatDate(r.end_date) : "—"}</td>
-                              <td className="py-2 px-3">{r.days_requested ?? r.duration ?? "—"}</td>
+                              <td className="py-2 px-3 font-mono">{r.start_date ? formatDate(r.start_date) : "â€”"}</td>
+                              <td className="py-2 px-3 font-mono">{r.end_date ? formatDate(r.end_date) : "â€”"}</td>
+                              <td className="py-2 px-3">{r.days_requested ?? r.duration ?? "â€”"}</td>
                               <td className="py-2 px-3">
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                   r.status === "approved" ? "bg-emerald-100 text-emerald-700" :
@@ -812,7 +812,7 @@ export default function EmployeeDetailsPage() {
             {activeTab === "payroll" && (
               <Card className="border-border bg-card">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold">Payslips — {fullName}</CardTitle>
+                  <CardTitle className="text-sm font-semibold">Payslips â€” {fullName}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {payslipsLoading ? (
@@ -835,9 +835,9 @@ export default function EmployeeDetailsPage() {
                           {payslips.map((p) => (
                             <tr key={p.id} className="hover:bg-muted/30">
                               <td className="py-2 px-3 font-mono font-bold">{p.payslip_number || p.reference || `#${p.id}`}</td>
-                              <td className="py-2 px-3">{p.pay_period_start ? `${formatDate(p.pay_period_start)} – ${formatDate(p.pay_period_end)}` : "—"}</td>
-                              <td className="py-2 px-3 text-right font-mono">{p.gross_salary != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.gross_salary) : "—"}</td>
-                              <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">{p.net_salary != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.net_salary) : "—"}</td>
+                              <td className="py-2 px-3">{p.pay_period_start ? `${formatDate(p.pay_period_start)} â€“ ${formatDate(p.pay_period_end)}` : "â€”"}</td>
+                              <td className="py-2 px-3 text-right font-mono">{p.gross_salary != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.gross_salary) : "â€”"}</td>
+                              <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">{p.net_salary != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.net_salary) : "â€”"}</td>
                               <td className="py-2 px-3">
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                   p.status === "paid" ? "bg-emerald-100 text-emerald-700" :
@@ -860,3 +860,4 @@ export default function EmployeeDetailsPage() {
     </div>
   );
 }
+

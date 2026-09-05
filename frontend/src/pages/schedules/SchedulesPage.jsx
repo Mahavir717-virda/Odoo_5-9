@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Clock,
@@ -141,7 +141,7 @@ export default function SchedulesPage() {
         header: "Hours/Week",
         sortable: true,
         render: (row) => (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
             {formatHours(row.weeklyHours)}
           </span>
         ),
@@ -236,7 +236,7 @@ export default function SchedulesPage() {
           <Button
             size="sm"
             onClick={() => navigate("/schedules/new")}
-            className="text-xs gap-1.5 shadow-xs"
+            className="text-xs gap-1.5 shadow-sm"
           >
             <Plus className="w-4 h-4" />
             New Schedule
@@ -278,3 +278,4 @@ export default function SchedulesPage() {
     </div>
   );
 }
+
