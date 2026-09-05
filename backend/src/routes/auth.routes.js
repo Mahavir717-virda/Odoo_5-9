@@ -205,6 +205,110 @@ router.get("/me", authenticate, async (req, res) => {
 });
 
 /**
+ * GET /api/v1/auth/users
+ * Admin-only: List all system users joined with employee profile data
+ */
+router.get("/users", authenticate, requireRole("admin", "ADMIN"), async (req, res) => {
+  try {
+    const { search, role, status } = req.query;
+    let conditions = [];
+    let values = [];
+    let idx = 1;
+
+    if (search && search.trim()) {
+      conditions.push(`(u.email ILIKE $${idx} OR e.name ILIKE $${idx})`);
+      values.push(`%${search.trim()}%`);
+      idx++;
+    }
+    if (role && role !== 'all') {
+      conditions.push(`u.role = $${idx}`);
+      values.push(role.toLowerCase());
+      idx++;
+    }
+    if (status && status !== 'all') {
+      conditions.push(`e.status = $${idx}`);
+      values.push(status.toLowerCase());
+      idx++;
+    }
+
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const query = `
+      SELECT
+        u.id AS user_id,
+        u.email,
+        u.role,
+        u.created_at AS user_created_at,
+        e.id AS employee_id,
+        e.name,
+        e.phone,
+        e.department,
+        e.job_position,
+        e.status,
+        e.joining_date
+      FROM users u
+      LEFT JOIN employees e ON e.user_id = u.id
+      ${where}
+      ORDER BY e.name ASC NULLS LAST
+    `;
+    const result = await pool.query(query, values);
+    return res.status(200).json({ success: true, data: { users: result.rows } });
+  } catch (error) {
+    console.error('List users error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+/**
+ * PATCH /api/v1/auth/users/:id/role
+ * Admin-only: Change a user's security role
+ */
+router.patch("/users/:id/role", authenticate, requireRole("admin", "ADMIN"), async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId) || userId <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+    }
+
+    const { role } = req.body;
+    const validRoles = ['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user', 'employee'];
+    const normalizedRole = (role || '').toLowerCase().trim();
+
+    if (!validRoles.includes(normalizedRole)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid role. Must be one of: ${validRoles.join(', ')}`,
+      });
+    }
+
+    // Prevent admin from demoting themselves
+    if (userId === req.user.id && normalizedRole !== 'admin') {
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot change your own admin role.',
+      });
+    }
+
+    const result = await pool.query(
+      'UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, role',
+      [normalizedRole, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Role updated to '${normalizedRole}' successfully.`,
+      data: { user: result.rows[0] },
+    });
+  } catch (error) {
+    console.error('Update role error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+/**
  * RBAC Demonstration Routes
  */
 
