@@ -16,13 +16,23 @@ const parseId = (id) => {
 const VIEW_ROLES = ["admin", "hr_payroll_manager", "hr_payroll_user"];
 const CALC_ROLES = ["admin", "hr_payroll_manager", "hr_payroll_user"];
 
-/**
- * Helper to fetch authenticated employee's ID
- */
-const getAuthenticatedEmployeeId = async (userId) => {
-  const empRes = await pool.query("SELECT id FROM employees WHERE user_id = $1", [userId]);
-  if (empRes.rows.length === 0) return null;
-  return empRes.rows[0].id;
+const getAuthenticatedEmployeeId = async (user) => {
+  if (!user) return null;
+  const userId = typeof user === "object" ? user.id : user;
+  if (!userId) return null;
+
+  let empRes = await pool.query("SELECT id FROM employees WHERE user_id = $1", [userId]);
+  if (empRes.rows.length > 0) return empRes.rows[0].id;
+
+  const email = typeof user === "object" ? user.email : null;
+  if (email) {
+    empRes = await pool.query("SELECT id FROM employees WHERE LOWER(email) = LOWER($1)", [email]);
+    if (empRes.rows.length > 0) {
+      await pool.query("UPDATE employees SET user_id = $1 WHERE id = $2", [userId, empRes.rows[0].id]);
+      return empRes.rows[0].id;
+    }
+  }
+  return null;
 };
 
 /**
@@ -32,7 +42,7 @@ const getAuthenticatedEmployeeId = async (userId) => {
  */
 router.get("/me", authenticate, async (req, res, next) => {
   try {
-    const employeeId = await getAuthenticatedEmployeeId(req.user.id);
+    const employeeId = await getAuthenticatedEmployeeId(req.user);
     if (!employeeId) {
       return res.status(404).json({
         success: false,

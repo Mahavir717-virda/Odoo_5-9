@@ -5,10 +5,13 @@ import notificationService from "./notificationService.js";
  * Calculate inclusive calendar days between two ISO date strings (YYYY-MM-DD)
  */
 const calculateDays = (startDate, endDate) => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  if (!startDate || !endDate) return 1;
+  const sStr = typeof startDate === 'string' ? startDate.split('T')[0] : new Date(startDate).toISOString().split('T')[0];
+  const eStr = typeof endDate === 'string' ? endDate.split('T')[0] : new Date(endDate).toISOString().split('T')[0];
+  const start = new Date(sStr + 'T00:00:00Z');
+  const end = new Date(eStr + 'T00:00:00Z');
   const diffTime = end.getTime() - start.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
   return diffDays > 0 ? diffDays : 1;
 };
 
@@ -411,6 +414,7 @@ export const listRequests = async ({ employee_id, type_id, status, from_date, to
       time_off_type_name: row.time_off_type_name,
       start_date: row.start_date,
       end_date: row.end_date,
+      duration: Number(row.requested_days),
       requested_days: Number(row.requested_days),
       status: row.status === "refused" ? "rejected" : row.status,
       reason: row.reason,
@@ -483,6 +487,7 @@ export const getRequestById = async (id) => {
     time_off_type_name: row.time_off_type_name,
     start_date: row.start_date,
     end_date: row.end_date,
+    duration: Number(row.requested_days),
     requested_days: Number(row.requested_days),
     status: row.status === "refused" ? "rejected" : row.status,
     reason: row.reason,
@@ -563,11 +568,11 @@ export const createRequest = async (data) => {
   try {
     const empInfoRes = await pool.query("SELECT name FROM employees WHERE id = $1", [employee_id]);
     const empName = empInfoRes.rows[0]?.name || "An employee";
-    await notificationService.notifyRoles(["admin", "hr_manager"], {
+    await notificationService.notifyRoles(["admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"], {
       title: "New Leave Request Submitted",
       message: `${empName} submitted a ${duration}-day ${leaveType.name} request (${start_date} to ${end_date}).`,
       type: "info",
-      link: "/time-off",
+      link: "/time-off/requests",
     });
   } catch (notifErr) {
     console.warn("Failed to dispatch leave request notification:", notifErr.message);
@@ -575,6 +580,7 @@ export const createRequest = async (data) => {
 
   return {
     ...row,
+    duration: Number(row.duration),
     requested_days: Number(row.duration),
     time_off_type_name: leaveType.name,
   };
@@ -590,7 +596,7 @@ export const approveRequest = async (id, approverUserId) => {
 
     // Lock and get request
     const reqRes = await client.query(
-      `SELECT r.*, tot.requires_allocation
+      `SELECT r.*, tot.name AS type_name, tot.requires_allocation
        FROM time_off_requests r
        JOIN time_off_types tot ON r.type_id = tot.id
        WHERE r.id = $1
@@ -614,33 +620,45 @@ export const approveRequest = async (id, approverUserId) => {
 
     const requestedDays = Number(request.duration);
 
-    // If allocation is required, check and deduct balance
+    // If allocation is required, check and deduct balance (or auto-provision allocation)
     if (request.requires_allocation) {
-      const allocRes = await client.query(
+      let allocRes = await client.query(
         `SELECT * FROM time_off_allocations
          WHERE employee_id = $1 AND type_id = $2
          FOR UPDATE`,
         [request.employee_id, request.type_id]
       );
 
+      let allocation;
       if (allocRes.rows.length === 0) {
-        const err = new Error("No leave allocation found for this employee and leave type");
-        err.statusCode = 400;
-        throw err;
+        // Auto-provision standard allocation
+        const initialDays = Math.max(24, requestedDays);
+        const newAllocRes = await client.query(
+          `INSERT INTO time_off_allocations (employee_id, type_id, allocated, taken, remaining)
+           VALUES ($1, $2, $3, 0, $3)
+           RETURNING *`,
+          [request.employee_id, request.type_id, initialDays]
+        );
+        allocation = newAllocRes.rows[0];
+      } else {
+        allocation = allocRes.rows[0];
       }
 
-      const allocation = allocRes.rows[0];
-      const remaining = Number(allocation.remaining);
-      const taken = Number(allocation.taken);
+      let remaining = Number(allocation.remaining);
+      let taken = Number(allocation.taken);
 
       if (requestedDays > remaining) {
-        const err = new Error("Insufficient leave balance.");
-        err.statusCode = 400;
-        throw err;
+        const diff = requestedDays - remaining;
+        const newAllocated = Number(allocation.allocated) + diff;
+        remaining += diff;
+        await client.query(
+          `UPDATE time_off_allocations SET allocated = $1, remaining = $2 WHERE id = $3`,
+          [newAllocated, remaining, allocation.id]
+        );
       }
 
       const newTaken = taken + requestedDays;
-      const newRemaining = remaining - requestedDays;
+      const newRemaining = Math.max(0, remaining - requestedDays);
 
       await client.query(
         `UPDATE time_off_allocations
@@ -665,12 +683,14 @@ export const approveRequest = async (id, approverUserId) => {
     try {
       const empUserRes = await pool.query("SELECT user_id, name FROM employees WHERE id = $1", [request.employee_id]);
       if (empUserRes.rows.length > 0 && empUserRes.rows[0].user_id) {
+        const startStr = request.start_date instanceof Date ? request.start_date.toISOString().split("T")[0] : String(request.start_date).split("T")[0];
+        const endStr = request.end_date instanceof Date ? request.end_date.toISOString().split("T")[0] : String(request.end_date).split("T")[0];
         await notificationService.createNotification({
           userId: empUserRes.rows[0].user_id,
           title: "Leave Request Approved",
-          message: `Your leave request for ${request.start_date} to ${request.end_date} (${request.duration} days) has been approved.`,
+          message: `Your leave request for ${startStr} to ${endStr} (${request.duration} days) has been approved.`,
           type: "success",
-          link: "/time-off",
+          link: "/my-time-off",
         });
       }
     } catch (notifErr) {
@@ -711,6 +731,24 @@ export const rejectRequest = async (id, reason = null) => {
      RETURNING *`,
     [reason, id]
   );
+
+  // Send notification to employee
+  try {
+    const empUserRes = await pool.query("SELECT user_id, name FROM employees WHERE id = $1", [request.employee_id]);
+    if (empUserRes.rows.length > 0 && empUserRes.rows[0].user_id) {
+      const startStr = request.start_date instanceof Date ? request.start_date.toISOString().split("T")[0] : String(request.start_date).split("T")[0];
+      const endStr = request.end_date instanceof Date ? request.end_date.toISOString().split("T")[0] : String(request.end_date).split("T")[0];
+      await notificationService.createNotification({
+        userId: empUserRes.rows[0].user_id,
+        title: "Leave Request Rejected",
+        message: `Your leave request from ${startStr} to ${endStr} has been rejected.${reason ? ` Reason: ${reason}` : ""}`,
+        type: "error",
+        link: "/my-time-off",
+      });
+    }
+  } catch (notifErr) {
+    console.warn("Failed to dispatch leave rejection notification:", notifErr.message);
+  }
 
   return {
     ...updateRes.rows[0],
