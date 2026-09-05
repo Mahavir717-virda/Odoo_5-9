@@ -3,6 +3,7 @@ import healthRoutes from "./health.routes.js";
 import authRoutes from "./auth.js";
 import employeeRoutes from "./employees.js";
 import contractRoutes from "./contracts.js";
+import attendanceRoutes from "./attendance.js";
 
 const router = express.Router();
 
@@ -17,5 +18,8 @@ router.use("/employees", employeeRoutes);
 
 // Contract routes (/api/v1/contracts)
 router.use("/contracts", contractRoutes);
+
+// Attendance routes (/api/v1/attendance)
+router.use("/attendance", attendanceRoutes);
 
 export default router;

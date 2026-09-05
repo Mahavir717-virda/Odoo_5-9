@@ -153,6 +153,47 @@ router.get("/:employeeId/contracts", authenticate, async (req, res, next) => {
 });
 
 /**
+ * GET /api/v1/employees/:employeeId/attendance
+ * Allowed: admin, hr_manager, hr_payroll_manager
+ */
+router.get(
+  "/:employeeId/attendance",
+  authenticate,
+  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  async (req, res, next) => {
+    try {
+      const employeeId = parseId(req.params.employeeId);
+      if (!employeeId) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid employee ID",
+        });
+      }
+
+      const attendanceService = (await import("../services/attendanceService.js")).default;
+      const { from_date, to_date, status, page, limit } = req.query;
+
+      const result = await attendanceService.getEmployeeAttendance(employeeId, {
+        from_date,
+        to_date,
+        status,
+        page,
+        limit,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Attendance retrieved successfully",
+        data: result.data,
+        pagination: result.pagination,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * GET /api/v1/employees/:id
  * Allowed: admin, hr_manager, hr_payroll_manager (any employee), employee (only their own)
  */
