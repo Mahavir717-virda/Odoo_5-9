@@ -20,7 +20,7 @@ DROP TABLE IF EXISTS users CASCADE;
 -- 1. USERS
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL CHECK (email ~* '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$'),
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL CHECK (role IN (
         'admin',
@@ -47,8 +47,8 @@ CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
     user_id INT UNIQUE REFERENCES users(id) ON DELETE SET NULL,
     name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone VARCHAR(50),
+    email VARCHAR(255) UNIQUE NOT NULL CHECK (email ~* '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$'),
+    phone VARCHAR(50) CHECK (phone IS NULL OR phone ~ '^\+?[0-9\s\-()]{10,20}$'),
     department VARCHAR(100) NOT NULL,
     manager_id INT REFERENCES employees(id) ON DELETE SET NULL,
     job_position VARCHAR(100) NOT NULL,

@@ -152,6 +152,45 @@ router.get(
 );
 
 /**
+ * GET /api/v1/time-off/allocations/:id
+ * Allowed: admin, hr_manager, hr_payroll_manager, employee (own only)
+ */
+router.get("/allocations/:id", authenticate, async (req, res, next) => {
+  try {
+    const allocId = parseId(req.params.id);
+    if (!allocId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid allocation ID",
+      });
+    }
+
+    const allocation = await timeOffService.getAllocationById(allocId);
+    if (!allocation) {
+      return res.status(404).json({
+        success: false,
+        message: "Leave allocation not found",
+      });
+    }
+
+    if (req.user.role === "employee" && allocation.user_id !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to access this allocation",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Leave allocation retrieved successfully",
+      data: allocation,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * POST /api/v1/time-off/allocations
  * Allowed: admin, hr_manager
  */

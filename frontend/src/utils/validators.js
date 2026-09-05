@@ -18,24 +18,39 @@ export const required = (value, fieldLabel = "This field") => {
 };
 
 /**
- * Validates standard email address format.
+ * Validates standard email address format with a valid domain and TLD.
+ * (e.g. rejects test@g, test@gmail., requires valid 2+ char domain extension)
  */
 export const isEmail = (value) => {
   if (!value || !String(value).trim()) return null; // let 'required' handle empty
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(String(value).trim())
+  const str = String(value).trim();
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(str)
     ? null
-    : "Enter a valid email address";
+    : "Enter a valid email address (e.g. name@domain.com)";
 };
 
 /**
- * Validates basic phone number pattern (10-15 digits, allowing +, spaces, hyphens, parentheses).
+ * Validates phone numbers.
+ * If prefix is +91 (India), enforces exactly 10 digits starting with 6-9.
+ * Otherwise requires 10-15 standard international digits.
  */
 export const isPhone = (value) => {
   if (!value || !String(value).trim()) return null; // let 'required' handle empty
-  const phoneDigits = String(value).replace(/[^0-9]/g, "");
+  const str = String(value).trim();
+
+  // If +91 is provided
+  if (str.startsWith("+91")) {
+    const rawDigits = str.slice(3).replace(/\D/g, "");
+    if (!/^[6-9]\d{9}$/.test(rawDigits)) {
+      return "Indian numbers with +91 must have exactly 10 valid digits";
+    }
+    return null;
+  }
+
+  const phoneDigits = str.replace(/[^0-9]/g, "");
   if (phoneDigits.length < 10 || phoneDigits.length > 15) {
-    return "Enter a valid phone number";
+    return "Enter a valid phone number (10 to 15 digits)";
   }
   return null;
 };
