@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   Users,
   Plus,
@@ -25,6 +26,25 @@ import {
   toggleUserStatus,
   updateUserRole,
 } from "../../services/settingsService";
+import DataTable from "../../components/common/DataTable";
+
+const STAGGER_CONTAINER_VARIANTS = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.06,
+    },
+  },
+};
+
+const CARD_ANIMATION_VARIANTS = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.25, ease: "easeOut" },
+  },
+};
 
 export default function UsersSettingsPage() {
   const [users, setUsers] = useState([]);
@@ -258,9 +278,13 @@ export default function UsersSettingsPage() {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+      <motion.div
+        variants={STAGGER_CONTAINER_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      >
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Users</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalCount}</h3>
@@ -269,9 +293,9 @@ export default function UsersSettingsPage() {
           <div className="p-3 bg-[#f6f2fd] rounded-xl text-[#7743db]">
             <Users className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Active Status</p>
             <h3 className="text-2xl font-bold text-emerald-600 mt-1">{activeCount}</h3>
@@ -280,9 +304,9 @@ export default function UsersSettingsPage() {
           <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <UserCheck className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Admin & Managers</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">{adminCount}</h3>
@@ -291,9 +315,9 @@ export default function UsersSettingsPage() {
           <div className="p-3 bg-purple-50 rounded-xl text-purple-600">
             <Shield className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Staff Members</p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">{employeeCount}</h3>
@@ -302,8 +326,8 @@ export default function UsersSettingsPage() {
           <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
             <Users className="w-6 h-6" />
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Action Messages */}
       {successMsg && (
@@ -359,101 +383,109 @@ export default function UsersSettingsPage() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="p-12 text-center">
-            <RefreshCw className="w-8 h-8 animate-spin text-[#7743db] mx-auto mb-3" />
-            <p className="text-sm text-slate-500">Loading system users...</p>
-          </div>
-        ) : filteredUsers.length === 0 ? (
-          <div className="p-12 text-center">
-            <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-900">No users found</h3>
-            <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
-              {search || roleFilter !== "all" || statusFilter !== "all"
-                ? "Try adjusting your search filters."
-                : "Create user credentials to allow staff members to log in."}
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  <th className="py-3.5 px-4 pl-6">User / Identity</th>
-                  <th className="py-3.5 px-4">Employee ID</th>
-                  <th className="py-3.5 px-4">Department & Position</th>
-                  <th className="py-3.5 px-4">Security Role</th>
-                  <th className="py-3.5 px-4 text-center">Status</th>
-                  <th className="py-3.5 px-4 pr-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
-                {filteredUsers.map((u) => (
-                  <tr
-                    key={u.id}
-                    className="hover:bg-slate-50/80 transition group"
-                  >
-                    <td className="py-3.5 px-4 pl-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#ede5fb] text-[#7743db] font-semibold text-xs flex items-center justify-center shrink-0">
-                          {u.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-900">{u.name}</p>
-                          <p className="text-xs text-slate-400 font-mono">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 font-mono text-xs font-medium text-slate-600">
-                      {u.employeeCode}
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      <p className="font-medium text-slate-900 text-xs">{u.jobPosition}</p>
-                      <p className="text-[11px] text-slate-400">{u.department}</p>
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      {getRoleBadge(u.role)}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-center">
-                      <button
-                        onClick={() => handleStatusToggle(u)}
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold cursor-pointer transition ${
-                          u.status === "Active"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-slate-100 text-slate-500 border border-slate-200"
-                        }`}
-                        title="Click to toggle status"
-                      >
-                        {u.status === "Active" ? (
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                        ) : (
-                          <XCircle className="w-3.5 h-3.5" />
-                        )}
-                        {u.status}
-                      </button>
-                    </td>
-
-                    <td className="py-3.5 px-4 pr-6 text-right">
-                      <button
-                        onClick={() => openEditModal(u)}
-                        className="p-1.5 rounded-lg text-slate-600 hover:text-[#7743db] hover:bg-slate-100 transition"
-                        title="Edit User"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <DataTable
+        columns={[
+          {
+            key: "name",
+            header: "User / Identity",
+            sortable: true,
+            render: (u) => (
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-[#ede5fb] text-[#7743db] font-semibold text-xs flex items-center justify-center shrink-0">
+                  {u.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">{u.name}</p>
+                  <p className="text-xs text-slate-400 font-mono">{u.email}</p>
+                </div>
+              </div>
+            ),
+          },
+          {
+            key: "employeeCode",
+            header: "Employee ID",
+            sortable: true,
+            render: (u) => (
+              <span className="font-mono text-xs font-medium text-slate-600">
+                {u.employeeCode}
+              </span>
+            ),
+          },
+          {
+            key: "department",
+            header: "Department & Position",
+            sortable: true,
+            render: (u) => (
+              <div>
+                <p className="font-medium text-slate-900 text-xs">{u.jobPosition}</p>
+                <p className="text-[11px] text-slate-400">{u.department}</p>
+              </div>
+            ),
+          },
+          {
+            key: "role",
+            header: "Security Role",
+            sortable: true,
+            render: (u) => getRoleBadge(u.role),
+          },
+          {
+            key: "status",
+            header: "Status",
+            sortable: true,
+            align: "center",
+            render: (u) => (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStatusToggle(u);
+                }}
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold cursor-pointer transition ${
+                  u.status === "Active"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : "bg-slate-100 text-slate-500 border border-slate-200"
+                }`}
+                title="Click to toggle status"
+              >
+                {u.status === "Active" ? (
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                ) : (
+                  <XCircle className="w-3.5 h-3.5" />
+                )}
+                {u.status}
+              </button>
+            ),
+          },
+          {
+            key: "actions",
+            header: "Actions",
+            align: "right",
+            render: (u) => (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openEditModal(u);
+                }}
+                className="p-1.5 rounded-lg text-slate-600 hover:text-[#7743db] hover:bg-slate-100 transition"
+                title="Edit User"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            ),
+          },
+        ]}
+        data={filteredUsers}
+        loading={loading}
+        error={error}
+        onRetry={fetchUsers}
+        emptyState={{
+          icon: Users,
+          title: "No users found",
+          description:
+            search || roleFilter !== "all" || statusFilter !== "all"
+              ? "Try adjusting your search filters."
+              : "Create user credentials to allow staff members to log in.",
+        }}
+      />
 
       {/* Create User Modal */}
       {isCreateOpen && (

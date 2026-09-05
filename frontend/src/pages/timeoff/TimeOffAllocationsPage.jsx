@@ -1,4 +1,5 @@
-﻿import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { motion } from "framer-motion";
 import {
   Calendar,
   Plus,
@@ -17,6 +18,25 @@ import {
 } from "lucide-react";
 
 import api from "../../services/api";
+import DataTable from "../../components/common/DataTable";
+
+const STAGGER_CONTAINER_VARIANTS = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.06,
+    },
+  },
+};
+
+const CARD_ANIMATION_VARIANTS = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.25, ease: "easeOut" },
+  },
+};
 
 // â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -262,8 +282,13 @@ export default function TimeOffAllocationsPage() {
       </div>
 
       {/* â”€â”€ KPI Cards â”€â”€ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+      <motion.div
+        variants={STAGGER_CONTAINER_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+      >
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Active Allocations</p>
             <p className="text-2xl font-bold mt-1 text-[#7743db]">{stats.count}</p>
@@ -271,9 +296,9 @@ export default function TimeOffAllocationsPage() {
           <div className="p-3 rounded-xl bg-[#f6f2fd] text-[#7743db]">
             <Layers className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Days Granted</p>
             <p className="text-2xl font-bold mt-1 text-blue-600">{fmt(stats.totalAlloc)}</p>
@@ -281,9 +306,9 @@ export default function TimeOffAllocationsPage() {
           <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
             <Calendar className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Days Utilized</p>
             <p className="text-2xl font-bold mt-1 text-amber-600">{fmt(stats.totalTaken)}</p>
@@ -292,9 +317,9 @@ export default function TimeOffAllocationsPage() {
           <div className="p-3 rounded-xl bg-amber-50 text-amber-600">
             <PieChart className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Remaining Balance</p>
             <p className="text-2xl font-bold mt-1 text-emerald-600">{fmt(stats.totalRemaining)}</p>
@@ -302,10 +327,10 @@ export default function TimeOffAllocationsPage() {
           <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600">
             <CheckCircle2 className="w-5 h-5" />
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* â”€â”€ Filters â”€â”€ */}
+      {/* ––– Filters ––– */}
       <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -353,169 +378,128 @@ export default function TimeOffAllocationsPage() {
         </div>
       </div>
 
-      {/* â”€â”€ Table â”€â”€ */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="py-20 text-center">
-            <RefreshCw className="w-8 h-8 animate-spin text-[#7743db] mx-auto mb-3" />
-            <p className="text-sm text-slate-500">Loading leave allocations from database...</p>
-          </div>
-        ) : error ? (
-          <div className="py-16 text-center">
-            <AlertCircle className="w-10 h-10 text-rose-400 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-slate-700 mb-1">Failed to load data</p>
-            <p className="text-xs text-slate-400 mb-4">{error}</p>
-            <button
-              onClick={() => loadData()}
-              className="px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] text-white hover:bg-[#6334b8] transition"
-            >
-              Retry
-            </button>
-          </div>
-        ) : paged.length === 0 ? (
-          <div className="py-20 text-center">
-            <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-700 mb-1">
-              {filtered.length === 0 && allocations.length === 0 ? "No Allocations Yet" : "No Results Found"}
-            </h3>
-            <p className="text-sm text-slate-400 max-w-sm mx-auto mb-5">
-              {allocations.length === 0
-                ? "Grant leave allocations to employees to get started."
-                : "Try adjusting your search filters."}
-            </p>
-            {allocations.length === 0 && (
+      {/* Table Section */}
+      <DataTable
+        columns={[
+          {
+            key: "employeeName",
+            header: "Employee",
+            sortable: true,
+            render: (a) => (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#ede5fb] text-[#7743db] font-bold text-xs flex items-center justify-center shrink-0">
+                  {a.employeeName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900 text-xs">{a.employeeName}</p>
+                  <p className="text-[11px] text-slate-400">{a.department}</p>
+                </div>
+              </div>
+            ),
+          },
+          {
+            key: "typeName",
+            header: "Leave Type",
+            sortable: true,
+            render: (a) => (
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {a.typeName}
+                </span>
+                {a.affectsPayroll && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                    Payroll
+                  </span>
+                )}
+              </div>
+            ),
+          },
+          {
+            key: "allocated",
+            header: "Allocated",
+            sortable: true,
+            align: "center",
+            render: (a) => (
+              <span className="text-xs font-mono font-bold text-slate-800">
+                {fmt(a.allocated)} <span className="font-normal text-slate-400">{a.unit}</span>
+              </span>
+            ),
+          },
+          {
+            key: "taken",
+            header: "Used",
+            sortable: true,
+            align: "center",
+            render: (a) => (
+              <span className="text-xs font-mono text-slate-600">
+                {fmt(a.taken)} <span className="text-slate-400">{a.unit}</span>
+              </span>
+            ),
+          },
+          {
+            key: "remaining",
+            header: "Remaining",
+            sortable: true,
+            align: "center",
+            render: (a) => (
+              <span className={`text-xs font-mono font-bold ${a.remaining > 0 ? "text-emerald-600" : "text-rose-500"}`}>
+                {fmt(a.remaining)} <span className="font-normal text-slate-400">{a.unit}</span>
+              </span>
+            ),
+          },
+          {
+            key: "utilization",
+            header: "Utilization",
+            align: "center",
+            render: (a) => {
+              const usedPct = a.allocated > 0 ? Math.round((a.taken / a.allocated) * 100) : 0;
+              const barColor =
+                usedPct >= 90 ? "bg-rose-500" : usedPct >= 65 ? "bg-amber-500" : "bg-emerald-500";
+              return (
+                <div className="flex items-center gap-2 justify-center">
+                  <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${barColor}`}
+                      style={{ width: `${Math.min(100, usedPct)}%` }}
+                    />
+                  </div>
+                  <span className="text-[11px] text-slate-500 font-mono w-8 text-right">{usedPct}%</span>
+                </div>
+              );
+            },
+          },
+          {
+            key: "actions",
+            header: "Actions",
+            align: "right",
+            render: (a) => (
               <button
-                onClick={openCreate}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#7743db] text-white hover:bg-[#6334b8] transition"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openEdit(a);
+                }}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-[#7743db] hover:bg-slate-100 transition"
+                title="Edit allocation"
               >
-                <Plus className="w-4 h-4" /> Grant First Allocation
+                <Pencil className="w-3.5 h-3.5" />
               </button>
-            )}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  <th className="py-3.5 px-4 pl-6">Employee</th>
-                  <th className="py-3.5 px-4">Leave Type</th>
-                  <th className="py-3.5 px-4 text-center">Allocated</th>
-                  <th className="py-3.5 px-4 text-center">Used</th>
-                  <th className="py-3.5 px-4 text-center">Remaining</th>
-                  <th className="py-3.5 px-4 text-center">Utilization</th>
-                  <th className="py-3.5 px-4 pr-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
-                {paged.map((a) => {
-                  const usedPct = a.allocated > 0 ? Math.round((a.taken / a.allocated) * 100) : 0;
-                  const barColor =
-                    usedPct >= 90 ? "bg-rose-500" : usedPct >= 65 ? "bg-amber-500" : "bg-emerald-500";
-
-                  return (
-                    <tr key={a.id} className="hover:bg-slate-50/70 transition group">
-                      <td className="py-3.5 px-4 pl-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#ede5fb] text-[#7743db] font-bold text-xs flex items-center justify-center shrink-0">
-                            {a.employeeName.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-900 text-xs">{a.employeeName}</p>
-                            <p className="text-[11px] text-slate-400">{a.department}</p>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
-                            <Calendar className="w-3 h-3" />
-                            {a.typeName}
-                          </span>
-                          {a.affectsPayroll && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
-                              Payroll
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        <span className="text-xs font-mono font-bold text-slate-800">
-                          {fmt(a.allocated)} <span className="font-normal text-slate-400">{a.unit}</span>
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        <span className="text-xs font-mono text-slate-600">
-                          {fmt(a.taken)} <span className="text-slate-400">{a.unit}</span>
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        <span className={`text-xs font-mono font-bold ${a.remaining > 0 ? "text-emerald-600" : "text-rose-500"}`}>
-                          {fmt(a.remaining)} <span className="font-normal text-slate-400">{a.unit}</span>
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2 justify-center">
-                          <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all ${barColor}`}
-                              style={{ width: `${Math.min(100, usedPct)}%` }}
-                            />
-                          </div>
-                          <span className="text-[11px] text-slate-500 font-mono w-8 text-right">{usedPct}%</span>
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 pr-6 text-right">
-                        <button
-                          onClick={() => openEdit(a)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-[#7743db] hover:bg-slate-100 transition"
-                          title="Edit allocation"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* â”€â”€ Pagination â”€â”€ */}
-      {!loading && !error && filtered.length > PAGE_SIZE && (
-        <div className="flex items-center justify-between text-sm">
-          <p className="text-slate-500 text-xs">
-            Showing {(page - 1) * PAGE_SIZE + 1}â€“{Math.min(page * PAGE_SIZE, filtered.length)} of{" "}
-            <strong>{filtered.length}</strong> allocations
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 transition"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-xs text-slate-600 px-2">
-              Page {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 transition"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
+            ),
+          },
+        ]}
+        data={filtered}
+        loading={loading}
+        error={error}
+        onRetry={loadData}
+        emptyState={{
+          icon: Calendar,
+          title: filtered.length === 0 && allocations.length === 0 ? "No Allocations Yet" : "No Results Found",
+          description: allocations.length === 0 ? "Grant leave allocations to employees to get started." : "Try adjusting your search filters.",
+          actionLabel: allocations.length === 0 ? "Grant First Allocation" : undefined,
+          onAction: allocations.length === 0 ? openCreate : undefined,
+        }}
+      />
+      {/* Modal */}
 
       {/* â”€â”€ Grant / Edit Modal â”€â”€ */}
       {modalOpen && (

@@ -53,17 +53,24 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
       <NavLink
         to={to}
         title={!showLabel ? label : undefined}
-        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 relative group ${
+        className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-150 relative group ${
           isActive
-            ? "bg-[#7743db] text-white shadow-sm shadow-[#7743db]/25 font-semibold"
-            : "text-[#c3acd0]/85 hover:bg-[#231c34] hover:text-white"
+            ? "bg-[#09351b] text-[#00e676] border-l-4 border-[#00e676] shadow-sm font-bold"
+            : "text-[#334155] hover:bg-[#f1f5f9] hover:text-[#0f172a]"
         }`}
       >
-        <Icon className="w-4.5 h-4.5 shrink-0 w-[18px] h-[18px]" />
-        {showLabel && <span className="truncate">{label}</span>}
+        <Icon className={`w-5 h-5 shrink-0 ${isActive ? "text-[#00e676]" : "text-[#475569] group-hover:text-slate-900"}`} />
+        {showLabel && (
+          <span className="flex items-center gap-2 truncate">
+            <span className={isActive ? "text-[#00e676]/80 font-normal" : "text-slate-400 font-normal"}>
+              -
+            </span>
+            <span className="truncate">{label}</span>
+          </span>
+        )}
         {!showLabel && (
-          <span className="absolute left-full ml-3 px-2 py-1 text-xs font-medium bg-[#1e182a] text-white rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 shadow-lg border border-[#28203b] transition-opacity duration-150">
-            {label}
+          <span className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium bg-slate-800 text-white rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 shadow-md transition-opacity duration-150">
+            - {label}
           </span>
         )}
       </NavLink>
@@ -84,21 +91,28 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
     <button
       onClick={() => toggleSection(sectionKey)}
       title={!showLabel ? label : undefined}
-      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
+      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-150 ${
         isActiveSection
-          ? "text-white bg-[#231c34]/70"
-          : "text-[#c3acd0]/85 hover:bg-[#231c34] hover:text-white"
+          ? "text-[#00e676] bg-[#09351b] border-l-4 border-[#00e676]"
+          : "text-[#334155] hover:bg-[#f1f5f9] hover:text-[#0f172a]"
       }`}
     >
-      <div className="flex items-center gap-3">
-        <Icon className="w-[18px] h-[18px] shrink-0" />
-        {showLabel && <span className="truncate">{label}</span>}
+      <div className="flex items-center gap-2.5">
+        <Icon className={`w-5 h-5 shrink-0 ${isActiveSection ? "text-[#00e676]" : "text-[#475569]"}`} />
+        {showLabel && (
+          <span className="flex items-center gap-2 truncate">
+            <span className={isActiveSection ? "text-[#00e676]/80 font-normal" : "text-slate-400 font-normal"}>
+              -
+            </span>
+            <span className="truncate">{label}</span>
+          </span>
+        )}
       </div>
       {showLabel && (
         <ChevronDown
-          className={`w-3.5 h-3.5 transition-transform duration-150 text-[#c3acd0]/70 ${
-            openSections[sectionKey] ? "rotate-180" : ""
-          }`}
+          className={`w-4 h-4 transition-transform duration-150 ${
+            isActiveSection ? "text-[#00e676]" : "text-slate-400"
+          } ${openSections[sectionKey] ? "rotate-180" : ""}`}
         />
       )}
     </button>
@@ -107,36 +121,32 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
   /* ─── Section label ─── */
   const SectionLabel = ({ children }) =>
     showLabel ? (
-      <div className="px-3 pt-4 pb-1">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-[#6b5880]">
+      <div className="px-3.5 pt-4 pb-1">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
           {children}
         </span>
       </div>
     ) : (
       <div className="py-2">
-        <div className="mx-auto w-6 border-t border-[#28203b]" />
+        <div className="mx-auto w-6 border-t border-slate-200" />
       </div>
     );
 
   return (
     <aside
-      className={`h-full flex flex-col transition-all duration-200 ${
+      className={`h-full flex flex-col transition-all duration-200 bg-white/90 backdrop-blur-md border-r border-slate-200/60 ${
         isMobileSheet ? "w-64" : collapsed ? "w-16" : "w-64"
       }`}
-      style={{ backgroundColor: "#120e1c", borderRight: "1px solid #28203b" }}
     >
       {/* ── Brand Header ── */}
-      <div
-        className="h-16 flex items-center px-3.5 shrink-0"
-        style={{ borderBottom: "1px solid #28203b" }}
-      >
+      <div className="h-16 flex items-center px-3.5 shrink-0 border-b border-slate-200/60">
         <Link to="/dashboard" className="flex items-center justify-center overflow-hidden py-1">
-          <Logo size={showLabel ? 42 : 32} lightText={true} />
+          <Logo size={showLabel ? 42 : 32} lightText={false} />
         </Link>
       </div>
 
       {/* ── Navigation ── */}
-      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
+      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
         {isEmployeeRole ? (
           /* Employee-only reduced menu */
           <>
@@ -162,7 +172,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
                 }
               />
               {(openSections.workspace || (!showLabel)) && (
-                <div className={`mt-0.5 space-y-0.5 ${showLabel ? "pl-7" : ""}`}>
+                <div className={`mt-1 space-y-1 ${showLabel ? "pl-5" : ""}`}>
                   <NavItem to="/profile"       icon={User}     label="My Profile" />
                   <NavItem to="/my-attendance"  icon={Clock}    label="My Attendance" />
                   <NavItem to="/my-time-off"   icon={Calendar} label="My Time Off" />
@@ -171,99 +181,165 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
               )}
             </div>
 
-            <SectionLabel>HR & Payroll Ops</SectionLabel>
+            {/* Employees */}
+            <NavItem
+              to="/employees"
+              icon={Users}
+              label="Employees"
+              permission={PERMISSIONS.EMPLOYEE.VIEW}
+            />
 
-            <NavItem to="/employees"  icon={Users}         label="Employees"     permission={PERMISSIONS.EMPLOYEE.VIEW} />
-            <NavItem to="/contracts"  icon={FileCheck}     label="Contracts"     permission={PERMISSIONS.CONTRACT.VIEW} />
-            <NavItem to="/schedules"  icon={CalendarClock} label="Schedules"     permission={PERMISSIONS.SCHEDULE.VIEW} />
-            <NavItem to="/attendance" icon={Clock}         label="Attendance"    permission={PERMISSIONS.ATTENDANCE.VIEW} />
+            {/* Contracts */}
+            <NavItem
+              to="/contracts"
+              icon={FileCheck}
+              label="Contracts"
+              permission={PERMISSIONS.CONTRACT.VIEW}
+            />
 
-            {/* Time Off */}
-            <PermissionGuard permission={PERMISSIONS.TIMEOFF.VIEW}>
-              <div>
-                <SectionToggle
-                  sectionKey="timeoff"
-                  icon={Calendar}
-                  label="Time Off"
-                  isActiveSection={location.pathname.startsWith("/time-off")}
-                />
-                {(openSections.timeoff || (!showLabel)) && (
-                  <div className={`mt-0.5 space-y-0.5 ${showLabel ? "pl-7" : ""}`}>
-                    <NavItem to="/time-off/requests"    icon={Calendar} label="Requests" />
-                    <NavItem to="/time-off/allocations" icon={Calendar} label="Allocations" />
-                    <NavItem
-                      to="/time-off/types"
-                      icon={Calendar}
-                      label="Types"
-                      permission={PERMISSIONS.TIMEOFF.MANAGE_TYPES}
-                    />
-                  </div>
-                )}
-              </div>
-            </PermissionGuard>
+            {/* Working Schedules */}
+            <NavItem
+              to="/schedules"
+              icon={CalendarClock}
+              label="Work Schedules"
+              permission={PERMISSIONS.SCHEDULE.VIEW}
+            />
 
-            {/* Payroll */}
-            <PermissionGuard permission={PERMISSIONS.PAYROLL.VIEW}>
-              <div>
-                <SectionToggle
-                  sectionKey="payroll"
-                  icon={DollarSign}
-                  label="Payroll"
-                  isActiveSection={location.pathname.startsWith("/payroll")}
-                />
-                {(openSections.payroll || (!showLabel)) && (
-                  <div className={`mt-0.5 space-y-0.5 ${showLabel ? "pl-7" : ""}`}>
-                    <NavItem to="/payroll/payruns"           icon={DollarSign} label="Payruns"           permission={PERMISSIONS.PAYRUN.VIEW} />
-                    <NavItem to="/payroll/payslips"          icon={FileText}   label="Payslips"          permission={PERMISSIONS.PAYSLIP.VIEW} />
-                    <NavItem to="/payroll/salary-structures" icon={Building2}  label="Salary Structures" permission={PERMISSIONS.SALARY_STRUCTURE.VIEW} />
-                    <NavItem to="/payroll/salary-rules"      icon={FileText}   label="Salary Rules"      permission={PERMISSIONS.SALARY_RULE.VIEW} />
-                  </div>
-                )}
-              </div>
-            </PermissionGuard>
+            {/* Attendance Overview */}
+            <NavItem
+              to="/attendance"
+              icon={Clock}
+              label="Attendance Overview"
+              permission={PERMISSIONS.ATTENDANCE.VIEW}
+            />
 
-            <NavItem to="/reports" icon={BarChart3} label="Reports" permission={PERMISSIONS.REPORTS.VIEW} />
+            {/* Time Off Section */}
+            <div>
+              <SectionToggle
+                sectionKey="timeoff"
+                icon={Calendar}
+                label="Time Off"
+                isActiveSection={location.pathname.startsWith("/time-off")}
+              />
+              {(openSections.timeoff || (!showLabel)) && (
+                <div className={`mt-1 space-y-1 ${showLabel ? "pl-5" : ""}`}>
+                  <NavItem
+                    to="/time-off/requests"
+                    icon={FileText}
+                    label="Leave Requests"
+                    permission={PERMISSIONS.TIMEOFF.VIEW}
+                  />
+                  <NavItem
+                    to="/time-off/allocations"
+                    icon={Building2}
+                    label="Leave Allocations"
+                    permission={PERMISSIONS.TIMEOFF.VIEW}
+                  />
+                  <NavItem
+                    to="/time-off/types"
+                    icon={Settings}
+                    label="Leave Types"
+                    permission={PERMISSIONS.TIMEOFF.MANAGE_TYPES}
+                  />
+                </div>
+              )}
+            </div>
 
-            {/* Settings */}
-            <PermissionGuard
-              anyOf={[
-                PERMISSIONS.SETTINGS.MANAGE_USERS,
-                PERMISSIONS.SETTINGS.MANAGE_ROLES,
-                PERMISSIONS.SETTINGS.MANAGE_SYSTEM,
-              ]}
-            >
-              <div>
-                <SectionToggle
-                  sectionKey="settings"
-                  icon={Settings}
-                  label="Settings"
-                  isActiveSection={location.pathname.startsWith("/settings")}
-                />
-                {(openSections.settings || (!showLabel)) && (
-                  <div className={`mt-0.5 space-y-0.5 ${showLabel ? "pl-7" : ""}`}>
-                    <NavItem to="/settings/users"  icon={Users}    label="Users"             permission={PERMISSIONS.SETTINGS.MANAGE_USERS} />
-                    <NavItem to="/settings/roles"  icon={Settings} label="Roles & Perms"     permission={PERMISSIONS.SETTINGS.MANAGE_ROLES} />
-                    <NavItem to="/settings/system" icon={Settings} label="System Settings"   permission={PERMISSIONS.SETTINGS.MANAGE_SYSTEM} />
-                  </div>
-                )}
-              </div>
-            </PermissionGuard>
+            {/* Payroll Section */}
+            <div>
+              <SectionToggle
+                sectionKey="payroll"
+                icon={DollarSign}
+                label="Payroll"
+                isActiveSection={location.pathname.startsWith("/payroll")}
+              />
+              {(openSections.payroll || (!showLabel)) && (
+                <div className={`mt-1 space-y-1 ${showLabel ? "pl-5" : ""}`}>
+                  <NavItem
+                    to="/payroll/payruns"
+                    icon={DollarSign}
+                    label="Payruns"
+                    permission={PERMISSIONS.PAYRUN.VIEW}
+                  />
+                  <NavItem
+                    to="/payroll/payslips"
+                    icon={FileText}
+                    label="Payslips"
+                    permission={PERMISSIONS.PAYSLIP.VIEW}
+                  />
+                  <NavItem
+                    to="/payroll/salary-structures"
+                    icon={Building2}
+                    label="Salary Structures"
+                    permission={PERMISSIONS.SALARY_STRUCTURE.VIEW}
+                  />
+                  <NavItem
+                    to="/payroll/salary-rules"
+                    icon={Settings}
+                    label="Salary Rules"
+                    permission={PERMISSIONS.SALARY_RULE.VIEW}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Reports */}
+            <NavItem
+              to="/reports"
+              icon={BarChart3}
+              label="Reports & Analytics"
+              permission={PERMISSIONS.REPORTS.VIEW}
+            />
+
+            {/* Settings Section */}
+            <div>
+              <SectionToggle
+                sectionKey="settings"
+                icon={Settings}
+                label="System Settings"
+                isActiveSection={location.pathname.startsWith("/settings")}
+              />
+              {(openSections.settings || (!showLabel)) && (
+                <div className={`mt-1 space-y-1 ${showLabel ? "pl-5" : ""}`}>
+                  <NavItem
+                    to="/settings/users"
+                    icon={Users}
+                    label="Users & Access"
+                    permission={PERMISSIONS.SETTINGS.MANAGE_USERS}
+                  />
+                  <NavItem
+                    to="/settings/roles"
+                    icon={Settings}
+                    label="Roles & Rights"
+                    permission={PERMISSIONS.SETTINGS.MANAGE_ROLES}
+                  />
+                  <NavItem
+                    to="/settings/system"
+                    icon={Building2}
+                    label="Company Profile"
+                    permission={PERMISSIONS.SETTINGS.MANAGE_SYSTEM}
+                  />
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>
 
-      {/* ── Collapse Toggle ── */}
+      {/* Collapse Toggle */}
       {!isMobileSheet && (
-        <div className="p-2 shrink-0" style={{ borderTop: "1px solid #28203b" }}>
+        <div className="p-3 shrink-0 border-t border-slate-200/60">
           <button
             onClick={onToggleCollapse}
-            aria-label="Toggle sidebar"
-            className="w-full flex items-center justify-center p-2 rounded-lg text-[#8f7a9f] hover:bg-[#231c34] hover:text-white transition-colors duration-150"
+            className="w-full flex items-center justify-center p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100/80 rounded-2xl transition-colors"
           >
             {collapsed ? (
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             ) : (
-              <ChevronLeft className="w-4 h-4" />
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                <ChevronLeft className="w-4 h-4" />
+                <span>Collapse Sidebar</span>
+              </div>
             )}
           </button>
         </div>
