@@ -1,4 +1,5 @@
 import pool from "../db.js";
+import notificationService from "./notificationService.js";
 
 const VALID_PAYRUN_STATUSES = ["draft", "computed", "validated", "paid"];
 const VALID_PAYSLIP_STATUSES = ["draft", "computed", "validated", "paid"];
@@ -446,7 +447,7 @@ const calculateEmployeePayrollInternal = ({
 /**
  * Calculate payroll for an entire payrun
  */
-export const calculatePayrun = async (id) => {
+export const calculatePayrun = async (id, options = {}) => {
   const parsedId = parseId(id);
   if (!parsedId) {
     const err = new Error("Invalid payrun ID");
@@ -467,14 +468,22 @@ export const calculatePayrun = async (id) => {
     throw err;
   }
 
+  const { employee_ids } = options || {};
+
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    // 1. Fetch active employees
-    const employeesRes = await client.query(
-      "SELECT id, name, email, department, job_position, status FROM employees WHERE status = 'active' ORDER BY id ASC"
-    );
+    // 1. Fetch active employees (or specific selected employees)
+    let employeesQuery = "SELECT id, name, email, department, job_position, status FROM employees WHERE status = 'active'";
+    const empParams = [];
+    if (Array.isArray(employee_ids) && employee_ids.length > 0) {
+      empParams.push(employee_ids.map(Number));
+      employeesQuery += ` AND id = ANY($1::int[])`;
+    }
+    employeesQuery += " ORDER BY id ASC";
+
+    const employeesRes = await client.query(employeesQuery, empParams);
     const employees = employeesRes.rows;
 
     let employeesProcessed = 0;
@@ -688,7 +697,131 @@ export const finalizePayrun = async (id) => {
 
     await client.query("COMMIT");
 
+    // Send notification to payroll users/admins
+    try {
+      await notificationService.notifyRoles(["admin", "hr_payroll_manager", "hr_payroll_user"], {
+        title: "Payrun Batch Validated",
+        message: `Payrun "${payrun.name}" has been validated and locked for disbursement.`,
+        type: "info",
+        link: `/payroll/payruns/${parsedId}`,
+      });
+    } catch (notifErr) {
+      console.warn("Failed to dispatch payrun validation notification:", notifErr.message);
+    }
+
     return payrunUpdateRes.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * Mark Payrun as Paid (Transitions payrun and payslips to 'paid' state)
+ */
+export const markPayrunPaid = async (id) => {
+  const parsedId = parseId(id);
+  if (!parsedId) {
+    const err = new Error("Invalid payrun ID");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const payrun = await getPayrunById(parsedId);
+  if (!payrun) {
+    const err = new Error("Payrun not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (payrun.status === "paid") {
+    const err = new Error("Payrun is already marked as paid");
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // Update payslips to paid
+    await client.query(
+      "UPDATE payslips SET status = 'paid', updated_at = NOW() WHERE payrun_id = $1",
+      [parsedId]
+    );
+
+    // Update payrun to paid with paid_at timestamp
+    const payrunUpdateRes = await client.query(
+      "UPDATE payruns SET status = 'paid', paid_at = NOW(), updated_at = NOW() WHERE id = $1 RETURNING id, name, status, period_start, period_end, paid_at, updated_at",
+      [parsedId]
+    );
+
+    await client.query("COMMIT");
+
+    // Send notifications to all paid employees
+    try {
+      const empUsersRes = await pool.query(
+        `SELECT DISTINCT e.user_id, e.name
+         FROM payslips ps
+         JOIN employees e ON ps.employee_id = e.id
+         WHERE ps.payrun_id = $1 AND e.user_id IS NOT NULL`,
+        [parsedId]
+      );
+      for (const emp of empUsersRes.rows) {
+        await notificationService.createNotification({
+          userId: emp.user_id,
+          title: "Payslip Disbursed",
+          message: `Your salary for ${payrun.period_start} to ${payrun.period_end} has been disbursed.`,
+          type: "success",
+          link: "/my-payslips",
+        });
+      }
+    } catch (notifErr) {
+      console.warn("Failed to dispatch payslip disbursement notifications:", notifErr.message);
+    }
+
+    return payrunUpdateRes.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * Delete a Payrun (and its associated payslips)
+ */
+export const deletePayrun = async (id) => {
+  const parsedId = parseId(id);
+  if (!parsedId) {
+    const err = new Error("Invalid payrun ID");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const payrun = await getPayrunById(parsedId);
+  if (!payrun) {
+    const err = new Error("Payrun not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (payrun.status === "paid") {
+    const err = new Error("Cannot delete a paid payrun");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM payslips WHERE payrun_id = $1", [parsedId]);
+    await client.query("DELETE FROM payruns WHERE id = $1", [parsedId]);
+    await client.query("COMMIT");
+    return true;
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -1063,6 +1196,8 @@ export default {
   updatePayrun,
   calculatePayrun,
   finalizePayrun,
+  markPayrunPaid,
+  deletePayrun,
   listPayslips,
   getPayslipById,
   getEmployeePayslips,

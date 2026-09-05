@@ -119,4 +119,45 @@ router.get("/time-off-summary", async (req, res, next) => {
   }
 });
 
+/**
+ * 6. GET /api/v1/reports/department-cost
+ * Payroll costs grouped by department
+ */
+router.get("/department-cost", async (req, res, next) => {
+  try {
+    const { period_start, period_end } = req.query;
+
+    const data = await reportService.getDepartmentCost({
+      period_start,
+      period_end,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Department cost report retrieved successfully",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * 7. GET /api/v1/reports/employee-history/:employeeId
+ * Employee wage and slip historical progression
+ */
+router.get("/employee-history/:employeeId", async (req, res, next) => {
+  try {
+    const data = await reportService.getEmployeePayrollHistory(req.params.employeeId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Employee payroll history retrieved successfully",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

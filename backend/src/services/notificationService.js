@@ -58,9 +58,11 @@ export const createNotification = async ({ userId, title, message, type = "info"
 export const notifyRoles = async (roles = [], { title, message, type = "info", link = null }) => {
   if (!roles || roles.length === 0 || !title || !message) return [];
 
+  const normalizedRoles = roles.map((r) => String(r).toLowerCase().trim());
+
   const usersRes = await pool.query(
-    "SELECT id FROM users WHERE role = ANY($1::varchar[])",
-    [roles]
+    "SELECT id FROM users WHERE LOWER(role) = ANY($1::varchar[])",
+    [normalizedRoles]
   );
 
   const notifications = [];

@@ -180,11 +180,14 @@ export default function MyTimeOffPage() {
         key: "daysCount",
         header: "Days",
         sortable: true,
-        render: (row) => (
-          <span className="font-medium text-xs text-foreground">
-            {row.daysCount} {row.daysCount === 1 ? "day" : "days"}
-          </span>
-        ),
+        render: (row) => {
+          const count = parseFloat(row.daysCount ?? row.days ?? row.duration ?? 1);
+          return (
+            <span className="font-medium text-xs text-foreground">
+              {count} {count === 1 ? "day" : "days"}
+            </span>
+          );
+        },
       },
       {
         key: "reason",

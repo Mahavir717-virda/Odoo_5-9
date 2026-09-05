@@ -285,18 +285,23 @@ export const getMyTimeOffData = async () => {
       };
     });
 
-    const requests = rawRequests.map((r) => ({
-      id: r.id,
-      leaveType: r.time_off_type_name || r.leaveType || "Leave",
-      typeId: r.time_off_type_id || r.typeId,
-      startDate: formatDate(r.start_date || r.startDate),
-      endDate: formatDate(r.end_date || r.endDate),
-      days: parseFloat(r.duration || r.days || 1),
-      status: r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1).toLowerCase() : "Pending",
-      reason: r.reason || "",
-      appliedDate: formatDate(r.created_at || r.appliedDate),
-      approvedBy: r.approved_by_email || r.approvedBy || null,
-    }));
+    const requests = rawRequests.map((r) => {
+      const days = parseFloat(r.duration || r.requested_days || r.days || 1);
+      return {
+        id: r.id,
+        leaveType: r.time_off_type_name || r.leaveType || "Leave",
+        typeId: r.time_off_type_id || r.typeId,
+        startDate: formatDate(r.start_date || r.startDate),
+        endDate: formatDate(r.end_date || r.endDate),
+        days,
+        daysCount: days,
+        duration: days,
+        status: r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1).toLowerCase() : "Pending",
+        reason: r.reason || "",
+        appliedDate: formatDate(r.created_at || r.appliedDate),
+        approvedBy: r.approved_by_email || r.approvedBy || null,
+      };
+    });
 
     return {
       balances,

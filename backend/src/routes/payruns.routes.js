@@ -172,12 +172,73 @@ router.put(
 
 /**
  * POST /api/v1/payruns/:id/calculate
+ * POST /api/v1/payruns/:id/compute
+ * Allowed: admin, hr_payroll_manager, hr_payroll_user
+ */
+const handleComputePayrun = async (req, res, next) => {
+  try {
+    const payrunId = parseId(req.params.id);
+    if (!payrunId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid payrun ID",
+      });
+    }
+
+    const { employee_ids } = req.body || {};
+    const summary = await payrollService.calculatePayrun(payrunId, { employee_ids });
+
+    return res.status(200).json({
+      success: true,
+      message: "Payroll calculated successfully",
+      data: summary,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+router.post("/:id/calculate", authenticate, requireRole(...CALC_ROLES), handleComputePayrun);
+router.post("/:id/compute", authenticate, requireRole(...CALC_ROLES), handleComputePayrun);
+
+/**
+ * POST /api/v1/payruns/:id/finalize
+ * PATCH /api/v1/payruns/:id/validate
+ * Allowed: admin, hr_payroll_manager, hr_payroll_user
+ */
+const handleFinalizePayrun = async (req, res, next) => {
+  try {
+    const payrunId = parseId(req.params.id);
+    if (!payrunId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid payrun ID",
+      });
+    }
+
+    const finalized = await payrollService.finalizePayrun(payrunId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Payrun finalized successfully",
+      data: finalized,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+router.post("/:id/finalize", authenticate, requireRole(...CALC_ROLES), handleFinalizePayrun);
+router.patch("/:id/validate", authenticate, requireRole(...CALC_ROLES), handleFinalizePayrun);
+
+/**
+ * PATCH /api/v1/payruns/:id/pay
  * Allowed: admin, hr_payroll_manager
  */
-router.post(
-  "/:id/calculate",
+router.patch(
+  "/:id/pay",
   authenticate,
-  requireRole(...CALC_ROLES),
+  requireRole("admin", "hr_payroll_manager"),
   async (req, res, next) => {
     try {
       const payrunId = parseId(req.params.id);
@@ -188,12 +249,12 @@ router.post(
         });
       }
 
-      const summary = await payrollService.calculatePayrun(payrunId);
+      const paid = await payrollService.markPayrunPaid(payrunId);
 
       return res.status(200).json({
         success: true,
-        message: "Payroll calculated successfully",
-        data: summary,
+        message: "Payrun marked as paid successfully",
+        data: paid,
       });
     } catch (error) {
       next(error);
@@ -202,13 +263,13 @@ router.post(
 );
 
 /**
- * POST /api/v1/payruns/:id/finalize
+ * DELETE /api/v1/payruns/:id
  * Allowed: admin, hr_payroll_manager
  */
-router.post(
-  "/:id/finalize",
+router.delete(
+  "/:id",
   authenticate,
-  requireRole(...CALC_ROLES),
+  requireRole("admin", "hr_payroll_manager"),
   async (req, res, next) => {
     try {
       const payrunId = parseId(req.params.id);
@@ -219,12 +280,11 @@ router.post(
         });
       }
 
-      const finalized = await payrollService.finalizePayrun(payrunId);
+      await payrollService.deletePayrun(payrunId);
 
       return res.status(200).json({
         success: true,
-        message: "Payrun finalized successfully",
-        data: finalized,
+        message: "Payrun deleted successfully",
       });
     } catch (error) {
       next(error);

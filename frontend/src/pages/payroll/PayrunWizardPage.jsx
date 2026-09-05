@@ -1,14 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   DollarSign,
   ArrowLeft,
+  ArrowRight,
   Calendar,
   Layers,
   Sparkles,
   AlertCircle,
-  Play,
+  Users,
   CheckCircle2,
+  Search,
+  CheckSquare,
+  Square,
+  Building2,
+  Briefcase,
 } from "lucide-react";
 
 import PageHeader from "../../components/common/PageHeader";
@@ -25,12 +31,22 @@ import {
 } from "../../components/ui/select";
 
 import * as payrollManagerService from "../../services/payrollManagerService";
+import * as employeeService from "../../services/employeeService";
 
 export default function PayrunWizardPage() {
   const navigate = useNavigate();
 
+  // Wizard Step State
+  const [step, setStep] = useState(1); // 1 = Configuration, 2 = Employee Selection
+
   const [structures, setStructures] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmpIds, setSelectedEmpIds] = useState(new Set());
+  const [empSearch, setEmpSearch] = useState("");
+  const [deptFilter, setDeptFilter] = useState("all");
+
   const [loading, setLoading] = useState(true);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
 
@@ -46,33 +62,113 @@ export default function PayrunWizardPage() {
   const [structureId, setStructureId] = useState("");
 
   useEffect(() => {
-    const loadStructures = async () => {
+    const loadData = async () => {
       try {
-        const data = await payrollManagerService.listSalaryStructures();
-        setStructures(data || []);
-        if (data && data.length > 0) {
-          setStructureId(String(data[0].id));
+        const [structuresData, empRes] = await Promise.all([
+          payrollManagerService.listSalaryStructures().catch(() => []),
+          employeeService.getEmployees({ status: "active", limit: 200 }).catch(() => ({ employees: [] })),
+        ]);
+
+        setStructures(structuresData || []);
+        if (structuresData && structuresData.length > 0) {
+          setStructureId(String(structuresData[0].id));
         }
+
+        const empList = empRes.employees || [];
+        setEmployees(empList);
+        // Default select all active employees
+        setSelectedEmpIds(new Set(empList.map((e) => String(e.id))));
       } catch (err) {
-        setFormError(err.message || "Failed to load salary structures");
+        setFormError(err.message || "Failed to load initial wizard data");
       } finally {
         setLoading(false);
       }
     };
-    loadStructures();
+    loadData();
   }, []);
 
-  const handleSubmit = async (e) => {
+  // Step 1 -> Step 2 validation
+  const handleProceedToEmployees = (e) => {
     e.preventDefault();
     setFormError(null);
 
     if (!name.trim() || !periodStart || !periodEnd || !structureId) {
-      setFormError("All fields are required to initialize a payrun batch.");
+      setFormError("All fields in Step 1 are required.");
+      return;
+    }
+
+    if (new Date(periodEnd) < new Date(periodStart)) {
+      setFormError("Period End Date must be greater than or equal to Start Date.");
+      return;
+    }
+
+    setStep(2);
+  };
+
+  // Toggle single employee
+  const toggleEmployee = (id) => {
+    setSelectedEmpIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(String(id))) {
+        next.delete(String(id));
+      } else {
+        next.add(String(id));
+      }
+      return next;
+    });
+  };
+
+  // Filtered employees in Step 2
+  const filteredEmployees = useMemo(() => {
+    return employees.filter((emp) => {
+      const matchesSearch =
+        !empSearch.trim() ||
+        (emp.name || "").toLowerCase().includes(empSearch.toLowerCase()) ||
+        (emp.email || "").toLowerCase().includes(empSearch.toLowerCase()) ||
+        (emp.jobPosition || "").toLowerCase().includes(empSearch.toLowerCase());
+
+      const matchesDept =
+        deptFilter === "all" ||
+        (emp.department || "").toLowerCase() === deptFilter.toLowerCase();
+
+      return matchesSearch && matchesDept;
+    });
+  }, [employees, empSearch, deptFilter]);
+
+  // Departments list for filter
+  const departments = useMemo(() => {
+    const set = new Set(employees.map((e) => e.department).filter(Boolean));
+    return Array.from(set);
+  }, [employees]);
+
+  // Select/Deselect all filtered
+  const handleToggleSelectAll = () => {
+    const filteredIds = filteredEmployees.map((e) => String(e.id));
+    const allSelected = filteredIds.every((id) => selectedEmpIds.has(id));
+
+    setSelectedEmpIds((prev) => {
+      const next = new Set(prev);
+      if (allSelected) {
+        filteredIds.forEach((id) => next.delete(id));
+      } else {
+        filteredIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  // Final Submit
+  const handleFinalSubmit = async () => {
+    setFormError(null);
+
+    if (selectedEmpIds.size === 0) {
+      setFormError("Please select at least 1 employee to include in this payrun batch.");
       return;
     }
 
     setSubmitting(true);
     try {
+      // 1. Create Payrun Batch record
       const created = await payrollManagerService.createPayrun({
         name: name.trim(),
         period_start: periodStart,
@@ -80,16 +176,20 @@ export default function PayrunWizardPage() {
         structure_id: structureId,
       });
 
-      // Navigate to Payrun details page to compute and review
+      // 2. Compute payroll for selected employees
+      const employeeIdsArray = Array.from(selectedEmpIds).map((id) => parseInt(id, 10));
+      await payrollManagerService.computePayrun(created.id, employeeIdsArray);
+
+      // 3. Navigate directly to Payrun details page
       navigate(`/payroll/payruns/${created.id}`);
     } catch (err) {
-      setFormError(err.message || "Failed to create payrun.");
+      setFormError(err.message || "Failed to initialize and compute payrun.");
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="space-y-6 pb-16 max-w-3xl mx-auto">
+    <div className="space-y-6 pb-16 max-w-4xl mx-auto">
       <div className="flex items-center gap-2">
         <Button
           variant="ghost"
@@ -104,102 +204,298 @@ export default function PayrunWizardPage() {
 
       <PageHeader
         title="Create Payrun Batch"
-        subtitle="Initialize a new monthly salary processing batch with active employee contracts and salary structures."
+        subtitle="Two-step wizard: configure batch parameters, select eligible employees, and compute payroll."
       />
 
-      <Card className="border-border bg-card shadow-xs">
-        <CardHeader className="border-b border-border/40 pb-4">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
-            <DollarSign className="w-4 h-4 text-primary" />
-            Batch Configuration & Payroll Period
-          </CardTitle>
-        </CardHeader>
+      {/* Progress Steps Header */}
+      <div className="flex items-center justify-between p-4 bg-card border border-border rounded-xl shadow-xs">
+        <div className="flex items-center gap-3">
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+              step === 1
+                ? "bg-primary text-primary-foreground"
+                : "bg-emerald-600 text-white"
+            }`}
+          >
+            {step === 2 ? <CheckCircle2 className="w-4 h-4" /> : "1"}
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-foreground">Step 1: Batch Scope</p>
+            <p className="text-[11px] text-muted-foreground">Period, Name & Salary Structure</p>
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <CardContent className="p-6 space-y-5">
-            {formError && (
-              <div className="p-3.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{formError}</span>
+        <div className="h-0.5 flex-1 mx-4 bg-border/80 max-w-[80px]" />
+
+        <div className="flex items-center gap-3">
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+              step === 2
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            2
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-foreground">Step 2: Employee Selection</p>
+            <p className="text-[11px] text-muted-foreground">
+              {selectedEmpIds.size} of {employees.length} selected
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {formError && (
+        <div className="p-3.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{formError}</span>
+        </div>
+      )}
+
+      {/* STEP 1: CONFIGURATION */}
+      {step === 1 && (
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="border-b border-border/40 pb-4">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
+              <DollarSign className="w-4 h-4 text-primary" />
+              Batch Configuration & Payroll Period
+            </CardTitle>
+          </CardHeader>
+
+          <form onSubmit={handleProceedToEmployees}>
+            <CardContent className="p-6 space-y-5">
+              <FormField label="Payrun Batch Name" required>
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. September 2026 Payroll Batch"
+                  className="h-9 text-xs"
+                />
+              </FormField>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField label="Period Start Date" required>
+                  <Input
+                    type="date"
+                    value={periodStart}
+                    onChange={(e) => setPeriodStart(e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </FormField>
+
+                <FormField label="Period End Date" required>
+                  <Input
+                    type="date"
+                    value={periodEnd}
+                    onChange={(e) => setPeriodEnd(e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </FormField>
               </div>
-            )}
 
-            <FormField label="Payrun Batch Name" required>
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. March 2026 Standard Payrun"
-                className="h-9 text-xs"
-              />
-            </FormField>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label="Period Start Date" required>
-                <Input
-                  type="date"
-                  value={periodStart}
-                  onChange={(e) => setPeriodStart(e.target.value)}
-                  className="h-9 text-xs"
-                />
+              <FormField label="Default Salary Structure" required>
+                <Select value={structureId} onValueChange={setStructureId}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue placeholder="Select salary structure" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {structures.map((s) => (
+                      <SelectItem key={s.id} value={String(s.id)} className="text-xs">
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormField>
 
-              <FormField label="Period End Date" required>
+              <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-800/40 text-xs text-blue-900 dark:text-blue-200 space-y-1">
+                <p className="font-semibold flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-blue-600" />
+                  Two-Step Workflow Note
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Clicking continue will move to Employee Selection without creating records yet. You can review and choose explicitly which staff to process.
+                </p>
+              </div>
+            </CardContent>
+
+            <div className="p-4 border-t border-border flex items-center justify-end gap-2 bg-muted/20">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/payroll/payruns")}
+                className="text-xs"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" className="text-xs gap-1.5 shadow-xs">
+                Continue to Select Employees
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </form>
+        </Card>
+      )}
+
+      {/* STEP 2: EMPLOYEE SELECTION */}
+      {step === 2 && (
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="border-b border-border/40 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                <Users className="w-4 h-4 text-primary" />
+                Select Employees for Batch ({selectedEmpIds.size} selected)
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="xs"
+                  onClick={handleToggleSelectAll}
+                  className="text-xs gap-1.5"
+                >
+                  {filteredEmployees.every((e) => selectedEmpIds.has(String(e.id))) ? (
+                    <>
+                      <Square className="w-3.5 h-3.5 text-muted-foreground" />
+                      Deselect All
+                    </>
+                  ) : (
+                    <>
+                      <CheckSquare className="w-3.5 h-3.5 text-primary" />
+                      Select All
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="p-6 space-y-4">
+            {/* Filter Bar */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-muted-foreground" />
                 <Input
-                  type="date"
-                  value={periodEnd}
-                  onChange={(e) => setPeriodEnd(e.target.value)}
-                  className="h-9 text-xs"
+                  value={empSearch}
+                  onChange={(e) => setEmpSearch(e.target.value)}
+                  placeholder="Search by name, email, or role..."
+                  className="pl-8 h-8 text-xs"
                 />
-              </FormField>
+              </div>
+
+              <div className="w-full sm:w-48">
+                <Select value={deptFilter} onValueChange={setDeptFilter}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="All Departments" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all" className="text-xs">
+                      All Departments
+                    </SelectItem>
+                    {departments.map((d) => (
+                      <SelectItem key={d} value={d} className="text-xs">
+                        {d}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <FormField label="Default Salary Structure" required>
-              <Select value={structureId} onValueChange={setStructureId}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue placeholder="Select salary structure" />
-                </SelectTrigger>
-                <SelectContent>
-                  {structures.map((s) => (
-                    <SelectItem key={s.id} value={String(s.id)} className="text-xs">
-                      {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
+            {/* Employees List with Checkboxes */}
+            <div className="border border-border rounded-xl divide-y divide-border/60 max-h-96 overflow-y-auto bg-background/50">
+              {filteredEmployees.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground text-xs">
+                  No active employees found matching your criteria.
+                </div>
+              ) : (
+                filteredEmployees.map((emp) => {
+                  const isSelected = selectedEmpIds.has(String(emp.id));
+                  return (
+                    <div
+                      key={emp.id}
+                      onClick={() => toggleEmployee(emp.id)}
+                      className={`p-3.5 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
+                        isSelected
+                          ? "bg-primary/5 dark:bg-primary/10 hover:bg-primary/10"
+                          : "hover:bg-muted/40"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {}} // handled by parent div
+                          className="w-4 h-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer"
+                        />
+                        <div>
+                          <p className="text-xs font-semibold text-foreground flex items-center gap-2">
+                            {emp.name}
+                            <span className="text-[10px] font-normal text-muted-foreground px-1.5 py-0.5 rounded-full bg-muted">
+                              {emp.employeeId || `EMP-${emp.id}`}
+                            </span>
+                          </p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {emp.email}
+                          </p>
+                        </div>
+                      </div>
 
-            <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-800/40 text-xs text-blue-900 dark:text-blue-200 space-y-1">
-              <p className="font-semibold flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-blue-600" />
-                Automatic Batch Computation
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                After initializing this batch, you will be directed to the Payrun Manager to compute payslips against all active employee contracts, attendance hours, and approved leaves.
-              </p>
+                      <div className="flex items-center gap-4 text-right">
+                        <div className="hidden sm:block text-[11px] text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <Building2 className="w-3 h-3 text-muted-foreground" />
+                            {emp.department || "General"}
+                          </span>
+                        </div>
+                        <div className="hidden sm:block text-[11px] text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <Briefcase className="w-3 h-3 text-muted-foreground" />
+                            {emp.jobPosition || "Staff"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+              <span>
+                Showing {filteredEmployees.length} of {employees.length} active employees
+              </span>
+              <span className="font-semibold text-foreground">
+                {selectedEmpIds.size} selected for this payrun
+              </span>
             </div>
           </CardContent>
 
-          <div className="p-4 border-t border-border flex items-center justify-end gap-2 bg-muted/20">
+          <div className="p-4 border-t border-border flex items-center justify-between bg-muted/20">
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => navigate("/payroll/payruns")}
-              className="text-xs"
+              onClick={() => setStep(1)}
+              className="text-xs gap-1.5"
             >
-              Cancel
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Back to Batch Details
             </Button>
             <Button
-              type="submit"
+              type="button"
               size="sm"
-              disabled={submitting}
+              disabled={submitting || selectedEmpIds.size === 0}
+              onClick={handleFinalSubmit}
               className="text-xs gap-1.5 shadow-xs"
             >
-              {submitting ? "Creating..." : "Initialize Batch"}
+              {submitting ? "Processing & Computing..." : `Initialize & Compute (${selectedEmpIds.size})`}
             </Button>
           </div>
-        </form>
-      </Card>
+        </Card>
+      )}
     </div>
   );
 }

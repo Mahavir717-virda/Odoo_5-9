@@ -376,10 +376,94 @@ export const getTimeOffSummary = async ({
   };
 };
 
+/**
+ * 6. GET /api/v1/reports/department-cost
+ * Payroll costs grouped by department
+ */
+export const getDepartmentCost = async ({ period_start, period_end } = {}) => {
+  let whereConditions = [];
+  let params = [];
+
+  if (period_start) {
+    params.push(period_start);
+    whereConditions.push(`pr.period_start >= $${params.length}`);
+  }
+
+  if (period_end) {
+    params.push(period_end);
+    whereConditions.push(`pr.period_end <= $${params.length}`);
+  }
+
+  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
+
+  const query = `
+    SELECT
+      COALESCE(NULLIF(TRIM(e.department), ''), 'General') AS department_name,
+      COUNT(DISTINCT e.id)::int AS headcount,
+      COALESCE(SUM(ps.gross_salary), 0)::numeric(12,2) AS total_gross_cost,
+      COALESCE(SUM(ps.net_salary), 0)::numeric(12,2) AS total_net_cost
+    FROM employees e
+    LEFT JOIN payslips ps ON e.id = ps.employee_id
+    LEFT JOIN payruns pr ON ps.payrun_id = pr.id
+    ${whereClause}
+    GROUP BY COALESCE(NULLIF(TRIM(e.department), ''), 'General')
+    ORDER BY total_gross_cost DESC, department_name ASC
+  `;
+
+  const res = await pool.query(query, params);
+
+  return res.rows.map((row) => ({
+    department_name: row.department_name,
+    name: row.department_name,
+    headcount: parseInt(row.headcount, 10) || 0,
+    total_gross_cost: parseFloat(row.total_gross_cost) || 0,
+    gross_wages: parseFloat(row.total_gross_cost) || 0,
+    total_net_cost: parseFloat(row.total_net_cost) || 0,
+    net_wages: parseFloat(row.total_net_cost) || 0,
+  }));
+};
+
+/**
+ * 7. GET /api/v1/reports/employee-history/:employeeId
+ * Employee wage and slip historical progression
+ */
+export const getEmployeePayrollHistory = async (employeeId) => {
+  const eId = parseId(employeeId);
+  if (!eId) {
+    const err = new Error("Invalid employee ID");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const query = `
+    SELECT
+      ps.id AS payslip_id,
+      pr.id AS payrun_id,
+      pr.name AS payrun_name,
+      pr.period_start,
+      pr.period_end,
+      ps.basic_salary,
+      ps.gross_salary,
+      ps.total_deductions,
+      ps.net_salary,
+      ps.status,
+      ps.created_at
+    FROM payslips ps
+    JOIN payruns pr ON ps.payrun_id = pr.id
+    WHERE ps.employee_id = $1
+    ORDER BY pr.period_start DESC
+  `;
+
+  const res = await pool.query(query, [eId]);
+  return res.rows;
+};
+
 export default {
   getDashboard,
   getPayrollSummary,
   getEmployeeSummary,
   getAttendanceSummary,
   getTimeOffSummary,
+  getDepartmentCost,
+  getEmployeePayrollHistory,
 };

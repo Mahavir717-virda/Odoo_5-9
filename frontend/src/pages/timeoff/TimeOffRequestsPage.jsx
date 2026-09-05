@@ -220,11 +220,14 @@ export default function TimeOffRequestsPage() {
         key: "duration",
         header: "Duration",
         sortable: true,
-        render: (row) => (
-          <span className="text-xs font-bold text-primary font-mono">
-            {parseFloat(row.duration || 1)} {parseFloat(row.duration || 1) === 1 ? "day" : "days"}
-          </span>
-        ),
+        render: (row) => {
+          const count = parseFloat(row.duration ?? row.requested_days ?? row.days ?? 1);
+          return (
+            <span className="text-xs font-bold text-primary font-mono">
+              {count} {count === 1 ? "day" : "days"}
+            </span>
+          );
+        },
       },
       {
         key: "reason",
