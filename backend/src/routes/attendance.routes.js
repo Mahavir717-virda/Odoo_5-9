@@ -15,12 +15,43 @@ const parseId = (id) => {
 };
 
 /**
- * Helper to retrieve employee ID for authenticated user
+ * Helper to retrieve or provision employee ID for authenticated user
  */
-const getAuthenticatedEmployeeId = async (userId) => {
-  const empRes = await pool.query("SELECT id FROM employees WHERE user_id = $1", [userId]);
-  if (empRes.rows.length === 0) return null;
-  return empRes.rows[0].id;
+const getAuthenticatedEmployeeId = async (user) => {
+  if (!user) return null;
+  const userId = typeof user === "object" ? user.id : user;
+  if (!userId) return null;
+
+  // 1. Check if employee linked by user_id
+  let empRes = await pool.query("SELECT id FROM employees WHERE user_id = $1", [userId]);
+  if (empRes.rows.length > 0) return empRes.rows[0].id;
+
+  // 2. Check if employee matched by email
+  const email = typeof user === "object" ? user.email : null;
+  const role = typeof user === "object" ? user.role : "employee";
+
+  if (email) {
+    empRes = await pool.query("SELECT id FROM employees WHERE LOWER(email) = LOWER($1)", [email]);
+    if (empRes.rows.length > 0) {
+      const empId = empRes.rows[0].id;
+      await pool.query("UPDATE employees SET user_id = $1 WHERE id = $2", [userId, empId]);
+      return empId;
+    }
+  }
+
+  // 3. Auto-provision employee profile for system user if none exists
+  const displayName = email ? email.split("@")[0] : `User-${userId}`;
+  const empEmail = email || `user-${userId}@system.local`;
+  const department = role === "admin" || role === "hr_manager" ? "Management" : "General";
+  const jobPosition = role ? role.replace(/_/g, " ").toUpperCase() : "Staff";
+
+  const insertRes = await pool.query(
+    `INSERT INTO employees (user_id, name, email, department, job_position, employee_type, schedule_id, joining_date, status)
+     VALUES ($1, $2, $3, $4, $5, 'full_time', 1, NOW(), 'active')
+     RETURNING id`,
+    [userId, displayName, empEmail, department, jobPosition]
+  );
+  return insertRes.rows[0].id;
 };
 
 /**
@@ -30,7 +61,7 @@ const getAuthenticatedEmployeeId = async (userId) => {
  */
 router.get("/me", authenticate, async (req, res, next) => {
   try {
-    const employeeId = await getAuthenticatedEmployeeId(req.user.id);
+    const employeeId = await getAuthenticatedEmployeeId(req.user);
     if (!employeeId) {
       return res.status(404).json({
         success: false,
@@ -69,7 +100,7 @@ router.post("/check-in", authenticate, async (req, res, next) => {
     let targetEmployeeId;
 
     if (req.user.role === "employee") {
-      targetEmployeeId = await getAuthenticatedEmployeeId(req.user.id);
+      targetEmployeeId = await getAuthenticatedEmployeeId(req.user);
       if (!targetEmployeeId) {
         return res.status(404).json({
           success: false,
@@ -87,7 +118,7 @@ router.post("/check-in", authenticate, async (req, res, next) => {
           });
         }
       } else {
-        targetEmployeeId = await getAuthenticatedEmployeeId(req.user.id);
+        targetEmployeeId = await getAuthenticatedEmployeeId(req.user);
         if (!targetEmployeeId) {
           return res.status(400).json({
             success: false,
@@ -119,7 +150,7 @@ router.post("/check-out", authenticate, async (req, res, next) => {
     let targetEmployeeId;
 
     if (req.user.role === "employee") {
-      targetEmployeeId = await getAuthenticatedEmployeeId(req.user.id);
+      targetEmployeeId = await getAuthenticatedEmployeeId(req.user);
       if (!targetEmployeeId) {
         return res.status(404).json({
           success: false,
@@ -136,7 +167,7 @@ router.post("/check-out", authenticate, async (req, res, next) => {
           });
         }
       } else {
-        targetEmployeeId = await getAuthenticatedEmployeeId(req.user.id);
+        targetEmployeeId = await getAuthenticatedEmployeeId(req.user);
         if (!targetEmployeeId) {
           return res.status(400).json({
             success: false,
