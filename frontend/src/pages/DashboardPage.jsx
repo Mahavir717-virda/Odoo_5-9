@@ -32,6 +32,7 @@ import * as portalService from "../services/employeePortalService";
 import { listPayruns } from "../services/payrollManagerService";
 import { listRequests } from "../services/managerTimeOffService";
 import { getEmployees } from "../services/employeeService";
+import AttendanceLeaderboard from "../components/attendance/AttendanceLeaderboard";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -48,35 +49,35 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [punchLoading, setPunchLoading] = useState(false);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        // Load employee portal data for everyone (including HR Payroll Users)
-        const essData = await portalService.getEmployeeDashboardData().catch(() => null);
-        setDashboardData(essData);
+  const loadData = async () => {
+    try {
+      // Load employee portal data for everyone (including HR Payroll Users)
+      const essData = await portalService.getEmployeeDashboardData().catch(() => null);
+      setDashboardData(essData);
 
-        if (!isEmployeeRole) {
-          // Load manager-level counts
-          const [empRes, leaveRes, payrunRes] = await Promise.all([
-            getEmployees().catch(() => []),
-            listRequests({ status: "pending" }).catch(() => ({ data: [] })),
-            listPayruns({ limit: 10 }).catch(() => ({ data: [] })),
-          ]);
+      if (!isEmployeeRole) {
+        // Load manager-level counts
+        const [empRes, leaveRes, payrunRes] = await Promise.all([
+          getEmployees().catch(() => []),
+          listRequests({ status: "pending" }).catch(() => ({ data: [] })),
+          listPayruns({ limit: 10 }).catch(() => ({ data: [] })),
+        ]);
 
-          setManagerMetrics({
-            totalEmployees: Array.isArray(empRes) ? empRes.length : 0,
-            pendingLeaves: Array.isArray(leaveRes.data) ? leaveRes.data.length : 0,
-            activePayruns: Array.isArray(payrunRes.data) ? payrunRes.data.length : 0,
-          });
-        }
-      } catch (err) {
-        console.error("Failed to load dashboard data:", err);
-      } finally {
-        setLoading(false);
+        setManagerMetrics({
+          totalEmployees: Array.isArray(empRes) ? empRes.length : 0,
+          pendingLeaves: Array.isArray(leaveRes.data) ? leaveRes.data.length : 0,
+          activePayruns: Array.isArray(payrunRes.data) ? payrunRes.data.length : 0,
+        });
       }
-    };
+    } catch (err) {
+      console.error("Failed to load dashboard data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    setLoading(true);
     loadData();
   }, [isEmployeeRole]);
 
@@ -89,7 +90,7 @@ export default function Dashboard() {
         ...prev,
         punchState: updatedPunch,
       }));
-      loadData();
+      await loadData();
     } catch (err) {
       console.error("Punch action error:", err);
       alert(err.response?.data?.message || err.message || "Failed to complete punch action.");
@@ -621,6 +622,11 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Monthly Attendance Champions & Perks Section */}
+      <div className="pt-4 border-t border-[#C3ACD0]/30">
+        <AttendanceLeaderboard />
       </div>
     </div>
   );

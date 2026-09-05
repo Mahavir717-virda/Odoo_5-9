@@ -76,10 +76,26 @@ export const deleteAttendance = async (id) => {
   return response.data?.success;
 };
 
+/**
+ * Get Monthly Attendance Leaderboard & Perks
+ */
+export const getLeaderboard = async ({ month, year, department, limit = 50 } = {}) => {
+  const params = new URLSearchParams();
+  if (month) params.append("month", month);
+  if (year) params.append("year", year);
+  if (department && department !== "all") params.append("department", department);
+  if (limit) params.append("limit", limit);
+
+  const response = await api.get(`/attendance/leaderboard?${params.toString()}`);
+  return response.data?.data;
+};
+
 export default {
   listAttendance,
   getAttendanceById,
   createAttendance,
   updateAttendance,
   deleteAttendance,
+  getLeaderboard,
 };
+

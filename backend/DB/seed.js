@@ -3,7 +3,7 @@
  * Run with: node DB/seed.js
  */
 
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import pool from "../src/db.js";
 
 async function seedDatabase() {

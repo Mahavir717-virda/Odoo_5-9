@@ -269,6 +269,17 @@ export default function EmployeeDetailsPage() {
     }
   };
 
+  const handleExportProfile = () => {
+    if (!employee) return;
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(employee, null, 2));
+    const link = document.createElement("a");
+    link.setAttribute("href", dataStr);
+    link.setAttribute("download", `${(employee.name || "employee").toLowerCase().replace(/\s+/g, "_")}_profile.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Loading skeleton state
   if (loading) {
     return (
@@ -421,7 +432,7 @@ export default function EmployeeDetailsPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
-                    onClick={() => alert("Profile export coming soon")}
+                    onClick={handleExportProfile}
                     className="text-xs cursor-pointer"
                   >
                     Export Profile

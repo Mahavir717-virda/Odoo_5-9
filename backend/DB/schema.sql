@@ -245,26 +245,31 @@ CREATE TABLE notifications (
 -- =============================================================================
 -- INDEXES FOR PERFORMANCE
 -- =============================================================================
-CREATE INDEX idx_employees_department ON employees(department);
-CREATE INDEX idx_employees_status ON employees(status);
-CREATE INDEX idx_employees_manager_id ON employees(manager_id);
+CREATE INDEX IF NOT EXISTS idx_employees_department ON employees(department);
+CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status);
+CREATE INDEX IF NOT EXISTS idx_employees_manager_id ON employees(manager_id);
 
-CREATE INDEX idx_contracts_employee_id ON contracts(employee_id);
-CREATE INDEX idx_contracts_start_date ON contracts(start_date);
-CREATE INDEX idx_contracts_end_date ON contracts(end_date);
+CREATE INDEX IF NOT EXISTS idx_contracts_employee_id ON contracts(employee_id);
+CREATE INDEX IF NOT EXISTS idx_contracts_start_date ON contracts(start_date);
+CREATE INDEX IF NOT EXISTS idx_contracts_end_date ON contracts(end_date);
+CREATE INDEX IF NOT EXISTS idx_contracts_emp_period ON contracts(employee_id, start_date, end_date, status);
 
-CREATE INDEX idx_attendance_employee_id ON attendance(employee_id);
-CREATE INDEX idx_attendance_date ON attendance(attendance_date);
+CREATE INDEX IF NOT EXISTS idx_attendance_employee_id ON attendance(employee_id);
+CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(attendance_date);
+CREATE INDEX IF NOT EXISTS idx_attendance_emp_date ON attendance(employee_id, attendance_date);
 
-CREATE INDEX idx_time_off_requests_employee_id ON time_off_requests(employee_id);
-CREATE INDEX idx_time_off_requests_status ON time_off_requests(status);
+CREATE INDEX IF NOT EXISTS idx_time_off_requests_employee_id ON time_off_requests(employee_id);
+CREATE INDEX IF NOT EXISTS idx_time_off_requests_status ON time_off_requests(status);
+CREATE INDEX IF NOT EXISTS idx_time_off_emp_dates ON time_off_requests(employee_id, status, start_date, end_date);
 
-CREATE INDEX idx_payruns_period_start ON payruns(period_start);
-CREATE INDEX idx_payruns_period_end ON payruns(period_end);
-CREATE INDEX idx_payruns_status ON payruns(status);
+CREATE INDEX IF NOT EXISTS idx_payruns_period_start ON payruns(period_start);
+CREATE INDEX IF NOT EXISTS idx_payruns_period_end ON payruns(period_end);
+CREATE INDEX IF NOT EXISTS idx_payruns_status ON payruns(status);
 
-CREATE INDEX idx_payslips_payrun_id ON payslips(payrun_id);
-CREATE INDEX idx_payslips_employee_id ON payslips(employee_id);
+CREATE INDEX IF NOT EXISTS idx_payslips_payrun_id ON payslips(payrun_id);
+CREATE INDEX IF NOT EXISTS idx_payslips_employee_id ON payslips(employee_id);
+CREATE INDEX IF NOT EXISTS idx_payslips_payrun_emp ON payslips(payrun_id, employee_id);
 
-CREATE INDEX idx_notifications_user_id ON notifications(user_id);
-CREATE INDEX idx_notifications_is_read ON notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, is_read, created_at DESC);

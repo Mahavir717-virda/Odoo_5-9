@@ -9,12 +9,14 @@ import {
   TrendingUp,
   AlertTriangle,
   History,
+  Trophy,
 } from "lucide-react";
 
 import PageHeader from "../../components/common/PageHeader";
 import FilterBar from "../../components/common/FilterBar";
 import DataTable from "../../components/common/DataTable";
 import StatusBadge from "../../components/common/StatusBadge";
+import AttendanceLeaderboard from "../../components/attendance/AttendanceLeaderboard";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 
@@ -34,6 +36,7 @@ const MONTH_OPTIONS = [
 ];
 
 export default function MyAttendancePage() {
+  const [activeTab, setActiveTab] = useState("my-logs"); // "my-logs" | "leaderboard"
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -174,11 +177,42 @@ export default function MyAttendancePage() {
     <div className="space-y-6 pb-16 max-w-6xl mx-auto">
       <PageHeader
         title="My Attendance"
-        subtitle="Track your daily punch logs, working hours, and monthly attendance statistics."
+        subtitle="Track your daily punch logs, working hours, and see where you rank on the company perks ladder."
       />
 
-      {/* Clock In / Out Interactive Hub */}
-      <Card className="border-border bg-gradient-to-r from-slate-900 to-indigo-950 text-white shadow-sm overflow-hidden">
+      {/* Tab Switcher */}
+      <div className="flex items-center gap-2 p-1 bg-[#F7EFE5] rounded-xl border border-[#C3ACD0]/30 w-fit">
+        <button
+          onClick={() => setActiveTab("my-logs")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+            activeTab === "my-logs"
+              ? "bg-[#7743DB] text-white shadow-sm"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Clock className="w-4 h-4" />
+          My Punch Logs & Shifts
+        </button>
+
+        <button
+          onClick={() => setActiveTab("leaderboard")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+            activeTab === "leaderboard"
+              ? "bg-[#7743DB] text-white shadow-sm"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Trophy className="w-4 h-4 text-amber-300" />
+          Company Leaderboard & Perks
+        </button>
+      </div>
+
+      {activeTab === "leaderboard" ? (
+        <AttendanceLeaderboard />
+      ) : (
+        <>
+          {/* Clock In / Out Interactive Hub */}
+          <Card className="border-border bg-gradient-to-r from-slate-900 to-indigo-950 text-white shadow-sm overflow-hidden">
         <CardContent className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-blue-400 shrink-0">
@@ -379,6 +413,8 @@ export default function MyAttendancePage() {
         }}
         pageSize={10}
       />
+        </>
+      )}
     </div>
   );
 }

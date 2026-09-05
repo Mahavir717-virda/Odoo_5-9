@@ -334,6 +334,29 @@ export default function EmployeesListPage() {
     onAction: can("employee.create") ? () => navigate("/employees/new") : null,
   };
 
+  const handleExportCSV = () => {
+    if (!employees || employees.length === 0) return;
+    const headers = ["ID", "Name", "Email", "Phone", "Department", "Job Position", "Employee Type", "Joining Date", "Status"];
+    const rows = employees.map((e) => [
+      e.id,
+      `"${(e.name || "").replace(/"/g, '""')}"`,
+      `"${(e.email || "").replace(/"/g, '""')}"`,
+      `"${(e.phone || "").replace(/"/g, '""')}"`,
+      `"${(e.department || "").replace(/"/g, '""')}"`,
+      `"${(e.job_position || "").replace(/"/g, '""')}"`,
+      `"${(e.employee_type || "").replace(/"/g, '""')}"`,
+      `"${(e.joining_date ? e.joining_date.split("T")[0] : "")}"`,
+      `"${(e.status || "")}"`,
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", `employees_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6 pb-12">
       {/* Page Header */}
@@ -354,7 +377,7 @@ export default function EmployeesListPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => alert("Export coming soon")}
+              onClick={handleExportCSV}
               className="text-xs gap-1.5"
             >
               <Download className="w-3.5 h-3.5" />

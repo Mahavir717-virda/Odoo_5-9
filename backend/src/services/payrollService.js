@@ -426,6 +426,19 @@ const calculateEmployeePayrollInternal = ({
     }
   }
 
+  // Detect pre-flight warnings
+  const warnings = [];
+  if (!employee.bank_account_number && !employee.bank_name) {
+    warnings.push({ code: "MISSING_BANK_DETAILS", message: "Employee does not have bank account information configured on profile" });
+  }
+  if (!contract || contract.status !== "active") {
+    warnings.push({ code: "INACTIVE_CONTRACT", message: "Contract is not in active status for the current pay period" });
+  }
+  const unclosedAttendance = attendanceRecords.filter((a) => !a.check_out && a.status !== "absent");
+  if (unclosedAttendance.length > 0) {
+    warnings.push({ code: "UNCLOSED_ATTENDANCE", message: `${unclosedAttendance.length} attendance record(s) with missing check-out detected` });
+  }
+
   return {
     contract_id: contract.id,
     worked_days: workedDays,
@@ -434,9 +447,11 @@ const calculateEmployeePayrollInternal = ({
     total_deductions: totalDeductions,
     net_salary: netSalary,
     lines,
+    warnings,
     attendance_summary: {
       total_records: attendanceRecords.length,
       worked_days: workedDays,
+      unclosed_punches: unclosedAttendance.length,
     },
     leave_summary: {
       total_requests: timeOffRequests.length,
