@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../db.js";
 import { authenticate, requireRole } from "../middleware/auth.middleware.js";
+import { isValidEmail } from "../utils/validators.js";
 
 const router = express.Router();
 
@@ -22,6 +23,13 @@ router.post("/login", async (req, res, next) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
 
     const userResult = await pool.query(
       "SELECT id, email, password, role FROM users WHERE email = $1 LIMIT 1",
@@ -98,6 +106,13 @@ router.post("/register", async (req, res, next) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address with a valid domain (e.g. user@example.com)",
+      });
+    }
 
     // Check if user already exists
     const existingUser = await pool.query("SELECT id FROM users WHERE email = $1", [normalizedEmail]);
