@@ -1,18 +1,16 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "/api/v1";
-
-export const api = axios.create({
-  baseURL: API_BASE_URL,
+const api = axios.create({
+  baseURL: "http://localhost:5000/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Request Interceptor to attach Authorization Bearer token
+// Request Interceptor: Attach Authorization Bearer token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token") || localStorage.getItem("authToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -21,15 +19,14 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor for centralized error formatting and 401 handling
+// Response Interceptor: Format error responses and handle 401 unauthorized
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear token and authUser if unauthorized
+      localStorage.removeItem("token");
       localStorage.removeItem("authToken");
       localStorage.removeItem("authUser");
-      // If we are not on login page, we can redirect or let AuthContext handle state
     }
 
     const message =
