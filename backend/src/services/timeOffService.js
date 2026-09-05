@@ -140,7 +140,7 @@ export const listAllocations = async ({ employee_id, type_id, page = 1, limit = 
       a.type_id,
       tot.name AS time_off_type_name,
       tot.unit,
-      tot.is_paid,
+      tot.requires_allocation,
       tot.affects_payroll,
       a.allocated,
       a.taken,
@@ -166,7 +166,7 @@ export const listAllocations = async ({ employee_id, type_id, page = 1, limit = 
       type_id: r.type_id,
       time_off_type_name: r.time_off_type_name,
       unit: r.unit,
-      is_paid: r.is_paid,
+      requires_allocation: r.requires_allocation,
       affects_payroll: r.affects_payroll,
       allocated: Number(r.allocated),
       taken: Number(r.taken),
@@ -192,6 +192,55 @@ export const getMyAllocations = async (userId, filters = {}) => {
   }
   const employeeId = empRes.rows[0].id;
   return await listAllocations({ ...filters, employee_id: employeeId });
+};
+
+export const getAllocationById = async (id) => {
+  const query = `
+    SELECT 
+      a.id,
+      a.employee_id,
+      e.user_id,
+      e.name AS employee_name,
+      e.email AS employee_email,
+      e.department,
+      a.type_id,
+      tot.name AS time_off_type_name,
+      tot.unit,
+      tot.requires_allocation,
+      tot.affects_payroll,
+      a.allocated,
+      a.taken,
+      a.remaining,
+      a.created_at,
+      a.updated_at
+    FROM time_off_allocations a
+    JOIN employees e ON a.employee_id = e.id
+    JOIN time_off_types tot ON a.type_id = tot.id
+    WHERE a.id = $1
+    LIMIT 1
+  `;
+  const result = await pool.query(query, [id]);
+  if (result.rows.length === 0) return null;
+
+  const r = result.rows[0];
+  return {
+    id: r.id,
+    employee_id: r.employee_id,
+    user_id: r.user_id,
+    employee_name: r.employee_name,
+    employee_email: r.employee_email,
+    department: r.department,
+    type_id: r.type_id,
+    time_off_type_name: r.time_off_type_name,
+    unit: r.unit,
+    requires_allocation: r.requires_allocation,
+    affects_payroll: r.affects_payroll,
+    allocated: Number(r.allocated),
+    taken: Number(r.taken),
+    remaining: Number(r.remaining),
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+  };
 };
 
 export const createAllocation = async (data) => {
@@ -738,6 +787,7 @@ export default {
   updateTimeOffType,
   listAllocations,
   getMyAllocations,
+  getAllocationById,
   createAllocation,
   updateAllocation,
   listRequests,

@@ -102,6 +102,7 @@ export const getContracts = async ({
   try {
     const params = new URLSearchParams();
     if (search && search.trim()) params.append("search", search.trim());
+    if (employeeId && employeeId !== "all") params.append("employee_id", normalizeId(employeeId));
     if (department && department !== "all") params.append("department", department);
     if (status && status !== "all") params.append("status", status.toLowerCase());
 
@@ -109,7 +110,7 @@ export const getContracts = async ({
     const rows = response.data?.data?.contracts || response.data?.data || [];
 
     if (rows.length > 0) {
-      const mapped = rows.map((c) => ({
+      let mapped = rows.map((c) => ({
         id: String(c.id),
         contractId: `CON-${String(c.id).padStart(4, "0")}`,
         employeeId: String(c.employee_id),
@@ -122,6 +123,23 @@ export const getContracts = async ({
         salaryStructure: c.structure_name || "Standard Software Engineer Structure",
         status: c.status ? c.status.charAt(0).toUpperCase() + c.status.slice(1).toLowerCase() : "Draft",
       }));
+
+      if (search && search.trim()) {
+        const q = search.trim().toLowerCase();
+        mapped = mapped.filter(
+          (con) =>
+            (con.contractId || "").toLowerCase().includes(q) ||
+            (con.employeeName || "").toLowerCase().includes(q) ||
+            (con.jobPosition || "").toLowerCase().includes(q) ||
+            (con.department || "").toLowerCase().includes(q) ||
+            String(con.id || "").toLowerCase().includes(q)
+        );
+      }
+
+      if (employeeId && employeeId !== "all") {
+        mapped = mapped.filter((con) => isSameId(con.employeeId, employeeId));
+      }
+
       return enforceSingleActiveContract(mapped);
     }
   } catch (err) {
@@ -134,7 +152,10 @@ export const getContracts = async ({
     results = results.filter(
       (con) =>
         (con.contractId || "").toLowerCase().includes(q) ||
-        (con.employeeName || "").toLowerCase().includes(q)
+        (con.employeeName || "").toLowerCase().includes(q) ||
+        (con.jobPosition || "").toLowerCase().includes(q) ||
+        (con.department || "").toLowerCase().includes(q) ||
+        String(con.id || "").toLowerCase().includes(q)
     );
   }
   if (employeeId && employeeId !== "all") {
@@ -231,7 +252,7 @@ export const getActiveContractForEmployee = async (employeeId) => {
 export const createContract = async (data) => {
   try {
     const response = await api.post("/contracts", {
-      employee_id: parseInt(data.employeeId, 10),
+      employee_id: parseInt(normalizeId(data.employeeId), 10),
       wage: parseFloat(data.wage),
       start_date: data.startDate,
       end_date: data.endDate || null,
@@ -242,9 +263,28 @@ export const createContract = async (data) => {
     return response.data?.data;
   } catch (err) {
     console.warn("Backend createContract failed, storing locally:", err.message);
+    const newNum = localContracts.length + 1;
+    const year = new Date().getFullYear();
     const newId = `con-${Date.now()}`;
-    const newContract = { id: newId, ...data };
+    const contractId = data.contractId || `CON/${year}/${String(newNum).padStart(4, "0")}`;
+    const empName = data.employeeName || resolveEmployeeName(data);
+
+    const newContract = {
+      id: newId,
+      contractId,
+      employeeId: String(data.employeeId),
+      employeeName: empName,
+      department: data.department || "General",
+      jobPosition: data.jobPosition || "Staff",
+      startDate: data.startDate,
+      endDate: data.endDate || null,
+      wage: parseFloat(data.wage) || 0,
+      salaryStructure: data.salaryStructure || "Regular Salary",
+      status: data.status || "Active",
+    };
+
     localContracts.push(newContract);
+    localContracts = enforceSingleActiveContract(localContracts);
     return newContract;
   }
 };
@@ -260,9 +300,10 @@ export const updateContract = async (id, data) => {
     return response.data?.data;
   } catch (err) {
     console.warn("Backend updateContract failed, updating locally:", err.message);
-    const idx = localContracts.findIndex((c) => String(c.id) === String(id));
+    const idx = localContracts.findIndex((c) => isSameId(c.id, id));
     if (idx !== -1) {
       localContracts[idx] = { ...localContracts[idx], ...data };
+      localContracts = enforceSingleActiveContract(localContracts);
       return localContracts[idx];
     }
     return data;

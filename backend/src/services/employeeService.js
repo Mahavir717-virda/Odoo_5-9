@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import pool from "../db.js";
+import { isValidEmail, isValidPhone } from "../utils/validators.js";
 
 const VALID_EMPLOYEE_TYPES = ["full_time", "part_time", "contract", "intern"];
 const VALID_STATUSES = ["active", "inactive", "terminated"];
@@ -247,7 +248,25 @@ const createEmployee = async (data) => {
     status = "active",
   } = data;
 
-  const normalizedEmail = email.toLowerCase().trim();
+  const normalizedEmail = email ? email.toLowerCase().trim() : "";
+
+  if (!isValidEmail(normalizedEmail)) {
+    const err = new Error(
+      "Please enter a valid email address with a valid domain (e.g. user@example.com)",
+    );
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (phone && phone.trim()) {
+    if (!isValidPhone(phone)) {
+      const err = new Error(
+        "Please enter a valid phone number (e.g. +91 9876543210 with 10 digits)",
+      );
+      err.statusCode = 400;
+      throw err;
+    }
+  }
 
   // Validate employee type & status
   if (!VALID_EMPLOYEE_TYPES.includes(employee_type)) {
@@ -471,6 +490,24 @@ const updateEmployee = async (id, data) => {
   }
 
   const normalizedEmail = email ? email.toLowerCase().trim() : existing.email;
+
+  if (email && !isValidEmail(normalizedEmail)) {
+    const err = new Error(
+      "Please enter a valid email address with a valid domain (e.g. user@example.com)",
+    );
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (phone !== undefined && phone !== null && phone.trim() !== "") {
+    if (!isValidPhone(phone)) {
+      const err = new Error(
+        "Please enter a valid phone number (e.g. +91 9876543210 with 10 digits)",
+      );
+      err.statusCode = 400;
+      throw err;
+    }
+  }
 
   const client = await pool.connect();
   try {

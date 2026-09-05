@@ -48,7 +48,7 @@ export const checkContractOverlap = async (
 /**
  * List all contracts with basic employee and salary structure info
  */
-export const listContracts = async ({ employee_id, status, department }) => {
+export const listContracts = async ({ employee_id, status, department, search }) => {
   let query = `
     SELECT 
       c.id,
@@ -85,6 +85,20 @@ export const listContracts = async ({ employee_id, status, department }) => {
   if (department) {
     params.push(department);
     query += ` AND c.department = $${params.length}`;
+  }
+
+  if (search && search.trim()) {
+    const term = `%${search.trim().toLowerCase()}%`;
+    params.push(term);
+    const pIdx = params.length;
+    query += ` AND (
+      LOWER(e.name) LIKE $${pIdx}
+      OR LOWER(e.email) LIKE $${pIdx}
+      OR LOWER(c.job_position) LIKE $${pIdx}
+      OR LOWER(c.department) LIKE $${pIdx}
+      OR LOWER(CAST(c.id AS TEXT)) LIKE $${pIdx}
+      OR LOWER(CONCAT('con-', LPAD(CAST(c.id AS TEXT), 4, '0'))) LIKE $${pIdx}
+    )`;
   }
 
   query += ` ORDER BY c.start_date DESC, c.id DESC`;
