@@ -21,6 +21,7 @@ import EmployeeDetailsPage from "./pages/employees/EmployeeDetailsPage";
 
 import ContractsPage from "./pages/contracts/ContractsPage";
 import ContractDetailsPage from "./pages/contracts/ContractDetailsPage";
+import ContractFormPage from "./pages/contracts/ContractFormPage";
 import SchedulesPage from "./pages/schedules/SchedulesPage";
 import ScheduleFormPage from "./pages/schedules/ScheduleFormPage";
 import AttendancePage from "./pages/attendance/AttendancePage";
@@ -117,10 +118,26 @@ function App() {
               }
             />
             <Route
+              path="/contracts/new"
+              element={
+                <ProtectedRoute requiredPermission={PERMISSIONS.CONTRACT.MANAGE}>
+                  <ContractFormPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/contracts/:id"
               element={
                 <ProtectedRoute requiredPermission={PERMISSIONS.CONTRACT.VIEW}>
                   <ContractDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/contracts/:id/edit"
+              element={
+                <ProtectedRoute requiredPermission={PERMISSIONS.CONTRACT.MANAGE}>
+                  <ContractFormPage />
                 </ProtectedRoute>
               }
             />

@@ -12,6 +12,7 @@ import {
   Info,
   FileText,
   FileCheck,
+  Pencil,
 } from "lucide-react";
 
 import StatusBadge from "../../components/common/StatusBadge";
@@ -254,15 +255,26 @@ export default function ContractDetailsPage() {
               </p>
             </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate(`/employees/${contract.employeeId}`)}
-              className="text-xs gap-1.5"
-            >
-              <User className="w-3.5 h-3.5" />
-              View Employee Profile
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/contracts/${contract.id}/edit`)}
+                className="text-xs gap-1.5"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Edit Contract
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/employees/${contract.employeeId}`)}
+                className="text-xs gap-1.5"
+              >
+                <User className="w-3.5 h-3.5" />
+                View Employee Profile
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

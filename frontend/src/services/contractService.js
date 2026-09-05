@@ -231,7 +231,7 @@ export const getActiveContractForEmployee = async (employeeId) => {
 export const createContract = async (data) => {
   try {
     const response = await api.post("/contracts", {
-      employee_id: parseInt(data.employeeId, 10),
+      employee_id: parseInt(normalizeId(data.employeeId), 10),
       wage: parseFloat(data.wage),
       start_date: data.startDate,
       end_date: data.endDate || null,
@@ -242,9 +242,28 @@ export const createContract = async (data) => {
     return response.data?.data;
   } catch (err) {
     console.warn("Backend createContract failed, storing locally:", err.message);
+    const newNum = localContracts.length + 1;
+    const year = new Date().getFullYear();
     const newId = `con-${Date.now()}`;
-    const newContract = { id: newId, ...data };
+    const contractId = data.contractId || `CON/${year}/${String(newNum).padStart(4, "0")}`;
+    const empName = data.employeeName || resolveEmployeeName(data);
+
+    const newContract = {
+      id: newId,
+      contractId,
+      employeeId: String(data.employeeId),
+      employeeName: empName,
+      department: data.department || "General",
+      jobPosition: data.jobPosition || "Staff",
+      startDate: data.startDate,
+      endDate: data.endDate || null,
+      wage: parseFloat(data.wage) || 0,
+      salaryStructure: data.salaryStructure || "Regular Salary",
+      status: data.status || "Active",
+    };
+
     localContracts.push(newContract);
+    localContracts = enforceSingleActiveContract(localContracts);
     return newContract;
   }
 };
@@ -260,9 +279,10 @@ export const updateContract = async (id, data) => {
     return response.data?.data;
   } catch (err) {
     console.warn("Backend updateContract failed, updating locally:", err.message);
-    const idx = localContracts.findIndex((c) => String(c.id) === String(id));
+    const idx = localContracts.findIndex((c) => isSameId(c.id, id));
     if (idx !== -1) {
       localContracts[idx] = { ...localContracts[idx], ...data };
+      localContracts = enforceSingleActiveContract(localContracts);
       return localContracts[idx];
     }
     return data;
