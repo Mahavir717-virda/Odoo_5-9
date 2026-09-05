@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Users,
   FileCheck,
+  CalendarClock,
   Clock,
   Calendar,
   DollarSign,
@@ -119,6 +120,13 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
               icon={FileCheck}
               label="Contracts"
               permission={PERMISSIONS.CONTRACT.VIEW}
+            />
+
+            <NavItem
+              to="/schedules"
+              icon={CalendarClock}
+              label="Schedules"
+              permission={PERMISSIONS.SCHEDULE.VIEW}
             />
 
             <NavItem
