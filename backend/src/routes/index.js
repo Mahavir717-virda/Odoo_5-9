@@ -33,15 +33,6 @@ router.use("/contracts", contractRoutes);
 // Attendance routes
 router.use("/attendance", attendanceRoutes);
 
-
-// Time Off routes (/api/v1/time-off)
-router.use("/time-off", timeOffRoutes);
-
-// Payslip routes (/api/v1/payslips)
-router.use("/payslips", payslipRoutes);
-
-
-
 // Salary Rule routes (/api/v1/salary-rules)
 router.use("/salary-rules", salaryRulesRoutes);
 
