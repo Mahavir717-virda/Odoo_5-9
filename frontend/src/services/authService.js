@@ -1,7 +1,7 @@
 import api from "./api";
 
 /**
- * Login user against backend PostgreSQL database
+ * Authenticate user credentials against backend database
  * @param {string} email 
  * @param {string} password 
  * @returns {Promise<{ id: string|number, email: string, name: string, role: string, token: string }>}
@@ -14,10 +14,11 @@ export const loginUser = async (email, password) => {
 
   const { token, user } = response.data.data;
   if (token) {
+    localStorage.setItem("token", token);
     localStorage.setItem("authToken", token);
   }
 
-  // Attempt to fetch detailed employee profile (name, department, avatar, etc.)
+  // Fetch detailed employee profile (name, department, avatar, jobPosition, etc.)
   let profileName = user.email.split("@")[0];
   let employeeId = null;
   let department = "";
@@ -34,9 +35,8 @@ export const loginUser = async (email, password) => {
       jobPosition = emp.job_position;
       avatar = emp.avatar || "";
     }
-  } catch (err) {
-    // Fallback if employee profile not created yet
-    console.warn("Could not load employee details on login:", err.message);
+  } catch {
+    // If not an employee profile or not created yet, proceed with basic user info
   }
 
   const normalizedUser = {
@@ -59,7 +59,7 @@ export const loginUser = async (email, password) => {
  * Fetch current authenticated user session from backend
  */
 export const getCurrentUser = async () => {
-  const token = localStorage.getItem("authToken");
+  const token = localStorage.getItem("token") || localStorage.getItem("authToken");
   if (!token) return null;
 
   try {
@@ -101,6 +101,7 @@ export const getCurrentUser = async () => {
     localStorage.setItem("authUser", JSON.stringify(normalizedUser));
     return normalizedUser;
   } catch (err) {
+    localStorage.removeItem("token");
     localStorage.removeItem("authToken");
     localStorage.removeItem("authUser");
     return null;
@@ -125,15 +126,33 @@ export const registerUser = async (formData) => {
     name = formData.name || "";
   }
 
-  // If backend registration endpoint is available, call it; otherwise login or throw
   const response = await api.post("/auth/register", { email, password, name });
-  return response.data?.data;
+  const { token, user } = response.data?.data || {};
+  if (token) {
+    localStorage.setItem("token", token);
+    localStorage.setItem("authToken", token);
+  }
+
+  const normalizedUser = {
+    id: user?.id,
+    employeeId: user?.id,
+    email: user?.email || email,
+    name: name || email.split("@")[0],
+    role: (user?.role || "EMPLOYEE").toUpperCase(),
+    department: "Engineering",
+    jobPosition: "Software Engineer",
+    token,
+  };
+
+  localStorage.setItem("authUser", JSON.stringify(normalizedUser));
+  return normalizedUser;
 };
 
 /**
- * Logout user
+ * Logout user and clear tokens
  */
 export const logoutUser = async () => {
+  localStorage.removeItem("token");
   localStorage.removeItem("authToken");
   localStorage.removeItem("authUser");
   return true;
