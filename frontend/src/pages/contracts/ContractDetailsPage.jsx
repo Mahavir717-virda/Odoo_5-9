@@ -20,6 +20,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Skeleton } from "../../components/ui/skeleton";
 import * as contractService from "../../services/contractService";
+import { isSameId } from "../../services/contractService";
 
 /**
  * Format currency to Indian Rupee (INR)
@@ -96,8 +97,10 @@ export default function ContractDetailsPage() {
   // Fetch target contract data
   useEffect(() => {
     let isMounted = true;
-    setLoading(true);
+    setContract(null);
+    setHistory([]);
     setError(null);
+    setLoading(true);
 
     contractService
       .getContractById(id)
@@ -361,7 +364,7 @@ export default function ContractDetailsPage() {
           ) : (
             <div className="relative border-l-2 border-border/70 ml-3.5 pl-6 space-y-6">
               {history.map((c) => {
-                const isCurrent = String(c.id) === String(contract.id);
+                const isCurrent = isSameId(c.id, contract.id);
                 const cIsActive = String(c.status).toLowerCase() === "active";
 
                 return (

@@ -36,6 +36,9 @@ export function getPageTitle(pathname) {
   }
 
   // Dynamic route matches
+  if (pathname.startsWith("/contracts/")) {
+    return "Contract Details";
+  }
   if (pathname.startsWith("/employees/")) {
     if (pathname.endsWith("/edit")) return "Edit Employee";
     return "Employee Details";
