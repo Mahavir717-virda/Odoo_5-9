@@ -89,8 +89,10 @@ export default function Dashboard() {
         ...prev,
         punchState: updatedPunch,
       }));
+      loadData();
     } catch (err) {
       console.error("Punch action error:", err);
+      alert(err.response?.data?.message || err.message || "Failed to complete punch action.");
     } finally {
       setPunchLoading(false);
     }
