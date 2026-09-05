@@ -20,9 +20,17 @@ app.use("/api/v1", v1Routes);
 // Centralized Error Handling Middleware
 app.use(errorHandler);
 
-// Start Server
-app.listen(PORT, () => {
+// Start Server & Check Database Connection
+app.listen(PORT, async () => {
   console.log(`🚀 PeoplePay360 Server running on port ${PORT}`);
+  try {
+    const { pool } = await import("./db.js");
+    const res = await pool.query("SELECT current_database() AS db, inet_server_addr() AS host, inet_server_port() AS port");
+    const isLocal = !process.env.DATABASE_URL || !process.env.DATABASE_URL.includes("neon.tech");
+    console.log(`✅ Database Connected: [${isLocal ? "LOCAL POSTGRESQL" : "NEON CLOUD"}] -> DB: "${res.rows[0].db}"`);
+  } catch (dbErr) {
+    console.error("❌ Database Connection Failed:", dbErr.message);
+  }
 });
 
 export default app;

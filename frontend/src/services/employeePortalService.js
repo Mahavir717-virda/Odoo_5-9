@@ -359,6 +359,7 @@ export const submitTimeOffRequest = async (requestData) => {
   };
 
   const response = await api.post("/time-off/requests", payload);
+  window.dispatchEvent(new Event("notifications-refresh"));
   return response.data?.data;
 };
 
@@ -367,6 +368,7 @@ export const submitTimeOffRequest = async (requestData) => {
  */
 export const cancelTimeOffRequest = async (requestId) => {
   const response = await api.patch(`/time-off/requests/${requestId}/cancel`);
+  window.dispatchEvent(new Event("notifications-refresh"));
   return response.data?.success;
 };
 

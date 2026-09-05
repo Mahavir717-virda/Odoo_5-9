@@ -46,8 +46,22 @@ export default function Navbar({ onMobileMenuClick }) {
   useEffect(() => {
     if (user) {
       fetchNotifications();
-      const interval = setInterval(fetchNotifications, 30000); // Polling every 30s
-      return () => clearInterval(interval);
+      // Fast polling every 3 seconds for near-instant updates on local DB
+      const interval = setInterval(fetchNotifications, 3000);
+
+      // Instant refresh when user switches tabs or clicks into the app
+      const onFocus = () => fetchNotifications();
+      window.addEventListener("focus", onFocus);
+      window.addEventListener("visibilitychange", () => {
+        if (!document.hidden) fetchNotifications();
+      });
+      window.addEventListener("notifications-refresh", onFocus);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener("focus", onFocus);
+        window.removeEventListener("notifications-refresh", onFocus);
+      };
     }
   }, [user]);
 
