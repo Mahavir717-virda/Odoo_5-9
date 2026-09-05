@@ -92,6 +92,10 @@ export default function EmployeesListPage() {
   const navigate = useNavigate();
   const { can } = usePermissions();
 
+  // Kanban pagination config — prevents 5000 DOM nodes from mounting at once
+  const KANBAN_PAGE_SIZE = 24;
+  const [kanbanPage, setKanbanPage] = useState(1);
+
   // Data & View state
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -169,6 +173,11 @@ export default function EmployeesListPage() {
       isCancelled = true;
     };
   }, [debouncedSearch, department, status, employeeType, managerId, refreshTrigger]);
+
+  // Reset kanban page when filters change (so user sees fresh results from top)
+  useEffect(() => {
+    setKanbanPage(1);
+  }, [debouncedSearch, department, status, employeeType, managerId]);
 
   const handleRetry = () => {
     setLoading(true);
@@ -554,16 +563,36 @@ export default function EmployeesListPage() {
             />
           )}
 
-          {/* Kanban Cards Grid */}
+          {/* Kanban Cards Grid — only renders kanbanPage * KANBAN_PAGE_SIZE cards */}
           {!loading && !error && employees.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {employees.map((employee) => (
-                <EmployeeCard
-                  key={employee.id}
-                  employee={employee}
-                  onClick={(emp) => navigate(`/employees/${emp.id}`)}
-                />
-              ))}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {employees.slice(0, kanbanPage * KANBAN_PAGE_SIZE).map((employee) => (
+                  <EmployeeCard
+                    key={employee.id}
+                    employee={employee}
+                    onClick={(emp) => navigate(`/employees/${emp.id}`)}
+                  />
+                ))}
+              </div>
+
+              {/* Load More footer */}
+              {employees.length > kanbanPage * KANBAN_PAGE_SIZE && (
+                <div className="flex flex-col items-center gap-1.5 pt-4">
+                  <p className="text-xs text-muted-foreground">
+                    Showing <span className="font-medium text-foreground">{Math.min(kanbanPage * KANBAN_PAGE_SIZE, employees.length)}</span> of{" "}
+                    <span className="font-medium text-foreground">{employees.length}</span> employees
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setKanbanPage((p) => p + 1)}
+                    className="text-xs gap-1.5"
+                  >
+                    Load More
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
