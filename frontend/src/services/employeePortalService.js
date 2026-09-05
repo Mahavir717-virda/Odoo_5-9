@@ -51,15 +51,29 @@ export const getEmployeeDashboardData = async () => {
       0
     );
 
-    // Determine today's punch state
-    const todayStr = new Date().toISOString().split("T")[0];
-    const todayLog = attendanceRecords.find((a) => {
-      const logDate = a.date || (a.attendance_date ? a.attendance_date.split("T")[0] : null);
-      return logDate === todayStr;
-    });
+    // Determine active punch state (within 24 hours or open shift)
+    const activeLog = attendanceRecords.find((a) => {
+      if (!a.check_in || a.check_out) return false;
+      const checkInMs = new Date(a.check_in).getTime();
+      if (isNaN(checkInMs)) return false;
+      const diffHours = (Date.now() - checkInMs) / (1000 * 60 * 60);
+      return diffHours >= 0 && diffHours <= 24;
+    }) || attendanceRecords.find((a) => a.check_in && !a.check_out);
 
-    const isClockedIn = Boolean(todayLog && todayLog.check_in && !todayLog.check_out);
-    const clockInTime = todayLog?.check_in ? formatTime(todayLog.check_in) : null;
+    // Recent shift log (for displaying last shift info when clocked out)
+    const recentShift = activeLog || attendanceRecords.find((a) => a.check_in);
+
+    const isClockedIn = Boolean(activeLog);
+    const clockInTime = activeLog?.check_in ? formatTime(activeLog.check_in) : (recentShift?.check_in ? formatTime(recentShift.check_in) : null);
+    const clockOutTime = recentShift?.check_out ? formatTime(recentShift.check_out) : null;
+
+    let lastShiftText = null;
+    if (isClockedIn) {
+      lastShiftText = `Shift active since ${clockInTime}`;
+    } else if (recentShift?.check_in) {
+      const shiftDate = formatDate(recentShift.date || recentShift.attendance_date);
+      lastShiftText = `Last Shift (${shiftDate}): ${formatTime(recentShift.check_in)}${recentShift.check_out ? ` – ${formatTime(recentShift.check_out)}` : ""}`;
+    }
 
     // Calculate worked hours this month
     let totalMonthlyHours = 0;
@@ -115,6 +129,8 @@ export const getEmployeeDashboardData = async () => {
       punchState: {
         isClockedIn,
         clockInTime,
+        clockOutTime,
+        lastShiftText,
         isOnBreak: localBreakState.isOnBreak,
         breakStartTime: localBreakState.breakStartTime,
         totalWorkedMinutes: Math.round(totalMonthlyHours * 60),
@@ -150,14 +166,29 @@ export const getMyAttendance = async ({ status, month } = {}) => {
     const response = await api.get(`/attendance/me?${params.toString()}`);
     const rawData = Array.isArray(response.data?.data) ? response.data.data : [];
 
-    const todayStr = new Date().toISOString().split("T")[0];
-    const todayLog = rawData.find((a) => {
-      const logDate = a.date || (a.attendance_date ? a.attendance_date.split("T")[0] : null);
-      return logDate === todayStr;
-    });
+    // Determine active punch state (within 24 hours or open shift)
+    const activeLog = rawData.find((a) => {
+      if (!a.check_in || a.check_out) return false;
+      const checkInMs = new Date(a.check_in).getTime();
+      if (isNaN(checkInMs)) return false;
+      const diffHours = (Date.now() - checkInMs) / (1000 * 60 * 60);
+      return diffHours >= 0 && diffHours <= 24;
+    }) || rawData.find((a) => a.check_in && !a.check_out);
 
-    const isClockedIn = Boolean(todayLog && todayLog.check_in && !todayLog.check_out);
-    const clockInTime = todayLog?.check_in ? formatTime(todayLog.check_in) : null;
+    // Recent shift log (for displaying last shift info when clocked out)
+    const recentShift = activeLog || rawData.find((a) => a.check_in);
+
+    const isClockedIn = Boolean(activeLog);
+    const clockInTime = activeLog?.check_in ? formatTime(activeLog.check_in) : (recentShift?.check_in ? formatTime(recentShift.check_in) : null);
+    const clockOutTime = recentShift?.check_out ? formatTime(recentShift.check_out) : null;
+
+    let lastShiftText = null;
+    if (isClockedIn) {
+      lastShiftText = `Shift active since ${clockInTime}`;
+    } else if (recentShift?.check_in) {
+      const shiftDate = formatDate(recentShift.date || recentShift.attendance_date);
+      lastShiftText = `Last Shift (${shiftDate}): ${formatTime(recentShift.check_in)}${recentShift.check_out ? ` – ${formatTime(recentShift.check_out)}` : ""}`;
+    }
 
     let presentCount = 0;
     let lateCount = 0;
@@ -183,7 +214,7 @@ export const getMyAttendance = async ({ status, month } = {}) => {
         date: formatDate(row.date || row.attendance_date),
         checkIn: formatTime(row.check_in) || "—",
         checkOut: row.check_out ? formatTime(row.check_out) : "—",
-        workedHours: hrs > 0 ? `${wholeH}h ${String(mins).padStart(2, "0")}m` : "—",
+        workedHours: row.check_out ? `${wholeH}h ${String(mins).padStart(2, "0")}m` : "—",
         breakHours: "0m",
         overtime: hrs > 8 ? `${(hrs - 8).toFixed(1)}h` : "0h 00m",
         status: st.charAt(0).toUpperCase() + st.slice(1),
@@ -196,6 +227,8 @@ export const getMyAttendance = async ({ status, month } = {}) => {
       punchState: {
         isClockedIn,
         clockInTime,
+        clockOutTime,
+        lastShiftText,
         isOnBreak: localBreakState.isOnBreak,
         breakStartTime: localBreakState.breakStartTime,
       },
