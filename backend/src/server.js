@@ -3,7 +3,7 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
-import v1Routes from "./routes/index.js";
+import v1Routes from "./routes/index.routes.js";
 import errorHandler from "./middleware/error.middleware.js";
 
 const app = express();
