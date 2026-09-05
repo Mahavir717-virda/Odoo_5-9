@@ -28,6 +28,7 @@ import {
 } from "../../components/ui/select";
 
 import * as employeeService from "../../services/employeeService";
+import * as scheduleService from "../../services/scheduleService";
 import {
   required,
   isEmail,
@@ -63,13 +64,6 @@ const EMPLOYEE_TYPE_OPTIONS = [
   { value: "Full-time", label: "Full-time" },
   { value: "Part-time", label: "Part-time" },
   { value: "Contract", label: "Contract" },
-];
-
-const WORK_SCHEDULE_OPTIONS = [
-  { value: "40 Hours / Week", label: "40 Hours / Week (Standard)" },
-  { value: "Part-time 20h", label: "Part-time 20h / Week" },
-  { value: "32 Hours / Week", label: "32 Hours / Week" },
-  { value: "Flexible Hybrid", label: "Flexible Hybrid" },
 ];
 
 const STATUS_OPTIONS = [
@@ -129,6 +123,20 @@ export default function EmployeeFormPage() {
 
   // Manager options list loaded from existing employees
   const [availableManagers, setAvailableManagers] = useState([]);
+  // Working schedule options list loaded from active schedules
+  const [availableSchedules, setAvailableSchedules] = useState([]);
+
+  // Fetch active working schedules
+  useEffect(() => {
+    scheduleService
+      .getSchedules({ status: "Active" })
+      .then((schedules) => {
+        setAvailableSchedules(schedules);
+      })
+      .catch((err) => {
+        console.error("Failed to load active working schedules:", err);
+      });
+  }, []);
 
   // Fetch all employees for manager dropdown
   useEffect(() => {
@@ -610,9 +618,9 @@ export default function EmployeeFormPage() {
                     <SelectValue placeholder="Select Schedule" />
                   </SelectTrigger>
                   <SelectContent>
-                    {WORK_SCHEDULE_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
+                    {availableSchedules.map((sch) => (
+                      <SelectItem key={sch.id} value={sch.name}>
+                        {sch.name} ({sch.weeklyHours}h/wk)
                       </SelectItem>
                     ))}
                   </SelectContent>
