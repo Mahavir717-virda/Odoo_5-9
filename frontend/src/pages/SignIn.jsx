@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
-import { Eye, EyeOff, Briefcase, ArrowRight, Lock, Mail } from "lucide-react";
+import Logo from "../components/common/Logo";
+import { Eye, EyeOff, ArrowRight, Lock, Mail } from "lucide-react";
 
 function SignIn() {
   const navigate = useNavigate();
@@ -47,19 +48,8 @@ function SignIn() {
         style={{ background: "linear-gradient(160deg, #120e1c 0%, #26104c 50%, #120e1c 100%)" }}
       >
         <div>
-          <div className="flex items-center gap-3 mb-16">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-[#7743db]/30"
-              style={{ background: "linear-gradient(135deg, #7743db, #6334b8)" }}
-            >
-              <Briefcase className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="font-bold text-white text-lg leading-tight">
-                PeoplePay<span className="text-[#c3acd0]">360</span>
-              </p>
-              <p className="text-[11px] text-[#c3acd0]/70">HR & Payroll Platform</p>
-            </div>
+          <div className="mb-14">
+            <Logo size={54} lightText={true} />
           </div>
 
           <div className="space-y-6">
@@ -98,16 +88,8 @@ function SignIn() {
       {/* Right Login Panel */}
       <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-10 bg-[#fffbf5]">
         {/* Mobile brand */}
-        <div className="lg:hidden flex items-center gap-2.5 mb-8">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md shadow-[#7743db]/30"
-            style={{ background: "linear-gradient(135deg, #7743db, #6334b8)" }}
-          >
-            <Briefcase className="w-4 h-4 text-white" />
-          </div>
-          <p className="font-bold text-[#1e1b24] text-lg">
-            PeoplePay<span className="text-[#7743db]">360</span>
-          </p>
+        <div className="lg:hidden flex items-center justify-center mb-8">
+          <Logo size={44} />
         </div>
 
         <div className="w-full max-w-md">

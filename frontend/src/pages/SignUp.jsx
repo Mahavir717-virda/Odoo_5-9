@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
+import Logo from "../components/common/Logo";
 import { Eye, EyeOff, Briefcase, ArrowRight, Lock, Mail, User } from "lucide-react";
 
 function SignUp() {
@@ -52,16 +53,8 @@ function SignUp() {
     <div className="min-h-screen bg-[#fffbf5] flex flex-col justify-center items-center p-6">
       <div className="w-full max-w-md">
         {/* Brand */}
-        <div className="flex items-center justify-center gap-2.5 mb-8">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md shadow-[#7743db]/30"
-            style={{ background: "linear-gradient(135deg, #7743db, #6334b8)" }}
-          >
-            <Briefcase className="w-4 h-4 text-white" />
-          </div>
-          <p className="font-bold text-[#1e1b24] text-lg">
-            PeoplePay<span className="text-[#7743db]">360</span>
-          </p>
+        <div className="flex items-center justify-center mb-8">
+          <Logo size={48} />
         </div>
 
         <div className="bg-white rounded-xl border border-[#eae0d5] shadow-sm p-8 space-y-5">

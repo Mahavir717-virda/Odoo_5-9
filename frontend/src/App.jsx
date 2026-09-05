@@ -48,9 +48,12 @@ import MyAttendancePage from "./pages/employee-portal/MyAttendancePage";
 import MyTimeOffPage from "./pages/employee-portal/MyTimeOffPage";
 import MyPayslipsPage from "./pages/employee-portal/MyPayslipsPage";
 
+import IntroAnimation from "./components/common/IntroAnimation";
+
 function App() {
   return (
     <AuthProvider>
+      <IntroAnimation />
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}

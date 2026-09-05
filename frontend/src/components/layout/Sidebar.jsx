@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { PERMISSIONS } from "../../utils/permissions";
 import PermissionGuard from "../common/PermissionGuard";
@@ -21,6 +21,8 @@ import {
   Building2,
   Briefcase,
 } from "lucide-react";
+
+import Logo from "../common/Logo";
 
 export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = false }) {
   const { user } = useAuth();
@@ -125,25 +127,12 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
     >
       {/* ── Brand Header ── */}
       <div
-        className="h-16 flex items-center px-4 shrink-0"
+        className="h-16 flex items-center px-3.5 shrink-0"
         style={{ borderBottom: "1px solid #28203b" }}
       >
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white font-bold text-xs shadow-sm shadow-[#7743db]/30"
-            style={{ background: "linear-gradient(135deg, #7743db 0%, #6334b8 100%)" }}
-          >
-            <Briefcase className="w-4 h-4" />
-          </div>
-          {showLabel && (
-            <div className="overflow-hidden">
-              <p className="font-bold text-sm text-white truncate leading-tight">
-                PeoplePay<span className="text-[#c3acd0]">360</span>
-              </p>
-              <p className="text-[10px] text-[#8f7a9f] truncate">HR & Payroll</p>
-            </div>
-          )}
-        </div>
+        <Link to="/dashboard" className="flex items-center justify-center overflow-hidden py-1">
+          <Logo size={showLabel ? 42 : 32} lightText={true} />
+        </Link>
       </div>
 
       {/* ── Navigation ── */}
