@@ -45,14 +45,20 @@ router.post("/login", async (req, res, next) => {
       });
     }
 
+    const jwtSecret =
+      process.env.JWT_SECRET ||
+      process.env.ACCESS_TOKEN_SECRET ||
+      "default_jwt_secret_key_peoplepay360";
+
     const token = jwt.sign(
       {
         userId: user.id,
         role: user.role,
       },
+      jwtSecret,
       process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET,
       {
-        expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+        expiresIn: process.env.JWT_EXPIRES_IN || process.env.ACCESS_TOKEN_EXPIRY || "1d",
       }
     );
 

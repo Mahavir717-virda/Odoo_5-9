@@ -26,6 +26,11 @@ export const authenticate = async (req, res, next) => {
   }
 
   try {
+    const jwtSecret =
+      process.env.JWT_SECRET ||
+      process.env.ACCESS_TOKEN_SECRET ||
+      "default_jwt_secret_key_peoplepay360";
+    const decoded = jwt.verify(token, jwtSecret);
     const secret = process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET;
     const decoded = jwt.verify(token, secret);
 
