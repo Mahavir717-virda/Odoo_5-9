@@ -1,103 +1,140 @@
-/**
- * MOCK SERVICE — replace each function body with a real axios call to the backend when available.
- * Function signatures and return shapes are designed to stay the same.
- */
-
-import { mockUsers } from "./mockUsers";
-
-const SIMULATED_DELAY_MS = 500;
-
-const delay = (ms = SIMULATED_DELAY_MS) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+import api from "./api";
 
 /**
- * Authenticate user credentials against mock database.
+ * Login user against backend PostgreSQL database
  * @param {string} email 
  * @param {string} password 
- * @returns {Promise<{ id: string, email: string, name: string, role: string }>}
+ * @returns {Promise<{ id: string|number, email: string, name: string, role: string, token: string }>}
  */
 export const loginUser = async (email, password) => {
-  await delay();
-  
-  const user = mockUsers.find(
-    (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-  );
+  const response = await api.post("/auth/login", {
+    email: email.trim(),
+    password,
+  });
 
-  if (!user) {
-    throw new Error("Invalid email or password");
+  const { token, user } = response.data.data;
+  if (token) {
+    localStorage.setItem("authToken", token);
   }
 
-  return {
+  // Attempt to fetch detailed employee profile (name, department, avatar, etc.)
+  let profileName = user.email.split("@")[0];
+  let employeeId = null;
+  let department = "";
+  let jobPosition = "";
+  let avatar = "";
+
+  try {
+    const profileRes = await api.get("/employees/me");
+    if (profileRes.data?.data) {
+      const emp = profileRes.data.data;
+      profileName = emp.name || profileName;
+      employeeId = emp.id;
+      department = emp.department;
+      jobPosition = emp.job_position;
+      avatar = emp.avatar || "";
+    }
+  } catch (err) {
+    // Fallback if employee profile not created yet
+    console.warn("Could not load employee details on login:", err.message);
+  }
+
+  const normalizedUser = {
     id: user.id,
+    employeeId: employeeId || user.id,
     email: user.email,
-    name: user.name,
-    role: user.role,
+    name: profileName,
+    role: (user.role || "EMPLOYEE").toUpperCase(),
+    department,
+    jobPosition,
+    avatar,
+    token,
   };
+
+  localStorage.setItem("authUser", JSON.stringify(normalizedUser));
+  return normalizedUser;
 };
 
 /**
- * Register a new user with default EMPLOYEE role.
- * @param {FormData|Object} formData 
- * @returns {Promise<{ id: string, email: string, name: string, role: string }>}
+ * Fetch current authenticated user session from backend
+ */
+export const getCurrentUser = async () => {
+  const token = localStorage.getItem("authToken");
+  if (!token) return null;
+
+  try {
+    const authRes = await api.get("/auth/me");
+    const user = authRes.data.data;
+
+    let profileName = user.email.split("@")[0];
+    let employeeId = null;
+    let department = "";
+    let jobPosition = "";
+    let avatar = "";
+
+    try {
+      const profileRes = await api.get("/employees/me");
+      if (profileRes.data?.data) {
+        const emp = profileRes.data.data;
+        profileName = emp.name || profileName;
+        employeeId = emp.id;
+        department = emp.department;
+        jobPosition = emp.job_position;
+        avatar = emp.avatar || "";
+      }
+    } catch {
+      // Continue with base user info
+    }
+
+    const normalizedUser = {
+      id: user.id,
+      employeeId: employeeId || user.id,
+      email: user.email,
+      name: profileName,
+      role: (user.role || "EMPLOYEE").toUpperCase(),
+      department,
+      jobPosition,
+      avatar,
+      token,
+    };
+
+    localStorage.setItem("authUser", JSON.stringify(normalizedUser));
+    return normalizedUser;
+  } catch (err) {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("authUser");
+    return null;
+  }
+};
+
+/**
+ * Register a new user
  */
 export const registerUser = async (formData) => {
-  await delay();
-
   let email = "";
   let password = "";
   let name = "";
-  let avatarFile = null;
 
   if (formData instanceof FormData) {
     email = formData.get("email") || "";
     password = formData.get("password") || "";
     name = formData.get("name") || "";
-    avatarFile = formData.get("avatar");
   } else if (formData && typeof formData === "object") {
     email = formData.email || "";
     password = formData.password || "";
     name = formData.name || "";
   }
 
-  if (avatarFile) {
-    console.log("[mockAuthService] Received profile image:", avatarFile.name);
-  }
-
-  if (!email || !password) {
-    throw new Error("Email and password are required");
-  }
-
-  const existingUser = mockUsers.find(
-    (u) => u.email.toLowerCase() === email.toLowerCase()
-  );
-
-  if (existingUser) {
-    throw new Error("User with this email already exists");
-  }
-
-  const newUser = {
-    id: `usr_${Date.now()}`,
-    email,
-    password,
-    name: name || email.split("@")[0],
-    role: "EMPLOYEE", // New signups always default to EMPLOYEE role
-  };
-
-  mockUsers.push(newUser);
-
-  return {
-    id: newUser.id,
-    email: newUser.email,
-    name: newUser.name,
-    role: newUser.role,
-  };
+  // If backend registration endpoint is available, call it; otherwise login or throw
+  const response = await api.post("/auth/register", { email, password, name });
+  return response.data?.data;
 };
 
 /**
- * Simulate user logout.
- * @returns {Promise<boolean>}
+ * Logout user
  */
 export const logoutUser = async () => {
-  await delay();
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("authUser");
   return true;
 };

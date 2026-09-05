@@ -8,17 +8,28 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("authUser");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+    const initAuth = async () => {
+      try {
+        const storedUser = localStorage.getItem("authUser");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+
+        const token = localStorage.getItem("authToken");
+        if (token) {
+          const freshUser = await authService.getCurrentUser();
+          if (freshUser) {
+            setUser(freshUser);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to initialize auth state:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to parse stored authUser from localStorage:", error);
-      localStorage.removeItem("authUser");
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email, password) => {

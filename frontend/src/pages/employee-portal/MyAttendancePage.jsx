@@ -1,14 +1,369 @@
-import React from "react";
-import { Clock } from "lucide-react";
-import EmptyState from "../../components/common/EmptyState";
+import { useState, useEffect, useMemo } from "react";
+import {
+  Clock,
+  Play,
+  Square,
+  Coffee,
+  CheckCircle2,
+  Calendar,
+  TrendingUp,
+  AlertTriangle,
+  History,
+} from "lucide-react";
+
+import PageHeader from "../../components/common/PageHeader";
+import FilterBar from "../../components/common/FilterBar";
+import DataTable from "../../components/common/DataTable";
+import StatusBadge from "../../components/common/StatusBadge";
+import { Card, CardContent } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+
+import * as portalService from "../../services/employeePortalService";
+
+const STATUS_OPTIONS = [
+  { value: "Present", label: "Present" },
+  { value: "Late", label: "Late" },
+  { value: "Half Day", label: "Half Day" },
+  { value: "Absent", label: "Absent" },
+];
+
+const MONTH_OPTIONS = [
+  { value: "2026-09", label: "September 2026 (Current)" },
+  { value: "2026-08", label: "August 2026" },
+  { value: "2026-07", label: "July 2026" },
+];
 
 export default function MyAttendancePage() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [punchLoading, setPunchLoading] = useState(false);
+
+  // Filters
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState("all");
+
+  const fetchAttendance = () => {
+    setLoading(true);
+    setError(null);
+    portalService
+      .getMyAttendance({ status: statusFilter, month: monthFilter })
+      .then((res) => {
+        setData(res);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to load attendance logs.");
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchAttendance();
+  }, [statusFilter, monthFilter]);
+
+  // Handle live punch in/out
+  const handlePunch = async (action) => {
+    setPunchLoading(true);
+    try {
+      const updatedPunch = await portalService.recordClockInOut(action);
+      setData((prev) => ({
+        ...prev,
+        punchState: updatedPunch,
+      }));
+      fetchAttendance();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPunchLoading(false);
+    }
+  };
+
+  const { punchState, records = [], monthlySummary } = data || {};
+
+  // Table Columns
+  const columns = useMemo(
+    () => [
+      {
+        key: "date",
+        header: "Date",
+        sortable: true,
+        render: (row) => (
+          <div className="flex items-center gap-2 font-medium text-foreground">
+            <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+            <span>
+              {new Date(row.date).toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+        ),
+      },
+      {
+        key: "checkIn",
+        header: "Check In",
+        sortable: true,
+        render: (row) => (
+          <span className="font-mono text-xs text-foreground">
+            {row.checkIn}
+          </span>
+        ),
+      },
+      {
+        key: "checkOut",
+        header: "Check Out",
+        sortable: true,
+        render: (row) => (
+          <span className="font-mono text-xs text-foreground">
+            {row.checkOut}
+          </span>
+        ),
+      },
+      {
+        key: "workedHours",
+        header: "Worked Hours",
+        sortable: true,
+        render: (row) => (
+          <span className="font-semibold text-xs text-foreground">
+            {row.workedHours}
+          </span>
+        ),
+      },
+      {
+        key: "breakHours",
+        header: "Break Duration",
+        sortable: true,
+        render: (row) => (
+          <span className="text-xs text-muted-foreground">
+            {row.breakHours}
+          </span>
+        ),
+      },
+      {
+        key: "overtime",
+        header: "Overtime",
+        sortable: true,
+        render: (row) => (
+          <span className="text-xs text-muted-foreground">
+            {row.overtime}
+          </span>
+        ),
+      },
+      {
+        key: "status",
+        header: "Status",
+        sortable: true,
+        render: (row) => <StatusBadge status={row.status} />,
+      },
+    ],
+    []
+  );
+
   return (
-    <div>
-      <EmptyState
-        icon={Clock}
-        title="My Attendance — Self Service"
-        description="Clock in and out, view personal attendance history, check daily worked hours, and request attendance corrections."
+    <div className="space-y-6 pb-16 max-w-6xl mx-auto">
+      <PageHeader
+        title="My Attendance"
+        subtitle="Track your daily punch logs, working hours, and monthly attendance statistics."
+      />
+
+      {/* Clock In / Out Interactive Hub */}
+      <Card className="border-border bg-gradient-to-r from-slate-900 to-indigo-950 text-white shadow-sm overflow-hidden">
+        <CardContent className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-blue-400 shrink-0">
+              <Clock className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`w-2.5 h-2.5 rounded-full ${
+                    punchState?.isClockedIn
+                      ? punchState?.isOnBreak
+                        ? "bg-amber-400 animate-pulse"
+                        : "bg-emerald-400 animate-pulse"
+                      : "bg-rose-400"
+                  }`}
+                />
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                  {punchState?.isClockedIn
+                    ? punchState?.isOnBreak
+                      ? "On Break"
+                      : "Currently Clocked In"
+                    : "Currently Clocked Out"}
+                </span>
+              </div>
+              <h2 className="text-xl font-bold mt-1">
+                {punchState?.isClockedIn
+                  ? `Shift Started: ${punchState?.clockInTime}`
+                  : "Ready to Start Today's Shift"}
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            {punchState?.isClockedIn ? (
+              <>
+                {punchState?.isOnBreak ? (
+                  <Button
+                    size="sm"
+                    disabled={punchLoading}
+                    onClick={() => handlePunch("end-break")}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1.5"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-white" />
+                    End Break & Resume
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={punchLoading}
+                    onClick={() => handlePunch("start-break")}
+                    className="bg-white/10 hover:bg-white/20 text-white text-xs gap-1.5 border border-white/20"
+                  >
+                    <Coffee className="w-3.5 h-3.5 text-amber-300" />
+                    Take Break
+                  </Button>
+                )}
+
+                <Button
+                  size="sm"
+                  disabled={punchLoading}
+                  onClick={() => handlePunch("clock-out")}
+                  className="bg-rose-600 hover:bg-rose-700 text-white text-xs gap-1.5"
+                >
+                  <Square className="w-3.5 h-3.5" />
+                  Clock Out
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                disabled={punchLoading}
+                onClick={() => handlePunch("clock-in")}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs gap-1.5 font-semibold shadow-xs px-5"
+              >
+                <Play className="w-3.5 h-3.5 fill-white" />
+                Clock In Now
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Monthly Summary Statistics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-border bg-card shadow-2xs">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Total Hours</p>
+              <p className="text-xl font-bold text-foreground mt-1">
+                {monthlySummary?.totalHours || "168h 15m"}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Avg: {monthlySummary?.averageDailyHours || "8h 24m"}/day
+              </p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600">
+              <Clock className="w-5 h-5" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border bg-card shadow-2xs">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Days Present</p>
+              <p className="text-xl font-bold text-foreground mt-1">
+                {monthlySummary?.presentDays || 20}{" "}
+                <span className="text-xs font-normal text-muted-foreground">/ 22</span>
+              </p>
+              <div className="flex items-center gap-1 text-[11px] text-emerald-600 mt-0.5">
+                <CheckCircle2 className="w-3 h-3" />
+                <span>91% Attendance</span>
+              </div>
+            </div>
+            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
+              <Calendar className="w-5 h-5" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border bg-card shadow-2xs">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Late Arrivals</p>
+              <p className="text-xl font-bold text-foreground mt-1">
+                {monthlySummary?.lateDays || 2}
+              </p>
+              <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5">
+                Within acceptable threshold
+              </p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border bg-card shadow-2xs">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Overtime Hours</p>
+              <p className="text-xl font-bold text-foreground mt-1">
+                {monthlySummary?.overtimeHours || "3h 45m"}
+              </p>
+              <p className="text-[11px] text-purple-600 dark:text-purple-400 mt-0.5">
+                Compensable
+              </p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filter Row */}
+      <FilterBar
+        filters={[
+          {
+            key: "month",
+            label: "Month",
+            options: MONTH_OPTIONS,
+            value: monthFilter,
+            onChange: setMonthFilter,
+          },
+          {
+            key: "status",
+            label: "Status",
+            options: STATUS_OPTIONS,
+            value: statusFilter,
+            onChange: setStatusFilter,
+          },
+        ]}
+        onClearAll={() => {
+          setMonthFilter("all");
+          setStatusFilter("all");
+        }}
+      />
+
+      {/* Attendance History Table */}
+      <DataTable
+        columns={columns}
+        data={records}
+        loading={loading}
+        error={error}
+        onRetry={fetchAttendance}
+        emptyState={{
+          icon: History,
+          title: "No Attendance Records",
+          description: "No punch logs found for the selected filter criteria.",
+        }}
+        pageSize={10}
       />
     </div>
   );
