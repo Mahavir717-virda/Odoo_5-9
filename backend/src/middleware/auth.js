@@ -26,11 +26,12 @@ export const authenticate = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET;
+    const decoded = jwt.verify(token, secret);
 
     const userResult = await pool.query(
       "SELECT id, email, role, created_at, updated_at FROM users WHERE id = $1 LIMIT 1",
-      [decoded.userId]
+      [decoded.userId || decoded.id]
     );
 
     if (userResult.rows.length === 0) {

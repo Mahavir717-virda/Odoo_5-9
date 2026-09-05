@@ -1,6 +1,6 @@
-import crypto from "crypto";
-import bcrypt from "bcrypt";
-import pool from "../db.js";
+const crypto = require("crypto");
+const bcrypt = require("bcrypt");
+const pool = require("../db");
 
 const VALID_EMPLOYEE_TYPES = ["full_time", "part_time", "contract", "intern"];
 const VALID_STATUSES = ["active", "inactive", "terminated"];
@@ -8,7 +8,7 @@ const VALID_STATUSES = ["active", "inactive", "terminated"];
 /**
  * List employees with optional filters: department, status, employee_type, search
  */
-export const listEmployees = async ({ department, status, employee_type, search }) => {
+const listEmployees = async ({ department, status, employee_type, search }) => {
   let query = `
     SELECT 
       e.id,
@@ -99,7 +99,7 @@ export const listEmployees = async ({ department, status, employee_type, search 
 /**
  * Get single employee by ID
  */
-export const getEmployeeById = async (id) => {
+const getEmployeeById = async (id) => {
   const query = `
     SELECT 
       e.id,
@@ -166,7 +166,7 @@ export const getEmployeeById = async (id) => {
 /**
  * Get authenticated user's own employee profile
  */
-export const getMyEmployeeProfile = async (userId) => {
+const getMyEmployeeProfile = async (userId) => {
   const query = `
     SELECT 
       e.id,
@@ -233,7 +233,7 @@ export const getMyEmployeeProfile = async (userId) => {
 /**
  * Create a new employee transactionally with user account creation
  */
-export const createEmployee = async (data) => {
+const createEmployee = async (data) => {
   const {
     name,
     email,
@@ -380,7 +380,7 @@ export const createEmployee = async (data) => {
 /**
  * Update an existing employee with email synchronization across users table
  */
-export const updateEmployee = async (id, data) => {
+const updateEmployee = async (id, data) => {
   const {
     name,
     email,
@@ -533,7 +533,7 @@ export const updateEmployee = async (id, data) => {
 /**
  * Deactivate employee (status = 'inactive')
  */
-export const deactivateEmployee = async (id) => {
+const deactivateEmployee = async (id) => {
   const result = await pool.query(
     "UPDATE employees SET status = 'inactive', updated_at = NOW() WHERE id = $1 RETURNING id",
     [id]
@@ -551,7 +551,7 @@ export const deactivateEmployee = async (id) => {
 /**
  * Reactivate employee (status = 'active')
  */
-export const reactivateEmployee = async (id) => {
+const reactivateEmployee = async (id) => {
   const result = await pool.query(
     "UPDATE employees SET status = 'active', updated_at = NOW() WHERE id = $1 RETURNING id",
     [id]
@@ -566,7 +566,7 @@ export const reactivateEmployee = async (id) => {
   return true;
 };
 
-export default {
+module.exports = {
   listEmployees,
   getEmployeeById,
   getMyEmployeeProfile,
