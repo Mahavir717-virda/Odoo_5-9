@@ -154,7 +154,7 @@ router.get("/:employeeId/contracts", authenticate, async (req, res, next) => {
 
 /**
  * GET /api/v1/employees/:id
- * Allowed: admin, hr_manager, hr_payroll_manager (any employee), employee (only their own)
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user (any employee), employee (only their own)
  */
 router.get("/:id", authenticate, async (req, res, next) => {
   try {
@@ -194,12 +194,12 @@ router.get("/:id", authenticate, async (req, res, next) => {
 
 /**
  * POST /api/v1/employees
- * Allowed: admin, hr_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.post(
   "/",
   authenticate,
-  requireRole("admin", "hr_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const {
@@ -259,12 +259,12 @@ router.post(
 
 /**
  * PUT /api/v1/employees/:id
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.put(
   "/:id",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const employeeId = parseId(req.params.id);
@@ -292,12 +292,12 @@ router.put(
 
 /**
  * PATCH /api/v1/employees/:id/deactivate
- * Allowed: admin, hr_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.patch(
   "/:id/deactivate",
   authenticate,
-  requireRole("admin", "hr_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const employeeId = parseId(req.params.id);
@@ -322,12 +322,12 @@ router.patch(
 
 /**
  * PATCH /api/v1/employees/:id/reactivate
- * Allowed: admin, hr_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.patch(
   "/:id/reactivate",
   authenticate,
-  requireRole("admin", "hr_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const employeeId = parseId(req.params.id);
