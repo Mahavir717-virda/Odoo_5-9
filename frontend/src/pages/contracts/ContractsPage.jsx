@@ -1,12 +1,22 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText } from "lucide-react";
+import { FileText, Plus, Eye, Pencil, MoreVertical } from "lucide-react";
 
 import PageHeader from "../../components/common/PageHeader";
 import FilterBar from "../../components/common/FilterBar";
 import DataTable from "../../components/common/DataTable";
 import StatusBadge from "../../components/common/StatusBadge";
+import PermissionGuard from "../../components/common/PermissionGuard";
+import { Button } from "../../components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
+
+import { PERMISSIONS } from "../../utils/permissions";
 import * as contractService from "../../services/contractService";
 
 const DEPARTMENT_OPTIONS = [
@@ -255,14 +265,56 @@ export default function ContractsPage() {
           );
         },
       },
+      {
+        key: "actions",
+        header: "Actions",
+        width: "80px",
+        render: (row) => (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center justify-end"
+          >
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                <DropdownMenuItem
+                  onClick={() => navigate(`/contracts/${row.id}`)}
+                  className="text-xs cursor-pointer gap-2"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => navigate(`/contracts/${row.id}/edit`)}
+                  className="text-xs cursor-pointer gap-2"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Edit
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
+      },
     ],
-    []
+    [navigate]
   );
 
   const emptyStateConfig = {
     icon: FileText,
     title: "No contracts found",
     description: "Try adjusting your filters.",
+    actionLabel: "Add Contract",
+    onAction: () => navigate("/contracts/new"),
   };
 
   return (
@@ -271,6 +323,18 @@ export default function ContractsPage() {
       <PageHeader
         title="Contracts"
         subtitle="Track employment contracts and their applicable payroll periods"
+        actions={
+          <PermissionGuard permission={PERMISSIONS.CONTRACT.MANAGE}>
+            <Button
+              size="sm"
+              onClick={() => navigate("/contracts/new")}
+              className="text-xs gap-1.5 shadow-xs"
+            >
+              <Plus className="w-4 h-4" />
+              Add Contract
+            </Button>
+          </PermissionGuard>
+        }
       />
 
       {/* Filter Bar */}
