@@ -42,12 +42,12 @@ router.get("/types", authenticate, async (req, res, next) => {
 
 /**
  * POST /api/v1/time-off/types
- * Allowed: admin, hr_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.post(
   "/types",
   authenticate,
-  requireRole("admin", "hr_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const type = await timeOffService.createTimeOffType(req.body);
@@ -64,12 +64,12 @@ router.post(
 
 /**
  * PUT /api/v1/time-off/types/:id
- * Allowed: admin, hr_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.put(
   "/types/:id",
   authenticate,
-  requireRole("admin", "hr_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const typeId = parseId(req.params.id);
@@ -98,7 +98,7 @@ router.put(
 
 /**
  * GET /api/v1/time-off/allocations/me
- * Allowed: employee, admin, hr_manager, hr_payroll_manager
+ * Allowed: employee, admin, hr_manager, hr_payroll_manager, hr_payroll_user
  * NOTE: Registered before /allocations
  */
 router.get("/allocations/me", authenticate, async (req, res, next) => {
@@ -153,7 +153,7 @@ router.get(
 
 /**
  * GET /api/v1/time-off/allocations/:id
- * Allowed: admin, hr_manager, hr_payroll_manager, employee (own only)
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user, employee (own only)
  */
 router.get("/allocations/:id", authenticate, async (req, res, next) => {
   try {
@@ -192,12 +192,12 @@ router.get("/allocations/:id", authenticate, async (req, res, next) => {
 
 /**
  * POST /api/v1/time-off/allocations
- * Allowed: admin, hr_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.post(
   "/allocations",
   authenticate,
-  requireRole("admin", "hr_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const allocation = await timeOffService.createAllocation(req.body);
@@ -214,12 +214,12 @@ router.post(
 
 /**
  * PUT /api/v1/time-off/allocations/:id
- * Allowed: admin, hr_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.put(
   "/allocations/:id",
   authenticate,
-  requireRole("admin", "hr_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const allocId = parseId(req.params.id);
@@ -248,7 +248,7 @@ router.put(
 
 /**
  * GET /api/v1/time-off/requests/me
- * Allowed: employee, admin, hr_manager, hr_payroll_manager
+ * Allowed: employee, admin, hr_manager, hr_payroll_manager, hr_payroll_user
  * NOTE: Registered before /requests/:id
  */
 router.get("/requests/me", authenticate, async (req, res, next) => {
@@ -308,7 +308,7 @@ router.get(
 
 /**
  * GET /api/v1/time-off/requests/:id
- * Allowed: admin, hr_manager, hr_payroll_manager, employee (own request only)
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user, employee (own request only)
  */
 router.get("/requests/:id", authenticate, async (req, res, next) => {
   try {
@@ -401,12 +401,12 @@ router.post("/requests", authenticate, async (req, res, next) => {
 
 /**
  * PATCH /api/v1/time-off/requests/:id/approve
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.patch(
   "/requests/:id/approve",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const requestId = parseId(req.params.id);
@@ -431,12 +431,12 @@ router.patch(
 
 /**
  * PATCH /api/v1/time-off/requests/:id/reject
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.patch(
   "/requests/:id/reject",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const requestId = parseId(req.params.id);
@@ -461,12 +461,12 @@ router.patch(
 
 /**
  * PATCH /api/v1/time-off/requests/:id/cancel
- * Allowed: employee, admin, hr_manager
+ * Allowed: employee, admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.patch(
   "/requests/:id/cancel",
   authenticate,
-  requireRole("employee", "admin", "hr_manager"),
+  requireRole("employee", "admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const requestId = parseId(req.params.id);

@@ -12,8 +12,8 @@ const parseId = (id) => {
   return parsed;
 };
 
-const ALLOWED_ROLES = ["admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"];
-const WRITE_ROLES = ["admin", "hr_manager", "hr_payroll_manager"];
+const ALLOWED_ROLES = ["admin", "hr_payroll_manager", "hr_payroll_user"];
+const WRITE_ROLES = ["admin", "hr_payroll_manager"];
 
 /**
  * GET /api/v1/salary-rules

@@ -62,12 +62,12 @@ router.get("/:id", authenticate, async (req, res, next) => {
 
 /**
  * POST /api/v1/working-schedules
- * Allowed: admin, hr_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.post(
   "/",
   authenticate,
-  requireRole("admin", "hr_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const schedule = await scheduleService.createSchedule(req.body);
@@ -84,12 +84,12 @@ router.post(
 
 /**
  * PUT /api/v1/working-schedules/:id
- * Allowed: admin, hr_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.put(
   "/:id",
   authenticate,
-  requireRole("admin", "hr_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const scheduleId = parseId(req.params.id);
@@ -114,12 +114,12 @@ router.put(
 
 /**
  * DELETE /api/v1/working-schedules/:id
- * Allowed: admin, hr_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.delete(
   "/:id",
   authenticate,
-  requireRole("admin", "hr_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const scheduleId = parseId(req.params.id);

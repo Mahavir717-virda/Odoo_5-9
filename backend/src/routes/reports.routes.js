@@ -4,7 +4,7 @@ import reportService from "../services/reportService.js";
 
 const router = express.Router();
 
-const ALLOWED_ROLES = ["admin", "hr_manager", "hr_payroll_manager"];
+const ALLOWED_ROLES = ["admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"];
 
 // Protect all report endpoints
 router.use(authenticate, requireRole(...ALLOWED_ROLES));

@@ -110,7 +110,7 @@ router.post("/check-in", authenticate, async (req, res, next) => {
   try {
     let targetEmployeeId = null;
 
-    if (req.body && req.body.employee_id && (req.user.role === "admin" || req.user.role === "hr_manager" || req.user.role === "hr_payroll_manager")) {
+    if (req.body && req.body.employee_id && (req.user.role === "admin" || req.user.role === "hr_manager" || req.user.role === "hr_payroll_manager" || req.user.role === "hr_payroll_user")) {
       targetEmployeeId = parseId(req.body.employee_id);
     }
 
@@ -145,7 +145,7 @@ router.post("/check-out", authenticate, async (req, res, next) => {
   try {
     let targetEmployeeId = null;
 
-    if (req.body && req.body.employee_id && (req.user.role === "admin" || req.user.role === "hr_manager" || req.user.role === "hr_payroll_manager")) {
+    if (req.body && req.body.employee_id && (req.user.role === "admin" || req.user.role === "hr_manager" || req.user.role === "hr_payroll_manager" || req.user.role === "hr_payroll_user")) {
       targetEmployeeId = parseId(req.body.employee_id);
     }
 
@@ -218,7 +218,7 @@ router.get(
 
 /**
  * GET /api/v1/attendance/:id
- * Allowed: admin, hr_manager, hr_payroll_manager, or employee (if own attendance)
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user, or employee (if own attendance)
  */
 router.get("/:id", authenticate, async (req, res, next) => {
   try {
@@ -259,12 +259,12 @@ router.get("/:id", authenticate, async (req, res, next) => {
 
 /**
  * POST /api/v1/attendance
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.post(
   "/",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const { employee_id, date, check_in, check_out, status } = req.body;
@@ -305,12 +305,12 @@ router.post(
 
 /**
  * PUT /api/v1/attendance/:id
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.put(
   "/:id",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const attendanceId = parseId(req.params.id);

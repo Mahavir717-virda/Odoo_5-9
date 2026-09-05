@@ -142,14 +142,16 @@ router.get("/:id", authenticate, async (req, res, next) => {
   }
 });
 
+const MANAGE_ROLES = ["admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"];
+
 /**
  * POST /api/v1/contracts
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.post(
   "/",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole(...MANAGE_ROLES),
   async (req, res, next) => {
     try {
       const {
@@ -196,12 +198,12 @@ router.post(
 
 /**
  * PUT /api/v1/contracts/:id
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.put(
   "/:id",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole(...MANAGE_ROLES),
   async (req, res, next) => {
     try {
       const contractId = parseId(req.params.id);
@@ -229,12 +231,12 @@ router.put(
 
 /**
  * PATCH /api/v1/contracts/:id/activate
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.patch(
   "/:id/activate",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole(...MANAGE_ROLES),
   async (req, res, next) => {
     try {
       const contractId = parseId(req.params.id);
@@ -262,12 +264,12 @@ router.patch(
 
 /**
  * PATCH /api/v1/contracts/:id/terminate
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.patch(
   "/:id/terminate",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole(...MANAGE_ROLES),
   async (req, res, next) => {
     try {
       const contractId = parseId(req.params.id);
