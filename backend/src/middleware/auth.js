@@ -26,7 +26,11 @@ export const authenticate = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const jwtSecret =
+      process.env.JWT_SECRET ||
+      process.env.ACCESS_TOKEN_SECRET ||
+      "default_jwt_secret_key_peoplepay360";
+    const decoded = jwt.verify(token, jwtSecret);
 
     const userResult = await pool.query(
       "SELECT id, email, role, created_at, updated_at FROM users WHERE id = $1 LIMIT 1",

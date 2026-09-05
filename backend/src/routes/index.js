@@ -4,6 +4,8 @@ import authRoutes from "./auth.js";
 import employeeRoutes from "./employees.js";
 import contractRoutes from "./contracts.js";
 import attendanceRoutes from "./attendance.js";
+import salaryRulesRoutes from "./salaryRules.js";
+import salaryStructuresRoutes from "./salaryStructures.js";
 
 const router = express.Router();
 
@@ -21,5 +23,11 @@ router.use("/contracts", contractRoutes);
 
 // Attendance routes (/api/v1/attendance)
 router.use("/attendance", attendanceRoutes);
+
+// Salary Rule routes (/api/v1/salary-rules)
+router.use("/salary-rules", salaryRulesRoutes);
+
+// Salary Structure routes (/api/v1/salary-structures)
+router.use("/salary-structures", salaryStructuresRoutes);
 
 export default router;
