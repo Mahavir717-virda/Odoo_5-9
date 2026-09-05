@@ -1,0 +1,61 @@
+import { createContext, useContext, useState, useEffect } from "react";
+import * as authService from "../services/authService";
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem("authUser");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.error("Failed to parse stored authUser from localStorage:", error);
+      localStorage.removeItem("authUser");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const login = async (email, password) => {
+    const userData = await authService.loginUser(email, password);
+    setUser(userData);
+    localStorage.setItem("authUser", JSON.stringify(userData));
+    return userData;
+  };
+
+  const register = async (formData) => {
+    const newUser = await authService.registerUser(formData);
+    return newUser;
+  };
+
+  const logout = async () => {
+    await authService.logoutUser();
+    localStorage.removeItem("authUser");
+    setUser(null);
+    return true;
+  };
+
+  const value = {
+    user,
+    isAuthenticated: Boolean(user),
+    loading,
+    login,
+    register,
+    logout,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}
