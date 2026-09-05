@@ -99,11 +99,21 @@ export default function MyTimeOffPage() {
 
     setSubmitting(true);
     try {
+      // Find type ID if available from backend data
+      const typeObj = (data?.types || []).find(
+        (t) => t.name.toLowerCase() === leaveType.toLowerCase() || t.id === Number(leaveType)
+      ) || (data?.balances || []).find(
+        (b) => b.type.toLowerCase() === leaveType.toLowerCase()
+      );
+
+      const typeId = typeObj?.typeId || typeObj?.id || 1;
+
       await portalService.submitTimeOffRequest({
+        typeId,
         leaveType,
         startDate,
         endDate,
-        daysCount: calculatedDays,
+        days: calculatedDays,
         reason: reason.trim(),
       });
 

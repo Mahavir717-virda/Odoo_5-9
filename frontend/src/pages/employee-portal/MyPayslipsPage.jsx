@@ -79,7 +79,7 @@ export default function MyPayslipsPage() {
                 {row.period}
               </span>
               <span className="text-[10px] text-muted-foreground font-mono">
-                {row.payrunId}
+                {row.payslipNumber || row.id}
               </span>
             </div>
           </div>
@@ -89,15 +89,20 @@ export default function MyPayslipsPage() {
         key: "paymentDate",
         header: "Disbursed Date",
         sortable: true,
-        render: (row) => (
-          <span className="text-xs text-muted-foreground">
-            {new Date(row.paymentDate).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </span>
-        ),
+        render: (row) => {
+          const dt = row.paymentDate || row.payDate;
+          return (
+            <span className="text-xs text-muted-foreground">
+              {dt
+                ? new Date(dt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "Pending"}
+            </span>
+          );
+        },
       },
       {
         key: "basicWage",
@@ -105,7 +110,7 @@ export default function MyPayslipsPage() {
         sortable: true,
         render: (row) => (
           <span className="text-xs font-mono text-foreground">
-            {formatCurrency(row.basicWage)}
+            {formatCurrency(row.basicSalary || row.basicWage || 0)}
           </span>
         ),
       },
