@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../db.js";
-import { authenticate, requireRole } from "../middleware/auth.js";
+import { authenticate, requireRole } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -56,7 +56,6 @@ router.post("/login", async (req, res, next) => {
         role: user.role,
       },
       jwtSecret,
-      process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET,
       {
         expiresIn: process.env.JWT_EXPIRES_IN || process.env.ACCESS_TOKEN_EXPIRY || "1d",
       }
@@ -79,6 +78,98 @@ router.post("/login", async (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
+    });
+  }
+});
+
+/**
+ * POST /api/v1/auth/register
+ * Public registration endpoint
+ */
+router.post("/register", async (req, res, next) => {
+  try {
+    const { email, password, name } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if user already exists
+    const existingUser = await pool.query("SELECT id FROM users WHERE email = $1", [normalizedEmail]);
+    if (existingUser.rows.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: "User with this email already exists",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const displayName = name ? name.trim() : normalizedEmail.split("@")[0];
+
+    // Insert new user
+    const newUserRes = await pool.query(
+      "INSERT INTO users (email, password, role) VALUES ($1, $2, 'employee') RETURNING id, email, role",
+      [normalizedEmail, hashedPassword]
+    );
+    const newUser = newUserRes.rows[0];
+
+    // Ensure a default working schedule exists for foreign key constraint
+    let scheduleId = null;
+    const scheduleRes = await pool.query("SELECT id FROM working_schedules LIMIT 1");
+    if (scheduleRes.rows.length === 0) {
+      const newSched = await pool.query(
+        "INSERT INTO working_schedules (name, lines) VALUES ('Standard 40h (Mon-Fri)', '[]'::jsonb) RETURNING id"
+      );
+      scheduleId = newSched.rows[0].id;
+    } else {
+      scheduleId = scheduleRes.rows[0].id;
+    }
+
+    // Insert associated employee record
+    await pool.query(`
+      INSERT INTO employees (user_id, name, email, department, job_position, employee_type, schedule_id, joining_date, status)
+      VALUES ($1, $2, $3, 'Engineering', 'Software Engineer', 'full_time', $4, CURRENT_DATE, 'active')
+      ON CONFLICT (email) DO UPDATE SET user_id = EXCLUDED.user_id, status = 'active'
+    `, [newUser.id, displayName, normalizedEmail, scheduleId]);
+
+    const jwtSecret =
+      process.env.JWT_SECRET ||
+      process.env.ACCESS_TOKEN_SECRET ||
+      "default_jwt_secret_key_peoplepay360";
+
+    const token = jwt.sign(
+      {
+        userId: newUser.id,
+        role: newUser.role,
+      },
+      jwtSecret,
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN || process.env.ACCESS_TOKEN_EXPIRY || "1d",
+      }
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      data: {
+        token,
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          role: newUser.role,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error during registration",
     });
   }
 });

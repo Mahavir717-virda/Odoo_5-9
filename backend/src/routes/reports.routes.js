@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticate, requireRole } from "../middleware/auth.js";
+import { authenticate, requireRole } from "../middleware/auth.middleware.js";
 import reportService from "../services/reportService.js";
 
 const router = express.Router();

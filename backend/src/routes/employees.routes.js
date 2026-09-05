@@ -1,6 +1,6 @@
-const express = require("express");
-const { authenticate, requireRole } = require("../middleware/auth");
-const employeeService = require("../services/employeeService");
+import express from "express";
+import { authenticate, requireRole } from "../middleware/auth.middleware.js";
+import employeeService from "../services/employeeService.js";
 
 const router = express.Router();
 
@@ -350,4 +350,4 @@ router.patch(
   }
 );
 
-module.exports = router;
+export default router;

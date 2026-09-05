@@ -5,6 +5,90 @@
 
 import api from "./api";
 import { mockContracts } from "../data/mockContracts";
+import { mockEmployees } from "../data/mockEmployees";
+
+const empMap = new Map(
+  mockEmployees.map((e) => [String(e.id), `${e.firstName} ${e.lastName}`])
+);
+
+export const normalizeId = (id) => String(id || "").trim().replace(/^(emp|con)-/i, "");
+
+export const isSameId = (a, b) => {
+  if (!a || !b) return false;
+  const strA = String(a).trim();
+  const strB = String(b).trim();
+  if (strA === strB) return true;
+  return normalizeId(strA) === normalizeId(strB);
+};
+
+function resolveEmployeeName(c) {
+  if (c.employee_name && c.employee_name !== "Employee") return c.employee_name;
+  if (c.employee?.name && c.employee?.name !== "Employee") return c.employee.name;
+  if (c.employeeName && c.employeeName !== "Employee") return c.employeeName;
+  const empId = String(c.employee_id || c.employeeId || "");
+  const found = empMap.get(empId) || empMap.get(`emp-${empId}`);
+  if (found) return found;
+  return "Employee";
+}
+
+function enforceSingleActiveContract(contractsList) {
+  const byEmp = new Map();
+  contractsList.forEach((c) => {
+    const key = normalizeId(c.employeeId || c.employee_id);
+    if (!byEmp.has(key)) byEmp.set(key, []);
+    byEmp.get(key).push(c);
+  });
+
+  const result = [];
+  for (const [_, list] of byEmp.entries()) {
+    // Sort chronologically ascending
+    list.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+    const activeList = list.filter(
+      (c) => String(c.status).toLowerCase() === "active"
+    );
+
+    if (activeList.length > 1) {
+      const latestActiveId = activeList[activeList.length - 1].id;
+      for (const c of list) {
+        if (
+          String(c.status).toLowerCase() === "active" &&
+          String(c.id) !== String(latestActiveId)
+        ) {
+          c.status = "Expired";
+        }
+      }
+    }
+
+    // Work backwards from newest contract to ensure strictly non-overlapping sequential date ranges
+    for (let i = list.length - 1; i >= 0; i--) {
+      const current = { ...list[i] };
+      const next = list[i + 1];
+
+      if (next && next.startDate) {
+        const nextStart = new Date(next.startDate);
+        const prevEnd = new Date(nextStart.getTime() - 86400000);
+        current.endDate = prevEnd.toISOString().split("T")[0];
+
+        if (!current.startDate || new Date(current.startDate) >= new Date(current.endDate)) {
+          const startDt = new Date(prevEnd.getTime() - 365 * 86400000);
+          current.startDate = startDt.toISOString().split("T")[0];
+        }
+      } else if (String(current.status).toLowerCase() === "expired" && !current.endDate) {
+        current.endDate = "2024-12-31";
+        if (new Date(current.startDate) >= new Date(current.endDate)) {
+          current.startDate = "2024-01-01";
+        }
+      }
+
+      list[i] = current;
+    }
+
+    result.push(...list);
+  }
+
+  // Preserve descending date order
+  return result.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+}
 
 // In-memory fallback
 let localContracts = [...mockContracts];
@@ -25,11 +109,11 @@ export const getContracts = async ({
     const rows = response.data?.data?.contracts || response.data?.data || [];
 
     if (rows.length > 0) {
-      return rows.map((c) => ({
+      const mapped = rows.map((c) => ({
         id: String(c.id),
         contractId: `CON-${String(c.id).padStart(4, "0")}`,
         employeeId: String(c.employee_id),
-        employeeName: c.employee_name || "Employee",
+        employeeName: resolveEmployeeName(c),
         jobPosition: c.job_position || "Staff",
         department: c.department || "General",
         wage: parseFloat(c.wage) || 0,
@@ -38,6 +122,7 @@ export const getContracts = async ({
         salaryStructure: c.structure_name || "Standard Software Engineer Structure",
         status: c.status ? c.status.charAt(0).toUpperCase() + c.status.slice(1).toLowerCase() : "Draft",
       }));
+      return enforceSingleActiveContract(mapped);
     }
   } catch (err) {
     console.warn("Backend /contracts failed, using local mock data:", err.message);
@@ -53,7 +138,7 @@ export const getContracts = async ({
     );
   }
   if (employeeId && employeeId !== "all") {
-    results = results.filter((con) => con.employeeId === employeeId);
+    results = results.filter((con) => isSameId(con.employeeId, employeeId));
   }
   if (department && department !== "all") {
     results = results.filter((con) => con.department.toLowerCase() === department.toLowerCase());
@@ -61,19 +146,21 @@ export const getContracts = async ({
   if (status && status !== "all") {
     results = results.filter((con) => con.status.toLowerCase() === status.toLowerCase());
   }
-  return results;
+  return enforceSingleActiveContract(results);
 };
 
 export const getContractById = async (id) => {
+  let target = null;
+
   try {
     const response = await api.get(`/contracts/${id}`);
     const c = response.data?.data;
     if (c) {
-      return {
+      target = {
         id: String(c.id),
         contractId: `CON-${String(c.id).padStart(4, "0")}`,
         employeeId: String(c.employee_id),
-        employeeName: c.employee_name || "Employee",
+        employeeName: resolveEmployeeName(c),
         jobPosition: c.job_position || "Staff",
         department: c.department || "General",
         wage: parseFloat(c.wage) || 0,
@@ -87,23 +174,35 @@ export const getContractById = async (id) => {
     console.warn(`Backend /contracts/${id} failed, checking local mock data:`, err.message);
   }
 
-  const contract = localContracts.find((c) => String(c.id) === String(id));
-  if (!contract) {
-    throw new Error("Contract not found");
+  if (!target) {
+    const contract = localContracts.find((c) => isSameId(c.id, id));
+    if (!contract) {
+      throw new Error("Contract not found");
+    }
+    target = { ...contract };
   }
-  return { ...contract };
+
+  // Cross-reference with the employee's sanitized history to ensure 100% data consistency
+  if (target && target.employeeId) {
+    const empContracts = await getContractsByEmployeeId(target.employeeId);
+    const matched = empContracts.find((c) => isSameId(c.id, target.id));
+    if (matched) return matched;
+  }
+
+  return target;
 };
 
 export const getContractsByEmployeeId = async (employeeId) => {
+  const cleanId = normalizeId(employeeId);
   try {
-    const response = await api.get(`/employees/${employeeId}/contracts`);
-    const rows = response.data?.data || [];
-    if (rows.length > 0) {
-      return rows.map((c) => ({
+    const response = await api.get(`/employees/${cleanId}/contracts`);
+    const rows = response.data?.data?.contracts || (Array.isArray(response.data?.data) ? response.data.data : []);
+    if (rows && rows.length > 0) {
+      const mapped = rows.map((c) => ({
         id: String(c.id),
         contractId: `CON-${String(c.id).padStart(4, "0")}`,
         employeeId: String(c.employee_id),
-        employeeName: c.employee_name || "Employee",
+        employeeName: resolveEmployeeName(c),
         jobPosition: c.job_position || "Staff",
         department: c.department || "General",
         wage: parseFloat(c.wage) || 0,
@@ -112,14 +211,16 @@ export const getContractsByEmployeeId = async (employeeId) => {
         salaryStructure: c.structure_name || "Standard Software Engineer Structure",
         status: c.status ? c.status.charAt(0).toUpperCase() + c.status.slice(1).toLowerCase() : "Draft",
       }));
+      return enforceSingleActiveContract(mapped);
     }
   } catch (err) {
-    console.warn(`Backend /employees/${employeeId}/contracts failed:`, err.message);
+    console.warn(`Backend /employees/${cleanId}/contracts failed:`, err.message);
   }
 
-  return localContracts
-    .filter((c) => String(c.employeeId) === String(employeeId))
-    .sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+  const matched = localContracts.filter((c) => isSameId(c.employeeId, employeeId));
+  return enforceSingleActiveContract(
+    [...matched].sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
+  );
 };
 
 export const getActiveContractForEmployee = async (employeeId) => {

@@ -46,6 +46,7 @@ import {
 } from "../../components/ui/dropdown-menu";
 
 import * as employeeService from "../../services/employeeService";
+import * as contractService from "../../services/contractService";
 
 /**
  * Format ISO date string into readable format (e.g. "Jan 15, 2024")
@@ -117,6 +118,40 @@ export default function EmployeeDetailsPage() {
   });
   const [countsLoading, setCountsLoading] = useState(true);
 
+  // Contracts tab lazy loading state
+  const [employeeContracts, setEmployeeContracts] = useState([]);
+  const [contractsLoading, setContractsLoading] = useState(false);
+  const [contractsLoaded, setContractsLoaded] = useState(false);
+
+  // Lazy-load employee contracts when Contracts tab becomes active for the first time
+  useEffect(() => {
+    if (activeTab === "contracts" && !contractsLoaded && !contractsLoading && id) {
+      let isMounted = true;
+      setContractsLoading(true);
+
+      contractService
+        .getContractsByEmployeeId(id)
+        .then((data) => {
+          if (isMounted) {
+            setEmployeeContracts(data);
+            setContractsLoaded(true);
+            setContractsLoading(false);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load employee contracts:", err);
+          if (isMounted) {
+            setContractsLoaded(true);
+            setContractsLoading(false);
+          }
+        });
+
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [activeTab, contractsLoaded, contractsLoading, id]);
+
   // Load employee data and relation counts
   useEffect(() => {
     let isMounted = true;
@@ -159,18 +194,26 @@ export default function EmployeeDetailsPage() {
     };
   }, [id]);
 
-  // Handle Archive action
-  const handleArchive = async () => {
-    if (!window.confirm("Archive this employee? This will mark their status as Inactive.")) {
-      return;
-    }
-
-    try {
-      await employeeService.archiveEmployee(id);
-      setEmployee((prev) => (prev ? { ...prev, status: "Inactive" } : null));
-      alert("Employee archived successfully.");
-    } catch (err) {
-      alert(err.message || "Failed to archive employee.");
+  // Handle Deactivate / Reactivate actions
+  const handleToggleStatus = async () => {
+    const isInactive = employee?.status?.toLowerCase() === "inactive";
+    if (isInactive) {
+      try {
+        await employeeService.reactivateEmployee(id);
+        setEmployee((prev) => (prev ? { ...prev, status: "Active" } : null));
+      } catch (err) {
+        alert(err.message || "Failed to reactivate employee.");
+      }
+    } else {
+      if (!window.confirm("Deactivate this employee? This will mark their status as Inactive.")) {
+        return;
+      }
+      try {
+        await employeeService.deactivateEmployee(id);
+        setEmployee((prev) => (prev ? { ...prev, status: "Inactive" } : null));
+      } catch (err) {
+        alert(err.message || "Failed to deactivate employee.");
+      }
     }
   };
 
@@ -305,11 +348,11 @@ export default function EmployeeDetailsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleArchive}
+                  onClick={handleToggleStatus}
                   className="text-xs gap-1.5 text-muted-foreground hover:text-destructive hover:border-destructive/30"
                 >
                   <Archive className="w-3.5 h-3.5" />
-                  Archive
+                  {employee?.status?.toLowerCase() === "inactive" ? "Reactivate" : "Deactivate"}
                 </Button>
               )}
 
@@ -342,7 +385,7 @@ export default function EmployeeDetailsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <SmartButton
           label="Contracts"
-          count={relationCounts.contracts}
+          count={contractsLoaded ? employeeContracts.length : relationCounts.contracts}
           icon={FileText}
           loading={countsLoading}
           onClick={() => setActiveTab("contracts")}
@@ -546,11 +589,76 @@ export default function EmployeeDetailsPage() {
 
             {/* 4. CONTRACTS TAB */}
             {activeTab === "contracts" && (
-              <EmployeeTabPlaceholder
-                moduleName="Contracts"
-                phaseLabel="Phase 2"
-                employeeName={fullName}
-              />
+              <div className="space-y-4">
+                {contractsLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-20 w-full rounded-lg" />
+                    <Skeleton className="h-20 w-full rounded-lg" />
+                  </div>
+                ) : employeeContracts.length === 0 ? (
+                  <EmptyState
+                    icon={FileText}
+                    title="No contracts yet"
+                    description={`No employment contracts found for ${fullName}.`}
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {employeeContracts.map((c) => {
+                      const isActive = String(c.status).toLowerCase() === "active";
+                      return (
+                        <Card
+                          key={c.id}
+                          onClick={() => navigate(`/contracts/${c.id}`)}
+                          className="p-4 border border-border/80 bg-card hover:border-primary/50 hover:shadow-xs transition-all cursor-pointer"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2.5">
+                                <span className="font-mono text-xs font-bold text-foreground">
+                                  {c.contractId}
+                                </span>
+                                <StatusBadge status={c.status} />
+                                {isActive && (
+                                  <motion.span
+                                    className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"
+                                    animate={{ opacity: [0.4, 1, 0.4] }}
+                                    transition={{
+                                      duration: 2,
+                                      repeat: Infinity,
+                                      ease: "easeInOut",
+                                    }}
+                                    title="Active contract"
+                                  />
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                {c.jobPosition} • {c.department}
+                              </p>
+                            </div>
+
+                            <div className="sm:text-right space-y-0.5 shrink-0">
+                              <div className="text-sm font-semibold text-foreground">
+                                {new Intl.NumberFormat("en-IN", {
+                                  style: "currency",
+                                  currency: "INR",
+                                  maximumFractionDigits: 0,
+                                }).format(c.wage)}{" "}
+                                <span className="text-xs text-muted-foreground font-normal">
+                                  / month
+                                </span>
+                              </div>
+                              <div className="text-xs text-muted-foreground font-medium">
+                                {formatDate(c.startDate)} –{" "}
+                                {c.endDate ? formatDate(c.endDate) : "Ongoing"}
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
 
             {/* 5. ATTENDANCE TAB */}
