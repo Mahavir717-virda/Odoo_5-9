@@ -1,13 +1,10 @@
-/**
- * Mock Contracts Dataset
- * 28 realistic contracts tied to real employees from mockEmployees.js.
- *
- * CRITICAL BUSINESS RULE:
- * For any given employeeId, at most ONE contract can have status "Active" at a time.
- * Previous contracts for the same employee are marked "Expired" with non-overlapping date ranges.
- */
+import { mockEmployees } from "./mockEmployees";
 
-export const mockContracts = [
+const empMap = new Map(
+  mockEmployees.map((emp) => [emp.id, `${emp.firstName} ${emp.lastName}`])
+);
+
+const rawContracts = [
   // emp-1: Marcus Vance (VP of Engineering) - 2 contracts (1 Expired, 1 Active)
   {
     id: "con-1",
@@ -414,3 +411,85 @@ export const mockContracts = [
     status: "Draft",
   },
 ];
+
+// Helper to enforce at most ONE Active contract per employeeId and valid date ranges
+function sanitizeContracts(contracts) {
+  const byEmp = new Map();
+  for (const c of contracts) {
+    const empId = c.employeeId || c.employee_id;
+    if (!byEmp.has(empId)) byEmp.set(empId, []);
+    byEmp.get(empId).push(c);
+  }
+
+  const result = [];
+
+  for (const [_, empContracts] of byEmp.entries()) {
+    // Sort by startDate ascending
+    empContracts.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+    const activeContracts = empContracts.filter(
+      (c) => String(c.status).toLowerCase() === "active"
+    );
+
+    if (activeContracts.length > 1) {
+      const latestActiveId = activeContracts[activeContracts.length - 1].id;
+
+      for (let i = 0; i < empContracts.length; i++) {
+        const c = { ...empContracts[i] };
+        if (
+          String(c.status).toLowerCase() === "active" &&
+          c.id !== latestActiveId
+        ) {
+          c.status = "Expired";
+          const nextContract = empContracts[i + 1];
+          if (nextContract && nextContract.startDate) {
+            const nextStart = new Date(nextContract.startDate);
+            const prevEnd = new Date(nextStart.getTime() - 86400000);
+            c.endDate = prevEnd.toISOString().split("T")[0];
+
+            // Ensure startDate is realistically earlier than endDate
+            if (new Date(c.startDate) >= new Date(c.endDate)) {
+              const startDt = new Date(prevEnd.getTime() - 365 * 86400000);
+              c.startDate = startDt.toISOString().split("T")[0];
+            }
+          } else if (!c.endDate) {
+            c.endDate = "2024-12-31";
+            if (new Date(c.startDate) >= new Date(c.endDate)) {
+              c.startDate = "2024-01-01";
+            }
+          }
+        }
+
+        // Final sanity check for date ordering
+        if (c.endDate && new Date(c.startDate) >= new Date(c.endDate)) {
+          const endDt = new Date(c.endDate);
+          const startDt = new Date(endDt.getTime() - 365 * 86400000);
+          c.startDate = startDt.toISOString().split("T")[0];
+        }
+
+        result.push(c);
+      }
+    } else {
+      for (const c of empContracts) {
+        const item = { ...c };
+        if (item.endDate && new Date(item.startDate) >= new Date(item.endDate)) {
+          const endDt = new Date(item.endDate);
+          const startDt = new Date(endDt.getTime() - 365 * 86400000);
+          item.startDate = startDt.toISOString().split("T")[0];
+        }
+        result.push(item);
+      }
+    }
+  }
+
+  return result.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+}
+
+const denormalizedContracts = rawContracts.map((c) => ({
+  ...c,
+  employeeName: empMap.get(c.employeeId) || c.employeeName || "Employee",
+}));
+
+export const mockContracts = sanitizeContracts(denormalizedContracts);
+
+
+
