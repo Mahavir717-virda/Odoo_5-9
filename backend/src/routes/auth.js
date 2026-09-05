@@ -45,14 +45,20 @@ router.post("/login", async (req, res, next) => {
       });
     }
 
+    const jwtSecret =
+      process.env.JWT_SECRET ||
+      process.env.ACCESS_TOKEN_SECRET ||
+      "default_jwt_secret_key_peoplepay360";
+
     const token = jwt.sign(
       {
         userId: user.id,
         role: user.role,
       },
-      process.env.JWT_SECRET,
+      jwtSecret,
+      process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET,
       {
-        expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+        expiresIn: process.env.JWT_EXPIRES_IN || process.env.ACCESS_TOKEN_EXPIRY || "1d",
       }
     );
 
@@ -97,7 +103,7 @@ router.get("/me", authenticate, async (req, res) => {
  */
 
 // GET /api/v1/auth/admin-test (admin only)
-router.get("/admin-test", authenticate, requireRole("admin"), (req, res) => {
+router.get("/admin-test", authenticate, requireRole("admin", "ADMIN"), (req, res) => {
   return res.status(200).json({
     success: true,
     message: "Admin access granted",
@@ -105,7 +111,7 @@ router.get("/admin-test", authenticate, requireRole("admin"), (req, res) => {
 });
 
 // GET /api/v1/auth/hr-test (admin, hr_manager)
-router.get("/hr-test", authenticate, requireRole("admin", "hr_manager"), (req, res) => {
+router.get("/hr-test", authenticate, requireRole("admin", "ADMIN", "hr_manager", "HR_MANAGER"), (req, res) => {
   return res.status(200).json({
     success: true,
     message: "HR access granted",
@@ -113,7 +119,7 @@ router.get("/hr-test", authenticate, requireRole("admin", "hr_manager"), (req, r
 });
 
 // GET /api/v1/auth/payroll-test (admin, hr_payroll_manager)
-router.get("/payroll-test", authenticate, requireRole("admin", "hr_payroll_manager"), (req, res) => {
+router.get("/payroll-test", authenticate, requireRole("admin", "ADMIN", "hr_payroll_manager", "HR_PAYROLL_MANAGER"), (req, res) => {
   return res.status(200).json({
     success: true,
     message: "Payroll access granted",
@@ -124,7 +130,7 @@ router.get("/payroll-test", authenticate, requireRole("admin", "hr_payroll_manag
 router.get(
   "/employee-test",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager", "employee"),
+  requireRole("admin", "ADMIN", "hr_manager", "HR_MANAGER", "hr_payroll_manager", "HR_PAYROLL_MANAGER", "employee", "EMPLOYEE"),
   (req, res) => {
     return res.status(200).json({
       success: true,
