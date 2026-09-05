@@ -18,6 +18,7 @@ import {
   User,
   FileText,
   Building2,
+  Sparkles,
 } from "lucide-react";
 
 export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = false }) {
@@ -27,6 +28,9 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
 
   // State for expandable menu sections
   const [openSections, setOpenSections] = useState({
+    workspace:
+      location.pathname.startsWith("/my-") ||
+      location.pathname === "/profile",
     timeoff: location.pathname.startsWith("/time-off"),
     payroll: location.pathname.startsWith("/payroll"),
     settings: location.pathname.startsWith("/settings"),
@@ -44,7 +48,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
     const content = (
       <NavLink
         to={to}
-        className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors relative group ${
+        className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors relative group ${
           isActive
             ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-semibold"
             : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -80,7 +84,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
       {/* Brand Header */}
       <div className="h-16 flex items-center px-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-sm shadow-blue-200 dark:shadow-none">
             P360
           </div>
           {(!collapsed || isMobileSheet) && (
@@ -94,7 +98,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
       {/* Navigation List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-1">
         {isEmployeeRole ? (
-          /* Reduced menu for EMPLOYEE role */
+          /* Reduced menu for pure EMPLOYEE role */
           <>
             <NavItem to="/dashboard" icon={LayoutDashboard} label="Dashboard" exact />
             <NavItem to="/profile" icon={User} label="My Profile" />
@@ -103,9 +107,51 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
             <NavItem to="/my-payslips" icon={FileText} label="My Payslips" />
           </>
         ) : (
-          /* Full Gated Menu for HR & Admin */
+          /* Complete Gated Menu for HR Payroll Users, Managers & Admin */
           <>
             <NavItem to="/dashboard" icon={LayoutDashboard} label="Dashboard" exact />
+
+            {/* My Personal Workspace (Available to HR Payroll Users & Admins) */}
+            <div>
+              <button
+                onClick={() => toggleSection("workspace")}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+                  location.pathname.startsWith("/my-") || location.pathname === "/profile"
+                    ? "text-blue-600 dark:text-blue-400 font-semibold"
+                    : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                }`}
+                title={collapsed && !isMobileSheet ? "My Workspace" : undefined}
+              >
+                <div className="flex items-center gap-3">
+                  <User className="w-5 h-5 shrink-0" />
+                  {(!collapsed || isMobileSheet) && <span className="truncate">My Workspace</span>}
+                </div>
+                {(!collapsed || isMobileSheet) && (
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform ${
+                      openSections.workspace ? "rotate-180" : ""
+                    }`}
+                  />
+                )}
+              </button>
+              {(openSections.workspace || (collapsed && !isMobileSheet)) && (
+                <div className={`mt-1 space-y-1 ${!collapsed || isMobileSheet ? "pl-8" : ""}`}>
+                  <NavItem to="/profile" icon={User} label="My Profile" />
+                  <NavItem to="/my-attendance" icon={Clock} label="My Attendance" />
+                  <NavItem to="/my-time-off" icon={Calendar} label="My Time Off" />
+                  <NavItem to="/my-payslips" icon={FileText} label="My Payslips" />
+                </div>
+              )}
+            </div>
+
+            {/* Divider */}
+            {(!collapsed || isMobileSheet) && (
+              <div className="pt-2 pb-1 px-3">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  HR & Payroll Ops
+                </span>
+              </div>
+            )}
 
             <NavItem
               to="/employees"
@@ -124,7 +170,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
             <NavItem
               to="/attendance"
               icon={Clock}
-              label="Attendance"
+              label="Attendance Logs"
               permission={PERMISSIONS.ATTENDANCE.VIEW}
             />
 
@@ -133,7 +179,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
               <div>
                 <button
                   onClick={() => toggleSection("timeoff")}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
                     location.pathname.startsWith("/time-off")
                       ? "text-blue-600 dark:text-blue-400 font-semibold"
                       : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -172,7 +218,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
               <div>
                 <button
                   onClick={() => toggleSection("payroll")}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
                     location.pathname.startsWith("/payroll")
                       ? "text-blue-600 dark:text-blue-400 font-semibold"
                       : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -240,7 +286,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
               <div>
                 <button
                   onClick={() => toggleSection("settings")}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
                     location.pathname.startsWith("/settings")
                       ? "text-blue-600 dark:text-blue-400 font-semibold"
                       : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -292,7 +338,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
         <div className="p-3 border-t border-gray-200 dark:border-gray-800 shrink-0">
           <button
             onClick={onToggleCollapse}
-            className="w-full flex items-center justify-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="w-full flex items-center justify-center p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Toggle sidebar collapse"
           >
             {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
