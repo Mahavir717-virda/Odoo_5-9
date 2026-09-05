@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticate, requireRole } from "../middleware/auth.js";
+import { authenticate, requireRole } from "../middleware/auth.middleware.js";
 import timeOffService from "../services/timeOffService.js";
 import pool from "../db.js";
 
