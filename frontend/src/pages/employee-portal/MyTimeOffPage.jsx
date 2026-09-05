@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import {
   Calendar,
   PlusCircle,
@@ -30,7 +30,7 @@ import {
 
 import * as portalService from "../../services/employeePortalService";
 
-// LEAVE_TYPE_OPTIONS removed — now loaded dynamically from backend
+// LEAVE_TYPE_OPTIONS removed â€” now loaded dynamically from backend
 
 export default function MyTimeOffPage() {
   const [data, setData] = useState(null);
@@ -43,7 +43,7 @@ export default function MyTimeOffPage() {
   const [requestSuccess, setRequestSuccess] = useState(false);
   const [formError, setFormError] = useState(null);
 
-  // Form State — leaveType stores the type id as string
+  // Form State â€” leaveType stores the type id as string
   const [leaveType, setLeaveType] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -166,7 +166,7 @@ export default function MyTimeOffPage() {
                 month: "short",
                 day: "numeric",
               })}{" "}
-              –{" "}
+              â€“{" "}
               {new Date(row.endDate).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
@@ -235,7 +235,7 @@ export default function MyTimeOffPage() {
               Cancel
             </Button>
           ) : (
-            <span className="text-xs text-muted-foreground">—</span>
+            <span className="text-xs text-muted-foreground">â€”</span>
           ),
       },
     ],
@@ -251,7 +251,7 @@ export default function MyTimeOffPage() {
           <Button
             onClick={() => setIsModalOpen(true)}
             size="sm"
-            className="text-xs gap-1.5 shadow-xs"
+            className="text-xs gap-1.5 shadow-sm"
           >
             <PlusCircle className="w-3.5 h-3.5" />
             Request Time Off
@@ -260,7 +260,7 @@ export default function MyTimeOffPage() {
       />
 
       {requestSuccess && (
-        <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
+        <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>Leave request submitted successfully. Your manager will be notified for review.</span>
         </div>
@@ -272,7 +272,7 @@ export default function MyTimeOffPage() {
           return (
             <Card
               key={b.id}
-              className="border-border bg-card shadow-2xs hover:border-primary/40 transition-colors"
+              className="border-border bg-card shadow-sm hover:border-primary/40 transition-colors"
             >
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
@@ -312,7 +312,7 @@ export default function MyTimeOffPage() {
       </div>
 
       {/* Leave Requests Table */}
-      <Card className="border-border bg-card shadow-xs">
+      <Card className="border-border bg-card shadow-sm">
         <CardHeader className="pb-3 border-b border-border/40">
           <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
             <CalendarDays className="w-4 h-4 text-blue-600" />
@@ -452,3 +452,4 @@ export default function MyTimeOffPage() {
     </div>
   );
 }
+

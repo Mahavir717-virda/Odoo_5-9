@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import {
   Calendar,
   Plus,
@@ -154,7 +154,7 @@ export default function TimeOffTypesPage() {
           <span
             className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
               row.requires_allocation
-                ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                ? "bg-blue-50 text-blue-700 border border-blue-200"
                 : "bg-muted text-muted-foreground"
             }`}
           >
@@ -170,8 +170,8 @@ export default function TimeOffTypesPage() {
           <span
             className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
               row.affects_payroll
-                ? "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200"
-                : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200"
+                ? "bg-rose-50 text-rose-700 border border-rose-200"
+                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
             }`}
           >
             {row.affects_payroll ? "Unpaid / Deducts Pay" : "Paid Leave"}
@@ -204,7 +204,7 @@ export default function TimeOffTypesPage() {
         title="Time Off Types"
         subtitle="Define and configure organizational leave categories, accounting units, and payroll rules."
         actions={
-          <Button onClick={handleOpenCreateModal} size="sm" className="gap-1.5 shadow-xs">
+          <Button onClick={handleOpenCreateModal} size="sm" className="gap-1.5 shadow-sm">
             <Plus className="w-4 h-4" />
             Create Leave Type
           </Button>
@@ -212,7 +212,7 @@ export default function TimeOffTypesPage() {
       />
 
       {toastMessage && (
-        <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
+        <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>{toastMessage}</span>
         </div>
@@ -330,3 +330,4 @@ export default function TimeOffTypesPage() {
     </div>
   );
 }
+

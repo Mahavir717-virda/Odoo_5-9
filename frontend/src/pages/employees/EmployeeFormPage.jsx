@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -383,7 +383,7 @@ export default function EmployeeFormPage() {
       {/* Form Form Body */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* SECTION 1: PERSONAL INFORMATION */}
-        <Card className="border border-border bg-card shadow-xs">
+        <Card className="border border-border bg-card shadow-sm">
           <CardHeader className="pb-4 border-b border-border/40">
             <CardTitle className="text-base font-semibold text-foreground">
               Personal Information
@@ -494,7 +494,7 @@ export default function EmployeeFormPage() {
         </Card>
 
         {/* SECTION 2: WORK INFORMATION */}
-        <Card className="border border-border bg-card shadow-xs">
+        <Card className="border border-border bg-card shadow-sm">
           <CardHeader className="pb-4 border-b border-border/40">
             <CardTitle className="text-base font-semibold text-foreground">
               Work Information
@@ -671,7 +671,7 @@ export default function EmployeeFormPage() {
 
         {/* SECTION 3: PAYROLL INFORMATION (Gated by can("employee.edit")) */}
         {can("employee.edit") && (
-          <Card className="border border-border bg-card shadow-xs">
+          <Card className="border border-border bg-card shadow-sm">
             <CardHeader className="pb-4 border-b border-border/40">
               <CardTitle className="text-base font-semibold text-foreground">
                 Payroll Information
@@ -679,7 +679,7 @@ export default function EmployeeFormPage() {
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               {/* Sensitive financial notice */}
-              <div className="p-3.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 text-amber-800 dark:text-amber-300 flex items-start gap-2.5 text-xs">
+              <div className="p-3.5 rounded-md bg-amber-50 border border-amber-200/80 text-amber-800 flex items-start gap-2.5 text-xs">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>
                   Sensitive financial information. Handle with care and only share on a need-to-know basis.
@@ -787,3 +787,4 @@ export default function EmployeeFormPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FileText,
@@ -84,7 +84,7 @@ export default function PayslipsListPage() {
     const s = (status || "draft").toLowerCase();
     if (s === "paid") {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
           <CheckCircle2 className="w-3.5 h-3.5" />
           Paid
         </span>
@@ -92,7 +92,7 @@ export default function PayslipsListPage() {
     }
     if (s === "validated" || s === "verify" || s === "done") {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 border border-blue-500/20">
           <Clock className="w-3.5 h-3.5" />
           Validated
         </span>
@@ -100,14 +100,14 @@ export default function PayslipsListPage() {
     }
     if (s === "cancelled") {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 border border-rose-500/20">
           <AlertCircle className="w-3.5 h-3.5" />
           Cancelled
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 border border-amber-500/20">
         <Clock className="w-3.5 h-3.5" />
         Draft
       </span>
@@ -120,14 +120,14 @@ export default function PayslipsListPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Employee Payslips
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
               {totalCount} Generated
             </span>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Review detailed salary disbursements, tax breakdowns, deductions, and itemized wage slips.
           </p>
         </div>
@@ -136,14 +136,14 @@ export default function PayslipsListPage() {
           <button
             onClick={fetchData}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition shadow-sm"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-indigo-600" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#7743db]" : ""}`} />
             Refresh
           </button>
           <Link
             to="/payroll/payruns"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 dark:shadow-none transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition"
           >
             <Layers className="w-4 h-4" />
             Manage Payruns
@@ -153,62 +153,62 @@ export default function PayslipsListPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Total Net Payout
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">
               ${totalNet.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Disbursed net wage sum</p>
           </div>
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-emerald-600 dark:text-emerald-400">
+          <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <DollarSign className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Total Gross Wages
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">
               ${totalGross.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Pre-tax & deductions</p>
           </div>
-          <div className="p-3 bg-blue-50 dark:bg-blue-950/40 rounded-xl text-blue-600 dark:text-blue-400">
+          <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
             <TrendingUp className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Paid Slips
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{paidCount}</h3>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">{paidCount}</h3>
+            <p className="text-xs text-emerald-600 mt-0.5 font-medium">
               Completed transactions
             </p>
           </div>
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-emerald-600 dark:text-emerald-400">
+          <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <CheckCircle2 className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Draft / Pending
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{draftCount}</h3>
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5 font-medium">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">{draftCount}</h3>
+            <p className="text-xs text-amber-600 mt-0.5 font-medium">
               Awaiting computation/payment
             </p>
           </div>
-          <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl text-amber-600 dark:text-amber-400">
+          <div className="p-3 bg-amber-50 rounded-xl text-amber-600">
             <Clock className="w-6 h-6" />
           </div>
         </div>
@@ -216,14 +216,14 @@ export default function PayslipsListPage() {
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 flex items-center gap-3 text-rose-700 dark:text-rose-400 text-sm">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-3 text-rose-700 text-sm">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Filters and Search Bar */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -231,7 +231,7 @@ export default function PayslipsListPage() {
             placeholder="Search employee, ID, or slip reference..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
           />
         </div>
 
@@ -241,7 +241,7 @@ export default function PayslipsListPage() {
             <select
               value={payrunFilter}
               onChange={(e) => setPayrunFilter(e.target.value)}
-              className="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+              className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
             >
               <option value="all">All Payruns</option>
               {payruns.map((pr) => (
@@ -255,7 +255,7 @@ export default function PayslipsListPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
           >
             <option value="all">All Statuses</option>
             <option value="draft">Draft</option>
@@ -267,17 +267,17 @@ export default function PayslipsListPage() {
       </div>
 
       {/* Table Container */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 text-center">
-            <RefreshCw className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-3" />
+            <RefreshCw className="w-8 h-8 animate-spin text-[#7743db] mx-auto mb-3" />
             <p className="text-sm text-slate-500">Loading employee payslips...</p>
           </div>
         ) : filteredPayslips.length === 0 ? (
           <div className="p-12 text-center">
-            <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white">No payslips found</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <h3 className="text-base font-semibold text-slate-900">No payslips found</h3>
+            <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
               {search || payrunFilter !== "all" || statusFilter !== "all"
                 ? "Try adjusting your search criteria or active filters."
                 : "Generate payslips by computing a payrun batch."}
@@ -286,7 +286,7 @@ export default function PayslipsListPage() {
               <div className="mt-4">
                 <Link
                   to="/payroll/payruns"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-sm"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white transition shadow-sm"
                 >
                   <Layers className="w-4 h-4" />
                   View Payruns
@@ -298,7 +298,7 @@ export default function PayslipsListPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/75 dark:bg-slate-900/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <tr className="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   <th className="py-3.5 px-4 pl-6">Reference / Slip</th>
                   <th className="py-3.5 px-4">Employee</th>
                   <th className="py-3.5 px-4">Payrun / Period</th>
@@ -310,7 +310,7 @@ export default function PayslipsListPage() {
                   <th className="py-3.5 px-4 pr-6 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
+              <tbody className="divide-y divide-slate-100 text-sm">
                 {filteredPayslips.map((slip) => {
                   const empName = `${slip.employee_first_name || slip.first_name || "Employee"} ${
                     slip.employee_last_name || slip.last_name || ""
@@ -326,51 +326,51 @@ export default function PayslipsListPage() {
                   return (
                     <tr
                       key={slip.id}
-                      className="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition group cursor-pointer"
+                      className="hover:bg-slate-50/80 transition group cursor-pointer"
                       onClick={() => navigate(`/payroll/payslips/${slip.id}`)}
                     >
-                      <td className="py-3.5 px-4 pl-6 font-mono text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                      <td className="py-3.5 px-4 pl-6 font-mono text-xs font-medium text-[#7743db]">
                         {refCode}
                       </td>
 
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-semibold text-xs flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-[#ede5fb] text-[#7743db] font-semibold text-xs flex items-center justify-center flex-shrink-0">
                             {empName.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                            <p className="font-semibold text-slate-900 group-hover:text-[#7743db] transition">
                               {empName}
                             </p>
-                            <p className="text-xs text-slate-400">{jobTitle} • {empCode}</p>
+                            <p className="text-xs text-slate-400">{jobTitle} â€¢ {empCode}</p>
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">
+                      <td className="py-3.5 px-4 text-slate-600">
                         <div className="flex flex-col">
-                          <span className="font-medium text-xs text-slate-900 dark:text-white">
+                          <span className="font-medium text-xs text-slate-900">
                             {slip.payrun_name || `Batch #${slip.payrun_id}`}
                           </span>
                           <span className="text-[11px] text-slate-400">
-                            {slip.period_start ? `${slip.period_start} → ${slip.period_end}` : "Monthly Cycle"}
+                            {slip.period_start ? `${slip.period_start} â†’ ${slip.period_end}` : "Monthly Cycle"}
                           </span>
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-right font-medium text-slate-600 dark:text-slate-300">
+                      <td className="py-3.5 px-4 text-right font-medium text-slate-600">
                         ${basicWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
 
-                      <td className="py-3.5 px-4 text-right font-medium text-slate-900 dark:text-white">
+                      <td className="py-3.5 px-4 text-right font-medium text-slate-900">
                         ${grossWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
 
-                      <td className="py-3.5 px-4 text-right font-medium text-rose-600 dark:text-rose-400">
+                      <td className="py-3.5 px-4 text-right font-medium text-rose-600">
                         -${totalDeductions.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
 
-                      <td className="py-3.5 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                      <td className="py-3.5 px-4 text-right font-bold text-emerald-600">
                         ${netWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
 
@@ -381,7 +381,7 @@ export default function PayslipsListPage() {
                       <td className="py-3.5 px-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
                         <Link
                           to={`/payroll/payslips/${slip.id}`}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:text-[#7743db] hover:bg-slate-100 transition"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           Details
@@ -398,3 +398,4 @@ export default function PayslipsListPage() {
     </div>
   );
 }
+

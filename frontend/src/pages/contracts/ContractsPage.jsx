@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FileText, Plus, Eye, Pencil, MoreVertical } from "lucide-react";
@@ -38,7 +38,7 @@ const STATUS_OPTIONS = [
  * Format currency to Indian Rupee (INR)
  */
 function formatCurrency(amount) {
-  if (amount == null) return "—";
+  if (amount == null) return "â€”";
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -50,7 +50,7 @@ function formatCurrency(amount) {
  * Format ISO date string into readable format (e.g. "Jan 15, 2024")
  */
 function formatDate(dateString) {
-  if (!dateString) return "—";
+  if (!dateString) return "â€”";
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
@@ -215,7 +215,7 @@ export default function ContractsPage() {
           row.endDate ? (
             formatDate(row.endDate)
           ) : (
-            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
+            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
               Running
             </span>
           ),
@@ -328,7 +328,7 @@ export default function ContractsPage() {
             <Button
               size="sm"
               onClick={() => navigate("/contracts/new")}
-              className="text-xs gap-1.5 shadow-xs"
+              className="text-xs gap-1.5 shadow-sm"
             >
               <Plus className="w-4 h-4" />
               Add Contract
@@ -391,3 +391,4 @@ export default function ContractsPage() {
     </div>
   );
 }
+

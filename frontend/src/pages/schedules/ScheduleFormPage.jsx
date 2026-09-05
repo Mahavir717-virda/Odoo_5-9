@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -354,7 +354,7 @@ export default function ScheduleFormPage() {
 
       {/* General Day Selection Error */}
       {errors.days && (
-        <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs flex items-center gap-2">
+        <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>{errors.days}</span>
         </div>
@@ -362,7 +362,7 @@ export default function ScheduleFormPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Section 1: Basic Information */}
-        <Card className="border border-border shadow-xs">
+        <Card className="border border-border shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Clock className="w-4 h-4 text-primary" />
@@ -423,7 +423,7 @@ export default function ScheduleFormPage() {
         </Card>
 
         {/* Section 2: Weekly Schedule Builder */}
-        <Card className="border border-border shadow-xs">
+        <Card className="border border-border shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4 flex flex-row items-center justify-between">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
@@ -575,7 +575,7 @@ export default function ScheduleFormPage() {
                   {activeWeeklyPattern.length === 1 ? "day" : "days"}
                 </span>
               </div>
-              <div className="text-xl font-extrabold text-primary bg-background px-4 py-1.5 rounded-md border border-primary/20 shadow-xs">
+              <div className="text-xl font-extrabold text-primary bg-background px-4 py-1.5 rounded-md border border-primary/20 shadow-sm">
                 {formatHours(totalWeeklyHours)}
               </div>
             </div>
@@ -610,3 +610,4 @@ export default function ScheduleFormPage() {
     </div>
   );
 }
+

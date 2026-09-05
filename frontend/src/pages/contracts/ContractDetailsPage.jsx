@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -27,7 +27,7 @@ import { isSameId } from "../../services/contractService";
  * Format currency to Indian Rupee (INR)
  */
 function formatCurrency(amount) {
-  if (amount == null) return "—";
+  if (amount == null) return "â€”";
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -39,7 +39,7 @@ function formatCurrency(amount) {
  * Format ISO date string into readable format (e.g. "Jan 15, 2024")
  */
 function formatDate(dateString) {
-  if (!dateString) return "—";
+  if (!dateString) return "â€”";
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
@@ -74,10 +74,10 @@ function InfoItem({ label, value, icon: Icon, isLink, to }) {
               to={to}
               className="text-primary hover:underline font-semibold"
             >
-              {value || "—"}
+              {value || "â€”"}
             </Link>
           ) : (
-            value || "—"
+            value || "â€”"
           )}
         </div>
       </div>
@@ -220,7 +220,7 @@ export default function ContractDetailsPage() {
       </div>
 
       {/* Header Card */}
-      <Card className="border border-border bg-card shadow-xs">
+      <Card className="border border-border bg-card shadow-sm">
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
@@ -397,8 +397,8 @@ export default function ContractDetailsPage() {
                       }}
                       className={`p-4 transition-all duration-200 border ${
                         isCurrent
-                          ? "border-primary bg-primary/5 shadow-xs ring-1 ring-primary/20"
-                          : "border-border/60 bg-card hover:border-border hover:shadow-xs cursor-pointer"
+                          ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20"
+                          : "border-border/60 bg-card hover:border-border hover:shadow-sm cursor-pointer"
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -419,7 +419,7 @@ export default function ContractDetailsPage() {
                           </div>
 
                           <p className="text-xs text-muted-foreground">
-                            {c.jobPosition} • {c.department}
+                            {c.jobPosition} â€¢ {c.department}
                           </p>
                         </div>
 
@@ -431,7 +431,7 @@ export default function ContractDetailsPage() {
                             </span>
                           </div>
                           <div className="text-xs text-muted-foreground font-medium">
-                            {formatDate(c.startDate)} –{" "}
+                            {formatDate(c.startDate)} â€“{" "}
                             {c.endDate ? formatDate(c.endDate) : "Ongoing"}
                           </div>
                         </div>
@@ -447,3 +447,4 @@ export default function ContractDetailsPage() {
     </div>
   );
 }
+

@@ -19,7 +19,7 @@ import {
   User,
   FileText,
   Building2,
-  Sparkles,
+  Briefcase,
 } from "lucide-react";
 
 export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = false }) {
@@ -27,13 +27,11 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
   const location = useLocation();
   const isEmployeeRole = user?.role === "EMPLOYEE";
 
-  // State for expandable menu sections
   const [openSections, setOpenSections] = useState({
     workspace:
-      location.pathname.startsWith("/my-") ||
-      location.pathname === "/profile",
-    timeoff: location.pathname.startsWith("/time-off"),
-    payroll: location.pathname.startsWith("/payroll"),
+      location.pathname.startsWith("/my-") || location.pathname === "/profile",
+    timeoff:  location.pathname.startsWith("/time-off"),
+    payroll:  location.pathname.startsWith("/payroll"),
     settings: location.pathname.startsWith("/settings"),
   });
 
@@ -41,6 +39,9 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const showLabel = !collapsed || isMobileSheet;
+
+  /* ─── Individual nav link ─── */
   const NavItem = ({ to, icon: Icon, label, permission, anyOf, exact = false }) => {
     const isActive = exact
       ? location.pathname === to
@@ -49,15 +50,20 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
     const content = (
       <NavLink
         to={to}
-        className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors relative group ${
+        title={!showLabel ? label : undefined}
+        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 relative group ${
           isActive
-            ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-semibold"
-            : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+            ? "bg-[#7743db] text-white shadow-sm shadow-[#7743db]/25 font-semibold"
+            : "text-[#c3acd0]/85 hover:bg-[#231c34] hover:text-white"
         }`}
-        title={collapsed && !isMobileSheet ? label : undefined}
       >
-        <Icon className="w-5 h-5 shrink-0" />
-        {(!collapsed || isMobileSheet) && <span className="truncate">{label}</span>}
+        <Icon className="w-4.5 h-4.5 shrink-0 w-[18px] h-[18px]" />
+        {showLabel && <span className="truncate">{label}</span>}
+        {!showLabel && (
+          <span className="absolute left-full ml-3 px-2 py-1 text-xs font-medium bg-[#1e182a] text-white rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 shadow-lg border border-[#28203b] transition-opacity duration-150">
+            {label}
+          </span>
+        )}
       </NavLink>
     );
 
@@ -68,147 +74,133 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
         </PermissionGuard>
       );
     }
-
     return content;
   };
 
-  return (
-    <aside
-      className={`h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col transition-all duration-200 ${
-        isMobileSheet
-          ? "w-64"
-          : collapsed
-          ? "w-16"
-          : "w-64"
+  /* ─── Collapsible section header ─── */
+  const SectionToggle = ({ sectionKey, icon: Icon, label, isActiveSection }) => (
+    <button
+      onClick={() => toggleSection(sectionKey)}
+      title={!showLabel ? label : undefined}
+      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
+        isActiveSection
+          ? "text-white bg-[#231c34]/70"
+          : "text-[#c3acd0]/85 hover:bg-[#231c34] hover:text-white"
       }`}
     >
-      {/* Brand Header */}
-      <div className="h-16 flex items-center px-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
+      <div className="flex items-center gap-3">
+        <Icon className="w-[18px] h-[18px] shrink-0" />
+        {showLabel && <span className="truncate">{label}</span>}
+      </div>
+      {showLabel && (
+        <ChevronDown
+          className={`w-3.5 h-3.5 transition-transform duration-150 text-[#c3acd0]/70 ${
+            openSections[sectionKey] ? "rotate-180" : ""
+          }`}
+        />
+      )}
+    </button>
+  );
+
+  /* ─── Section label ─── */
+  const SectionLabel = ({ children }) =>
+    showLabel ? (
+      <div className="px-3 pt-4 pb-1">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-[#6b5880]">
+          {children}
+        </span>
+      </div>
+    ) : (
+      <div className="py-2">
+        <div className="mx-auto w-6 border-t border-[#28203b]" />
+      </div>
+    );
+
+  return (
+    <aside
+      className={`h-full flex flex-col transition-all duration-200 ${
+        isMobileSheet ? "w-64" : collapsed ? "w-16" : "w-64"
+      }`}
+      style={{ backgroundColor: "#120e1c", borderRight: "1px solid #28203b" }}
+    >
+      {/* ── Brand Header ── */}
+      <div
+        className="h-16 flex items-center px-4 shrink-0"
+        style={{ borderBottom: "1px solid #28203b" }}
+      >
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-sm shadow-blue-200 dark:shadow-none">
-            P360
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white font-bold text-xs shadow-sm shadow-[#7743db]/30"
+            style={{ background: "linear-gradient(135deg, #7743db 0%, #6334b8 100%)" }}
+          >
+            <Briefcase className="w-4 h-4" />
           </div>
-          {(!collapsed || isMobileSheet) && (
-            <span className="font-bold text-lg text-gray-900 dark:text-gray-100 truncate">
-              PeoplePay<span className="text-blue-600">360</span>
-            </span>
+          {showLabel && (
+            <div className="overflow-hidden">
+              <p className="font-bold text-sm text-white truncate leading-tight">
+                PeoplePay<span className="text-[#c3acd0]">360</span>
+              </p>
+              <p className="text-[10px] text-[#8f7a9f] truncate">HR & Payroll</p>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Navigation List */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-1">
+      {/* ── Navigation ── */}
+      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
         {isEmployeeRole ? (
-          /* Reduced menu for pure EMPLOYEE role */
+          /* Employee-only reduced menu */
           <>
             <NavItem to="/dashboard" icon={LayoutDashboard} label="Dashboard" exact />
-            <NavItem to="/profile" icon={User} label="My Profile" />
-            <NavItem to="/my-attendance" icon={Clock} label="My Attendance" />
-            <NavItem to="/my-time-off" icon={Calendar} label="My Time Off" />
-            <NavItem to="/my-payslips" icon={FileText} label="My Payslips" />
+            <SectionLabel>My Workspace</SectionLabel>
+            <NavItem to="/profile"      icon={User}     label="My Profile" />
+            <NavItem to="/my-attendance" icon={Clock}    label="My Attendance" />
+            <NavItem to="/my-time-off"  icon={Calendar} label="My Time Off" />
+            <NavItem to="/my-payslips"  icon={FileText}  label="My Payslips" />
           </>
         ) : (
-          /* Complete Gated Menu for HR Payroll Users, Managers & Admin */
           <>
             <NavItem to="/dashboard" icon={LayoutDashboard} label="Dashboard" exact />
 
-            {/* My Personal Workspace (Available to HR Payroll Users & Admins) */}
+            {/* My Workspace */}
             <div>
-              <button
-                onClick={() => toggleSection("workspace")}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+              <SectionToggle
+                sectionKey="workspace"
+                icon={User}
+                label="My Workspace"
+                isActiveSection={
                   location.pathname.startsWith("/my-") || location.pathname === "/profile"
-                    ? "text-blue-600 dark:text-blue-400 font-semibold"
-                    : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                }`}
-                title={collapsed && !isMobileSheet ? "My Workspace" : undefined}
-              >
-                <div className="flex items-center gap-3">
-                  <User className="w-5 h-5 shrink-0" />
-                  {(!collapsed || isMobileSheet) && <span className="truncate">My Workspace</span>}
-                </div>
-                {(!collapsed || isMobileSheet) && (
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      openSections.workspace ? "rotate-180" : ""
-                    }`}
-                  />
-                )}
-              </button>
-              {(openSections.workspace || (collapsed && !isMobileSheet)) && (
-                <div className={`mt-1 space-y-1 ${!collapsed || isMobileSheet ? "pl-8" : ""}`}>
-                  <NavItem to="/profile" icon={User} label="My Profile" />
-                  <NavItem to="/my-attendance" icon={Clock} label="My Attendance" />
-                  <NavItem to="/my-time-off" icon={Calendar} label="My Time Off" />
-                  <NavItem to="/my-payslips" icon={FileText} label="My Payslips" />
+                }
+              />
+              {(openSections.workspace || (!showLabel)) && (
+                <div className={`mt-0.5 space-y-0.5 ${showLabel ? "pl-7" : ""}`}>
+                  <NavItem to="/profile"       icon={User}     label="My Profile" />
+                  <NavItem to="/my-attendance"  icon={Clock}    label="My Attendance" />
+                  <NavItem to="/my-time-off"   icon={Calendar} label="My Time Off" />
+                  <NavItem to="/my-payslips"   icon={FileText}  label="My Payslips" />
                 </div>
               )}
             </div>
 
-            {/* Divider */}
-            {(!collapsed || isMobileSheet) && (
-              <div className="pt-2 pb-1 px-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                  HR & Payroll Ops
-                </span>
-              </div>
-            )}
+            <SectionLabel>HR & Payroll Ops</SectionLabel>
 
-            <NavItem
-              to="/employees"
-              icon={Users}
-              label="Employees"
-              permission={PERMISSIONS.EMPLOYEE.VIEW}
-            />
+            <NavItem to="/employees"  icon={Users}         label="Employees"     permission={PERMISSIONS.EMPLOYEE.VIEW} />
+            <NavItem to="/contracts"  icon={FileCheck}     label="Contracts"     permission={PERMISSIONS.CONTRACT.VIEW} />
+            <NavItem to="/schedules"  icon={CalendarClock} label="Schedules"     permission={PERMISSIONS.SCHEDULE.VIEW} />
+            <NavItem to="/attendance" icon={Clock}         label="Attendance"    permission={PERMISSIONS.ATTENDANCE.VIEW} />
 
-            <NavItem
-              to="/contracts"
-              icon={FileCheck}
-              label="Contracts"
-              permission={PERMISSIONS.CONTRACT.VIEW}
-            />
-
-            <NavItem
-              to="/schedules"
-              icon={CalendarClock}
-              label="Schedules"
-              permission={PERMISSIONS.SCHEDULE.VIEW}
-            />
-
-            <NavItem
-              to="/attendance"
-              icon={Clock}
-              label="Attendance Logs"
-              permission={PERMISSIONS.ATTENDANCE.VIEW}
-            />
-
-            {/* Time Off Section */}
+            {/* Time Off */}
             <PermissionGuard permission={PERMISSIONS.TIMEOFF.VIEW}>
               <div>
-                <button
-                  onClick={() => toggleSection("timeoff")}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-                    location.pathname.startsWith("/time-off")
-                      ? "text-blue-600 dark:text-blue-400 font-semibold"
-                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                  }`}
-                  title={collapsed && !isMobileSheet ? "Time Off" : undefined}
-                >
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 shrink-0" />
-                    {(!collapsed || isMobileSheet) && <span className="truncate">Time Off</span>}
-                  </div>
-                  {(!collapsed || isMobileSheet) && (
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform ${
-                        openSections.timeoff ? "rotate-180" : ""
-                      }`}
-                    />
-                  )}
-                </button>
-                {(openSections.timeoff || (collapsed && !isMobileSheet)) && (
-                  <div className={`mt-1 space-y-1 ${!collapsed || isMobileSheet ? "pl-8" : ""}`}>
-                    <NavItem to="/time-off/requests" icon={Calendar} label="Requests" />
+                <SectionToggle
+                  sectionKey="timeoff"
+                  icon={Calendar}
+                  label="Time Off"
+                  isActiveSection={location.pathname.startsWith("/time-off")}
+                />
+                {(openSections.timeoff || (!showLabel)) && (
+                  <div className={`mt-0.5 space-y-0.5 ${showLabel ? "pl-7" : ""}`}>
+                    <NavItem to="/time-off/requests"    icon={Calendar} label="Requests" />
                     <NavItem to="/time-off/allocations" icon={Calendar} label="Allocations" />
                     <NavItem
                       to="/time-off/types"
@@ -221,69 +213,29 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
               </div>
             </PermissionGuard>
 
-            {/* Payroll Section */}
+            {/* Payroll */}
             <PermissionGuard permission={PERMISSIONS.PAYROLL.VIEW}>
               <div>
-                <button
-                  onClick={() => toggleSection("payroll")}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-                    location.pathname.startsWith("/payroll")
-                      ? "text-blue-600 dark:text-blue-400 font-semibold"
-                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                  }`}
-                  title={collapsed && !isMobileSheet ? "Payroll" : undefined}
-                >
-                  <div className="flex items-center gap-3">
-                    <DollarSign className="w-5 h-5 shrink-0" />
-                    {(!collapsed || isMobileSheet) && <span className="truncate">Payroll</span>}
-                  </div>
-                  {(!collapsed || isMobileSheet) && (
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform ${
-                        openSections.payroll ? "rotate-180" : ""
-                      }`}
-                    />
-                  )}
-                </button>
-                {(openSections.payroll || (collapsed && !isMobileSheet)) && (
-                  <div className={`mt-1 space-y-1 ${!collapsed || isMobileSheet ? "pl-8" : ""}`}>
-                    <NavItem
-                      to="/payroll/payruns"
-                      icon={DollarSign}
-                      label="Payruns"
-                      permission={PERMISSIONS.PAYRUN.VIEW}
-                    />
-                    <NavItem
-                      to="/payroll/payslips"
-                      icon={FileText}
-                      label="Payslips"
-                      permission={PERMISSIONS.PAYSLIP.VIEW}
-                    />
-                    <NavItem
-                      to="/payroll/salary-structures"
-                      icon={Building2}
-                      label="Salary Structures"
-                      permission={PERMISSIONS.SALARY_STRUCTURE.VIEW}
-                    />
-                    <NavItem
-                      to="/payroll/salary-rules"
-                      icon={FileText}
-                      label="Salary Rules"
-                      permission={PERMISSIONS.SALARY_RULE.VIEW}
-                    />
+                <SectionToggle
+                  sectionKey="payroll"
+                  icon={DollarSign}
+                  label="Payroll"
+                  isActiveSection={location.pathname.startsWith("/payroll")}
+                />
+                {(openSections.payroll || (!showLabel)) && (
+                  <div className={`mt-0.5 space-y-0.5 ${showLabel ? "pl-7" : ""}`}>
+                    <NavItem to="/payroll/payruns"           icon={DollarSign} label="Payruns"           permission={PERMISSIONS.PAYRUN.VIEW} />
+                    <NavItem to="/payroll/payslips"          icon={FileText}   label="Payslips"          permission={PERMISSIONS.PAYSLIP.VIEW} />
+                    <NavItem to="/payroll/salary-structures" icon={Building2}  label="Salary Structures" permission={PERMISSIONS.SALARY_STRUCTURE.VIEW} />
+                    <NavItem to="/payroll/salary-rules"      icon={FileText}   label="Salary Rules"      permission={PERMISSIONS.SALARY_RULE.VIEW} />
                   </div>
                 )}
               </div>
             </PermissionGuard>
 
-            <NavItem
-              to="/reports"
-              icon={BarChart3}
-              label="Reports"
-              permission={PERMISSIONS.REPORTS.VIEW}
-            />
+            <NavItem to="/reports" icon={BarChart3} label="Reports" permission={PERMISSIONS.REPORTS.VIEW} />
 
-            {/* Settings Section */}
+            {/* Settings */}
             <PermissionGuard
               anyOf={[
                 PERMISSIONS.SETTINGS.MANAGE_USERS,
@@ -292,47 +244,17 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
               ]}
             >
               <div>
-                <button
-                  onClick={() => toggleSection("settings")}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-                    location.pathname.startsWith("/settings")
-                      ? "text-blue-600 dark:text-blue-400 font-semibold"
-                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                  }`}
-                  title={collapsed && !isMobileSheet ? "Settings" : undefined}
-                >
-                  <div className="flex items-center gap-3">
-                    <Settings className="w-5 h-5 shrink-0" />
-                    {(!collapsed || isMobileSheet) && <span className="truncate">Settings</span>}
-                  </div>
-                  {(!collapsed || isMobileSheet) && (
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform ${
-                        openSections.settings ? "rotate-180" : ""
-                      }`}
-                    />
-                  )}
-                </button>
-                {(openSections.settings || (collapsed && !isMobileSheet)) && (
-                  <div className={`mt-1 space-y-1 ${!collapsed || isMobileSheet ? "pl-8" : ""}`}>
-                    <NavItem
-                      to="/settings/users"
-                      icon={Users}
-                      label="Users"
-                      permission={PERMISSIONS.SETTINGS.MANAGE_USERS}
-                    />
-                    <NavItem
-                      to="/settings/roles"
-                      icon={Settings}
-                      label="Roles & Permissions"
-                      permission={PERMISSIONS.SETTINGS.MANAGE_ROLES}
-                    />
-                    <NavItem
-                      to="/settings/system"
-                      icon={Settings}
-                      label="System Settings"
-                      permission={PERMISSIONS.SETTINGS.MANAGE_SYSTEM}
-                    />
+                <SectionToggle
+                  sectionKey="settings"
+                  icon={Settings}
+                  label="Settings"
+                  isActiveSection={location.pathname.startsWith("/settings")}
+                />
+                {(openSections.settings || (!showLabel)) && (
+                  <div className={`mt-0.5 space-y-0.5 ${showLabel ? "pl-7" : ""}`}>
+                    <NavItem to="/settings/users"  icon={Users}    label="Users"             permission={PERMISSIONS.SETTINGS.MANAGE_USERS} />
+                    <NavItem to="/settings/roles"  icon={Settings} label="Roles & Perms"     permission={PERMISSIONS.SETTINGS.MANAGE_ROLES} />
+                    <NavItem to="/settings/system" icon={Settings} label="System Settings"   permission={PERMISSIONS.SETTINGS.MANAGE_SYSTEM} />
                   </div>
                 )}
               </div>
@@ -341,15 +263,19 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
         )}
       </div>
 
-      {/* Collapse Toggle Footer */}
+      {/* ── Collapse Toggle ── */}
       {!isMobileSheet && (
-        <div className="p-3 border-t border-gray-200 dark:border-gray-800 shrink-0">
+        <div className="p-2 shrink-0" style={{ borderTop: "1px solid #28203b" }}>
           <button
             onClick={onToggleCollapse}
-            className="w-full flex items-center justify-center p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            aria-label="Toggle sidebar collapse"
+            aria-label="Toggle sidebar"
+            className="w-full flex items-center justify-center p-2 rounded-lg text-[#8f7a9f] hover:bg-[#231c34] hover:text-white transition-colors duration-150"
           >
-            {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+            {collapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
           </button>
         </div>
       )}

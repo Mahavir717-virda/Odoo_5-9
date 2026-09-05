@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import {
@@ -100,18 +100,18 @@ export default function UserProfile() {
       />
 
       {saveSuccess && (
-        <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
+        <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>Contact details updated successfully.</span>
         </div>
       )}
 
       {/* Main Profile Header Card */}
-      <Card className="border-border bg-card shadow-xs">
+      <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <Avatar className="h-18 w-18 border-2 border-primary/20 shadow-xs shrink-0">
+              <Avatar className="h-18 w-18 border-2 border-primary/20 shadow-sm shrink-0">
                 <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
                   {getInitials(profile?.name || user?.name)}
                 </AvatarFallback>
@@ -125,7 +125,7 @@ export default function UserProfile() {
                   <StatusBadge status={profile?.status || "Active"} />
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5 font-medium">
-                  {profile?.jobPosition || "Employee"} •{" "}
+                  {profile?.jobPosition || "Employee"} â€¢{" "}
                   <span className="text-foreground/80">{profile?.department || "Engineering"}</span>
                 </p>
                 <p className="text-xs text-muted-foreground/80 font-mono mt-0.5">
@@ -164,7 +164,7 @@ export default function UserProfile() {
       {/* Grid: Personal & Work Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Personal & Contact Information */}
-        <Card className="border-border bg-card shadow-xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-3 border-b border-border/40 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
               <User className="w-4 h-4 text-blue-600" />
@@ -250,7 +250,7 @@ export default function UserProfile() {
         </Card>
 
         {/* Work & Organizational Information */}
-        <Card className="border-border bg-card shadow-xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-3 border-b border-border/40">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Building2 className="w-4 h-4 text-emerald-600" />
@@ -323,7 +323,7 @@ export default function UserProfile() {
         </Card>
 
         {/* Banking & Statutory Details */}
-        <Card className="border-border bg-card shadow-xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-3 border-b border-border/40">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-purple-600" />
@@ -338,7 +338,7 @@ export default function UserProfile() {
                 </span>
                 <div className="flex items-center gap-2 mt-1 text-sm font-mono font-medium text-foreground bg-muted/40 p-2 rounded-md border border-border/40">
                   <Building className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>{profile?.bankAccount || "•••• •••• •••• 4892 (Chase Bank)"}</span>
+                  <span>{profile?.bankAccount || "â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 4892 (Chase Bank)"}</span>
                 </div>
               </div>
 
@@ -366,7 +366,7 @@ export default function UserProfile() {
         </Card>
 
         {/* Account Security & Access Credentials */}
-        <Card className="border-border bg-card shadow-xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-3 border-b border-border/40">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Shield className="w-4 h-4 text-amber-600" />
@@ -387,7 +387,7 @@ export default function UserProfile() {
               <span className="text-xs text-muted-foreground block font-medium">
                 Session Token
               </span>
-              <div className="flex items-center gap-2 mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+              <div className="flex items-center gap-2 mt-1 text-xs text-emerald-600 font-medium">
                 <Key className="w-3.5 h-3.5" />
                 <span>Active JWT Session Authenticated</span>
               </div>
@@ -407,3 +407,4 @@ export default function UserProfile() {
     </div>
   );
 }
+
