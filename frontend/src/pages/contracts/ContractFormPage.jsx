@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -288,7 +288,7 @@ export default function ContractFormPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Card 1: Employee & Position Details */}
-        <Card className="border border-border shadow-xs">
+        <Card className="border border-border shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <User className="w-4 h-4 text-primary" />
@@ -371,7 +371,7 @@ export default function ContractFormPage() {
         </Card>
 
         {/* Card 2: Compensation & Salary Structure */}
-        <Card className="border border-border shadow-xs">
+        <Card className="border border-border shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <DollarSign className="w-4 h-4 text-primary" />
@@ -381,7 +381,7 @@ export default function ContractFormPage() {
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
             {/* Monthly Wage */}
             <FormField
-              label="Monthly Wage (₹ INR)"
+              label="Monthly Wage (â‚¹ INR)"
               required
               error={errors.wage}
               hint="Gross monthly base compensation"
@@ -422,7 +422,7 @@ export default function ContractFormPage() {
         </Card>
 
         {/* Card 3: Contract Schedule & Dates */}
-        <Card className="border border-border shadow-xs">
+        <Card className="border border-border shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
@@ -494,3 +494,4 @@ export default function ContractFormPage() {
     </div>
   );
 }
+

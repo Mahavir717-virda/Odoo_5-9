@@ -13,6 +13,11 @@ const DEFAULT_STATUS_MAP = {
   present: "success",
   validated: "success",
 
+  // Info / Computed (Purple / Lavender)
+  computed: "info",
+  confirmed: "info",
+  processing: "info",
+
   // Warning (Amber)
   pending: "warning",
   late: "warning",
@@ -27,7 +32,7 @@ const DEFAULT_STATUS_MAP = {
   missing: "danger",
   inactive: "danger",
 
-  // Neutral (Gray)
+  // Neutral (Warm Gray/Beige)
   draft: "neutral",
   cancelled: "neutral",
   expired: "neutral",
@@ -35,13 +40,15 @@ const DEFAULT_STATUS_MAP = {
 
 const VARIANT_STYLES = {
   success:
-    "bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
+    "bg-emerald-50 text-emerald-700 border-emerald-200/80",
+  info:
+    "bg-[#f6f2fd] text-[#7743db] border-[#ddcef7]",
   warning:
-    "bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+    "bg-amber-50 text-amber-700 border-amber-200/80",
   danger:
-    "bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800",
+    "bg-rose-50 text-rose-700 border-rose-200/80",
   neutral:
-    "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700",
+    "bg-[#f7efe5] text-slate-700 border-[#eae0d5]",
 };
 
 /**
@@ -82,3 +89,4 @@ export default function StatusBadge({ status, mapOverride, customMap, className 
     </Badge>
   );
 }
+

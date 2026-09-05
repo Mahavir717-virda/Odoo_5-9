@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import {
   Clock,
   Plus,
@@ -251,7 +251,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono">
             {row.check_in
               ? new Date(row.check_in).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-              : "—"}
+              : "â€”"}
           </span>
         ),
       },
@@ -263,7 +263,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono text-muted-foreground">
             {row.check_out
               ? new Date(row.check_out).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-              : "—"}
+              : "â€”"}
           </span>
         ),
       },
@@ -275,7 +275,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono font-medium">
             {row.worked_hours !== null && row.worked_hours !== undefined
               ? `${Number(row.worked_hours).toFixed(1)}h`
-              : "—"}
+              : "â€”"}
           </span>
         ),
       },
@@ -322,7 +322,7 @@ export default function AttendancePage() {
         title="Attendance Management"
         subtitle="Review real-time employee check-ins, worked hours, and manage attendance logs."
         actions={
-          <Button onClick={handleOpenCreateModal} size="sm" className="gap-1.5 shadow-xs">
+          <Button onClick={handleOpenCreateModal} size="sm" className="gap-1.5 shadow-sm">
             <Plus className="w-4 h-4" />
             Record Attendance
           </Button>
@@ -330,7 +330,7 @@ export default function AttendancePage() {
       />
 
       {toastMessage && (
-        <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
+        <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>{toastMessage}</span>
         </div>
@@ -338,49 +338,49 @@ export default function AttendancePage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Total Logs</p>
               <p className="text-2xl font-bold text-foreground mt-0.5">{stats.total}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600">
+            <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600">
               <Clock className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Present Today</p>
               <p className="text-2xl font-bold text-emerald-600 mt-0.5">{stats.present}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
+            <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Late Arrivals</p>
               <p className="text-2xl font-bold text-amber-600 mt-0.5">{stats.late}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600">
+            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600">
               <TrendingUp className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Absences</p>
               <p className="text-2xl font-bold text-rose-600 mt-0.5">{stats.absent}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600">
+            <div className="p-2.5 rounded-lg bg-rose-50 text-rose-600">
               <AlertCircle className="w-5 h-5" />
             </div>
           </CardContent>
@@ -471,7 +471,7 @@ export default function AttendancePage() {
                     <SelectContent>
                       {employees.map((emp) => (
                         <SelectItem key={emp.id} value={String(emp.id)} className="text-xs">
-                          {emp.name || `${emp.firstName} ${emp.lastName}`} • {emp.department}
+                          {emp.name || `${emp.firstName} ${emp.lastName}`} â€¢ {emp.department}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -546,3 +546,4 @@ export default function AttendancePage() {
     </div>
   );
 }
+

@@ -136,11 +136,11 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 pb-12 max-w-6xl mx-auto">
       {/* Welcome & Live Clock-In Hero Banner */}
-      <Card className="border-border bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white shadow-md overflow-hidden relative rounded-2xl">
+      <Card className="border-border bg-gradient-to-r from-[#7743db] via-[#6334b8] to-[#4f2795] text-white shadow-lg shadow-[#7743db]/15 overflow-hidden relative rounded-2xl">
         <div className="absolute right-0 top-0 w-96 h-full bg-white/5 skew-x-12 pointer-events-none" />
         <CardContent className="p-6 relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 text-blue-100 text-xs font-medium mb-1.5">
+            <div className="flex items-center gap-2 text-[#f6f2fd] text-xs font-medium mb-1.5">
               <Sparkles className="w-3.5 h-3.5" />
               <span>{todayFormatted}</span>
               <span className="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-semibold uppercase tracking-wider">
@@ -150,7 +150,7 @@ export default function Dashboard() {
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
               Good day, {user?.name || "Team Member"}!
             </h1>
-            <p className="text-blue-100 text-sm mt-1 max-w-md">
+            <p className="text-[#ede5fb] text-sm mt-1 max-w-md">
               {isEmployeeRole
                 ? "Welcome to your PeoplePay360 self-service workspace. Track your daily hours, leave allowances, and payslips."
                 : "Manage company payroll cycles, time off approvals, employee attendance, and your personal portal."}
@@ -158,7 +158,7 @@ export default function Dashboard() {
           </div>
 
           {/* Live Clock-In / Clock-Out Widget (Available to all logged in users) */}
-          <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto shrink-0 shadow-xs">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto shrink-0 shadow-sm">
             <div>
               <div className="flex items-center gap-2">
                 <span
@@ -170,7 +170,7 @@ export default function Dashboard() {
                       : "bg-rose-400"
                   }`}
                 />
-                <span className="text-xs font-semibold uppercase tracking-wider text-blue-100">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#ede5fb]">
                   {punchState?.isClockedIn
                     ? punchState?.isOnBreak
                       ? "On Break"
@@ -194,7 +194,7 @@ export default function Dashboard() {
                       variant="secondary"
                       disabled={punchLoading}
                       onClick={() => handlePunchAction("end-break")}
-                      className="bg-white text-blue-900 hover:bg-white/90 text-xs gap-1.5 font-semibold"
+                      className="bg-white text-[#4f2795] hover:bg-white/90 text-xs gap-1.5 font-semibold"
                     >
                       <Play className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
                       Resume
@@ -229,7 +229,7 @@ export default function Dashboard() {
                   variant="secondary"
                   disabled={punchLoading}
                   onClick={() => handlePunchAction("clock-in")}
-                  className="bg-white text-blue-900 hover:bg-white/90 text-xs gap-1.5 font-bold shadow-xs"
+                  className="bg-white text-[#4f2795] hover:bg-white/90 text-xs gap-1.5 font-bold shadow-sm"
                 >
                   <Play className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
                   Clock In
@@ -247,25 +247,25 @@ export default function Dashboard() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Operations & Payroll Overview
             </h3>
-            <span className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+            <span className="text-xs text-[#7743db] font-semibold">
               Live Database Synchronization
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link to="/employees" className="block group">
-              <Card className="border-border bg-card shadow-2xs group-hover:border-primary/40 transition">
+              <Card className="border-border bg-card shadow-sm group-hover:border-[#7743db]/40 transition">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">Total Employees</p>
                     <p className="text-2xl font-bold text-foreground mt-1">
                       {managerMetrics.totalEmployees}
                     </p>
-                    <p className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5">
+                    <p className="text-[11px] text-[#7743db] mt-0.5">
                       Active staff roster
                     </p>
                   </div>
-                  <div className="p-3 bg-blue-50 dark:bg-blue-950/40 text-blue-600 rounded-xl">
+                  <div className="p-3 bg-[#f6f2fd] text-[#7743db] rounded-xl">
                     <Users className="w-6 h-6" />
                   </div>
                 </CardContent>
@@ -273,18 +273,18 @@ export default function Dashboard() {
             </Link>
 
             <Link to="/time-off/requests" className="block group">
-              <Card className="border-border bg-card shadow-2xs group-hover:border-primary/40 transition">
+              <Card className="border-border bg-card shadow-sm group-hover:border-[#7743db]/40 transition">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">Pending Leave Requests</p>
                     <p className="text-2xl font-bold text-foreground mt-1">
                       {managerMetrics.pendingLeaves}
                     </p>
-                    <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5">
+                    <p className="text-[11px] text-amber-600 mt-0.5">
                       Requires manager review
                     </p>
                   </div>
-                  <div className="p-3 bg-amber-50 dark:bg-amber-950/40 text-amber-600 rounded-xl">
+                  <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
                     <Calendar className="w-6 h-6" />
                   </div>
                 </CardContent>
@@ -292,18 +292,18 @@ export default function Dashboard() {
             </Link>
 
             <Link to="/payroll/payruns" className="block group">
-              <Card className="border-border bg-card shadow-2xs group-hover:border-primary/40 transition">
+              <Card className="border-border bg-card shadow-sm group-hover:border-[#7743db]/40 transition">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">Payrun Batches</p>
                     <p className="text-2xl font-bold text-foreground mt-1">
                       {managerMetrics.activePayruns}
                     </p>
-                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    <p className="text-[11px] text-emerald-600 mt-0.5">
                       Payroll cycles recorded
                     </p>
                   </div>
-                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 rounded-xl">
+                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
                     <DollarSign className="w-6 h-6" />
                   </div>
                 </CardContent>
@@ -320,25 +320,25 @@ export default function Dashboard() {
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-border bg-card shadow-2xs hover:border-primary/40 transition-colors">
+          <Card className="border-border bg-card shadow-sm hover:border-[#7743db]/40 transition-colors">
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground">My Hours This Month</p>
                 <p className="text-xl font-bold text-foreground mt-1">
                   {stats?.workedHoursThisMonth || "0h 00m"}
                 </p>
-                <div className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                <div className="flex items-center gap-1 text-[11px] text-emerald-600 mt-0.5">
                   <TrendingUp className="w-3 h-3" />
                   <span>On schedule</span>
                 </div>
               </div>
-              <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+              <div className="p-2.5 rounded-lg bg-[#f6f2fd] text-[#7743db]">
                 <Clock className="w-5 h-5" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border bg-card shadow-2xs hover:border-primary/40 transition-colors">
+          <Card className="border-border bg-card shadow-sm hover:border-[#7743db]/40 transition-colors">
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground">My Leave Balance</p>
@@ -348,18 +348,18 @@ export default function Dashboard() {
                 </p>
                 <Link
                   to="/my-time-off"
-                  className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5 mt-0.5 font-medium"
+                  className="text-[11px] text-[#7743db] hover:underline flex items-center gap-0.5 mt-0.5 font-semibold"
                 >
                   Apply Leave <ArrowRight className="w-2.5 h-2.5" />
                 </Link>
               </div>
-              <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+              <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600">
                 <Calendar className="w-5 h-5" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border bg-card shadow-2xs hover:border-primary/40 transition-colors">
+          <Card className="border-border bg-card shadow-sm hover:border-[#7743db]/40 transition-colors">
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Attendance Regularity</p>
@@ -368,13 +368,13 @@ export default function Dashboard() {
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">Target: &gt;95%</p>
               </div>
-              <div className="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400">
+              <div className="p-2.5 rounded-lg bg-[#ede5fb] text-[#7743db]">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border bg-card shadow-2xs hover:border-primary/40 transition-colors">
+          <Card className="border-border bg-card shadow-sm hover:border-[#7743db]/40 transition-colors">
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground">Next Payday</p>
@@ -384,12 +384,12 @@ export default function Dashboard() {
                 </p>
                 <Link
                   to="/my-payslips"
-                  className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5 mt-0.5 font-medium"
+                  className="text-[11px] text-[#7743db] hover:underline flex items-center gap-0.5 mt-0.5 font-semibold"
                 >
                   View My Payslips <ArrowRight className="w-2.5 h-2.5" />
                 </Link>
               </div>
-              <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+              <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600">
                 <DollarSign className="w-5 h-5" />
               </div>
             </CardContent>
@@ -402,7 +402,7 @@ export default function Dashboard() {
         <Button
           size="sm"
           onClick={() => navigate("/my-time-off")}
-          className="text-xs gap-1.5 shadow-2xs"
+          className="text-xs gap-1.5 shadow-sm shadow-[#7743db]/20"
         >
           <Calendar className="w-3.5 h-3.5" />
           Request Time Off
@@ -444,7 +444,7 @@ export default function Dashboard() {
               size="sm"
               variant="outline"
               onClick={() => navigate("/payroll/payruns")}
-              className="text-xs gap-1.5 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-400"
+              className="text-xs gap-1.5 border-[#ddcef7] text-[#7743db] hover:bg-[#f6f2fd]"
             >
               <Layers className="w-3.5 h-3.5" />
               Manage Payruns
@@ -454,7 +454,7 @@ export default function Dashboard() {
               size="sm"
               variant="outline"
               onClick={() => navigate("/time-off/requests")}
-              className="text-xs gap-1.5 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400"
+              className="text-xs gap-1.5 border-amber-200 text-amber-700 hover:bg-amber-50"
             >
               <Check className="w-3.5 h-3.5" />
               Approve Leaves
@@ -467,15 +467,15 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Recent Attendance */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-border bg-card shadow-xs">
+          <Card className="border-border bg-card shadow-sm">
             <CardHeader className="pb-3 border-b border-border/50 flex flex-row items-center justify-between">
               <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-600" />
+                <Clock className="w-4 h-4 text-[#7743db]" />
                 Recent Personal Attendance
               </CardTitle>
               <Link
                 to="/my-attendance"
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                className="text-xs text-[#7743db] hover:underline font-semibold"
               >
                 View full history
               </Link>
@@ -486,7 +486,7 @@ export default function Dashboard() {
                   recentAttendance.map((att) => (
                     <div
                       key={att.id}
-                      className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-muted/30 transition-colors"
+                      className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#f7efe5]/40 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-muted flex flex-col items-center justify-center text-xs font-semibold shrink-0">
@@ -536,7 +536,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Recent Time Off Requests */}
-          <Card className="border-border bg-card shadow-xs">
+          <Card className="border-border bg-card shadow-sm">
             <CardHeader className="pb-3 border-b border-border/50 flex flex-row items-center justify-between">
               <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-emerald-600" />
@@ -544,7 +544,7 @@ export default function Dashboard() {
               </CardTitle>
               <Link
                 to="/my-time-off"
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                className="text-xs text-[#7743db] hover:underline font-semibold"
               >
                 Manage Leaves
               </Link>
@@ -583,7 +583,7 @@ export default function Dashboard() {
 
         {/* Right Column: Upcoming Holidays & Announcements */}
         <div className="space-y-6">
-          <Card className="border-border bg-card shadow-xs">
+          <Card className="border-border bg-card shadow-sm">
             <CardHeader className="pb-3 border-b border-border/50">
               <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
                 <PartyPopper className="w-4 h-4 text-amber-500" />
@@ -593,7 +593,7 @@ export default function Dashboard() {
             <CardContent className="p-4 space-y-3.5">
               {holidays?.map((h, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 flex flex-col items-center justify-center shrink-0 text-xs font-bold">
+                  <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex flex-col items-center justify-center shrink-0 text-xs font-bold">
                     <span className="text-[9px] uppercase">
                       {new Date(h.date).toLocaleDateString("en-US", { month: "short" })}
                     </span>
@@ -609,10 +609,10 @@ export default function Dashboard() {
           </Card>
 
           {/* Quick Info Card */}
-          <Card className="border-border bg-blue-50/50 dark:bg-blue-950/20 border-blue-200/60 dark:border-blue-800 shadow-2xs">
+          <Card className="border-border bg-[#f6f2fd]/60 border-[#ddcef7] shadow-sm">
             <CardContent className="p-4 space-y-2 text-xs">
-              <div className="flex items-center gap-1.5 font-semibold text-blue-900 dark:text-blue-300">
-                <AlertCircle className="w-4 h-4 text-blue-600" />
+              <div className="flex items-center gap-1.5 font-semibold text-[#3e1e75]">
+                <AlertCircle className="w-4 h-4 text-[#7743db]" />
                 <span>Portal Live Sync Notice</span>
               </div>
               <p className="text-muted-foreground leading-relaxed">
@@ -625,3 +625,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

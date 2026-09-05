@@ -11,7 +11,7 @@ export default function AppLayout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex text-gray-900 dark:text-gray-100 font-sans">
+    <div className="min-h-screen bg-[#fffbf5] flex text-[#1e1b24] font-sans">
       {/* Desktop Sidebar (hidden on mobile) */}
       <div className="hidden md:block shrink-0">
         <Sidebar
@@ -30,19 +30,20 @@ export default function AppLayout() {
               animate={{ opacity: 0.5 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 bg-black z-40 md:hidden"
+              className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-xs"
             />
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 250 }}
-              className="fixed top-0 left-0 bottom-0 z-50 md:hidden bg-white dark:bg-gray-900 shadow-xl"
+              className="fixed top-0 left-0 bottom-0 z-50 md:hidden shadow-2xl"
+              style={{ backgroundColor: "#120e1c" }}
             >
               <div className="relative h-full">
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="absolute top-4 right-4 p-1 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 z-10"
+                  className="absolute top-4 right-4 p-1 rounded-md text-[#c3acd0] hover:bg-[#231c34] z-10"
                 >
                   <X className="w-5 h-5" />
                 </button>

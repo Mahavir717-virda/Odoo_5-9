@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import {
   Building2,
   DollarSign,
@@ -48,14 +48,14 @@ export default function SystemSettingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               System Settings
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
               Enterprise Configuration
             </span>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Global company profile, localization parameters, payroll automation, and security policies.
           </p>
         </div>
@@ -63,7 +63,7 @@ export default function SystemSettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 dark:shadow-none transition disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
           {saving ? "Saving Changes..." : "Save Settings"}
@@ -72,20 +72,20 @@ export default function SystemSettingsPage() {
 
       {/* Success Notification */}
       {savedSuccess && (
-        <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-3 text-emerald-700 dark:text-emerald-400 text-sm">
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-3 text-emerald-700 text-sm">
           <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
           <span>System configuration parameters updated and applied successfully.</span>
         </div>
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
         <button
           onClick={() => setActiveTab("company")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === "company"
-              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200 dark:shadow-none"
-              : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+              ? "bg-[#7743db] text-white shadow-sm shadow-indigo-200"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
           <Building2 className="w-4 h-4" />
@@ -96,8 +96,8 @@ export default function SystemSettingsPage() {
           onClick={() => setActiveTab("payroll")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === "payroll"
-              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200 dark:shadow-none"
-              : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+              ? "bg-[#7743db] text-white shadow-sm shadow-indigo-200"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
           <DollarSign className="w-4 h-4" />
@@ -108,8 +108,8 @@ export default function SystemSettingsPage() {
           onClick={() => setActiveTab("security")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === "security"
-              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200 dark:shadow-none"
-              : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+              ? "bg-[#7743db] text-white shadow-sm shadow-indigo-200"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
           <Shield className="w-4 h-4" />
@@ -120,8 +120,8 @@ export default function SystemSettingsPage() {
           onClick={() => setActiveTab("notifications")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === "notifications"
-              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200 dark:shadow-none"
-              : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+              ? "bg-[#7743db] text-white shadow-sm shadow-indigo-200"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
           <Bell className="w-4 h-4" />
@@ -132,9 +132,9 @@ export default function SystemSettingsPage() {
       <form onSubmit={handleSave}>
         {/* TAB 1: Company Profile & Localization */}
         {activeTab === "company" && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm p-6 space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base font-bold text-slate-900">
                 Company Information & Branding
               </h3>
               <p className="text-xs text-slate-500">
@@ -144,7 +144,7 @@ export default function SystemSettingsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Operating Brand Name
                 </label>
                 <input
@@ -156,12 +156,12 @@ export default function SystemSettingsPage() {
                       company: { ...settings.company, name: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Legal Entity Name
                 </label>
                 <input
@@ -173,12 +173,12 @@ export default function SystemSettingsPage() {
                       company: { ...settings.company, legalName: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Tax Registration ID / EIN
                 </label>
                 <input
@@ -190,12 +190,12 @@ export default function SystemSettingsPage() {
                       company: { ...settings.company, taxId: e.target.value },
                     })
                   }
-                  className="w-full font-mono px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full font-mono px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Official Support Email
                 </label>
                 <input
@@ -207,12 +207,12 @@ export default function SystemSettingsPage() {
                       company: { ...settings.company, email: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Headquarters Physical Address
                 </label>
                 <input
@@ -224,19 +224,19 @@ export default function SystemSettingsPage() {
                       company: { ...settings.company, address: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
             </div>
 
-            <div className="border-t border-slate-100 dark:border-slate-700 pt-6">
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-3">
+            <div className="border-t border-slate-100 pt-6">
+              <h4 className="text-sm font-bold text-slate-900 mb-3">
                 Localization & Regional Standards
               </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Currency Symbol
                   </label>
                   <select
@@ -247,17 +247,17 @@ export default function SystemSettingsPage() {
                         company: { ...settings.company, currency: e.target.value },
                       })
                     }
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                   >
                     <option value="USD">USD ($ - US Dollar)</option>
-                    <option value="EUR">EUR (€ - Euro)</option>
-                    <option value="GBP">GBP (£ - British Pound)</option>
-                    <option value="INR">INR (₹ - Indian Rupee)</option>
+                    <option value="EUR">EUR (â‚¬ - Euro)</option>
+                    <option value="GBP">GBP (Â£ - British Pound)</option>
+                    <option value="INR">INR (â‚¹ - Indian Rupee)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Default Timezone
                   </label>
                   <input
@@ -269,12 +269,12 @@ export default function SystemSettingsPage() {
                         company: { ...settings.company, timezone: e.target.value },
                       })
                     }
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Fiscal Year Start Month
                   </label>
                   <select
@@ -285,7 +285,7 @@ export default function SystemSettingsPage() {
                         company: { ...settings.company, fiscalYearStart: e.target.value },
                       })
                     }
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                   >
                     <option value="January">January</option>
                     <option value="April">April</option>
@@ -300,9 +300,9 @@ export default function SystemSettingsPage() {
 
         {/* TAB 2: Payroll & Shift Parameters */}
         {activeTab === "payroll" && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm p-6 space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base font-bold text-slate-900">
                 Payroll Cycle & Time Tracking Parameters
               </h3>
               <p className="text-xs text-slate-500">
@@ -312,7 +312,7 @@ export default function SystemSettingsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Standard Work Hours / Day
                 </label>
                 <input
@@ -326,12 +326,12 @@ export default function SystemSettingsPage() {
                       payroll: { ...settings.payroll, workHoursPerDay: parseInt(e.target.value, 10) },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Work Days / Week
                 </label>
                 <input
@@ -345,12 +345,12 @@ export default function SystemSettingsPage() {
                       payroll: { ...settings.payroll, workDaysPerWeek: parseInt(e.target.value, 10) },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Monthly Payrun Cutoff Day of Month
                 </label>
                 <input
@@ -364,12 +364,12 @@ export default function SystemSettingsPage() {
                       payroll: { ...settings.payroll, cutoffDayOfMonth: parseInt(e.target.value, 10) },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Overtime Rate Multiplier (x Base Rate)
                 </label>
                 <input
@@ -387,12 +387,12 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-700">
+            <div className="pt-4 border-t border-slate-100">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -403,9 +403,9 @@ export default function SystemSettingsPage() {
                       payroll: { ...settings.payroll, autoCalculateTax: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
                 />
-                <span className="text-xs font-semibold text-slate-900 dark:text-white">
+                <span className="text-xs font-semibold text-slate-900">
                   Automatically calculate tax withholdings and deductions during payrun computation
                 </span>
               </label>
@@ -415,9 +415,9 @@ export default function SystemSettingsPage() {
 
         {/* TAB 3: Security & Session Policies */}
         {activeTab === "security" && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm p-6 space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base font-bold text-slate-900">
                 Authentication & Account Security
               </h3>
               <p className="text-xs text-slate-500">
@@ -427,7 +427,7 @@ export default function SystemSettingsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   JWT Session Lifetime (Hours)
                 </label>
                 <input
@@ -444,12 +444,12 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Minimum Password Length
                 </label>
                 <input
@@ -466,12 +466,12 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
                 />
               </div>
             </div>
 
-            <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+            <div className="space-y-3 pt-4 border-t border-slate-100">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -482,9 +482,9 @@ export default function SystemSettingsPage() {
                       security: { ...settings.security, requireSpecialChars: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
                 />
-                <span className="text-xs font-semibold text-slate-900 dark:text-white">
+                <span className="text-xs font-semibold text-slate-900">
                   Require special characters & numbers in user passwords
                 </span>
               </label>
@@ -499,9 +499,9 @@ export default function SystemSettingsPage() {
                       security: { ...settings.security, mfaEnabled: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
                 />
-                <span className="text-xs font-semibold text-slate-900 dark:text-white">
+                <span className="text-xs font-semibold text-slate-900">
                   Enable Multi-Factor Authentication (MFA / 2FA) requirement for administrative roles
                 </span>
               </label>
@@ -511,9 +511,9 @@ export default function SystemSettingsPage() {
 
         {/* TAB 4: Notifications & Automated Alerts */}
         {activeTab === "notifications" && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm p-6 space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base font-bold text-slate-900">
                 Email Dispatch & Automated Notifications
               </h3>
               <p className="text-xs text-slate-500">
@@ -522,9 +522,9 @@ export default function SystemSettingsPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">
+                  <p className="text-xs font-bold text-slate-900">
                     Email Payslip on Payrun Completion
                   </p>
                   <p className="text-xs text-slate-500">
@@ -543,13 +543,13 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
                 />
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">
+                  <p className="text-xs font-bold text-slate-900">
                     Instant Leave Request Alerts
                   </p>
                   <p className="text-xs text-slate-500">
@@ -568,13 +568,13 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
                 />
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">
+                  <p className="text-xs font-bold text-slate-900">
                     Attendance Anomaly Notifications
                   </p>
                   <p className="text-xs text-slate-500">
@@ -593,7 +593,7 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
                 />
               </div>
             </div>
@@ -603,3 +603,4 @@ export default function SystemSettingsPage() {
     </div>
   );
 }
+

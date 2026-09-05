@@ -192,11 +192,11 @@ export default function DataTable({
         </div>
       )}
 
-      {/* Table Container with sticky header & rounded border */}
-      <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+      {/* Table Container */}
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="overflow-auto max-h-[650px] relative">
           <Table className="w-full">
-            <TableHeader className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-border shadow-xs">
+            <TableHeader className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
               <TableRow className="hover:bg-transparent">
                 {columns.map((col) => {
                   const isSortable = Boolean(col.sortable);
@@ -207,8 +207,8 @@ export default function DataTable({
                       key={col.key}
                       style={{ width: col.width }}
                       className={cn(
-                        "font-semibold text-xs uppercase tracking-wider text-muted-foreground select-none py-3 px-4 bg-white dark:bg-gray-800",
-                        isSortable && "cursor-pointer hover:text-foreground transition-colors"
+                        "font-semibold text-[11px] uppercase tracking-wider text-slate-700 select-none py-3 px-4 bg-[#f7efe5]/70 border-b border-[#eae0d5]",
+                        isSortable && "cursor-pointer hover:text-[#7743db] transition-colors"
                       )}
                       onClick={() => isSortable && handleSort(col.key)}
                     >
@@ -217,9 +217,9 @@ export default function DataTable({
                         {isSortable && (
                           <span className="inline-flex shrink-0">
                             {isSorted && sortConfig.direction === "asc" ? (
-                              <ArrowUp className="w-3.5 h-3.5 text-primary" />
+                              <ArrowUp className="w-3.5 h-3.5 text-[#7743db]" />
                             ) : isSorted && sortConfig.direction === "desc" ? (
-                              <ArrowDown className="w-3.5 h-3.5 text-primary" />
+                              <ArrowDown className="w-3.5 h-3.5 text-[#7743db]" />
                             ) : (
                               <ArrowUpDown className="w-3.5 h-3.5 opacity-40 hover:opacity-100 transition-opacity" />
                             )}
@@ -266,7 +266,7 @@ export default function DataTable({
                           variant="outline"
                           size="sm"
                           onClick={onRetry}
-                          className="mt-2 text-xs flex items-center gap-1.5"
+                          className="mt-2 text-xs flex items-center gap-1.5 border-[#eae0d5] hover:bg-[#f7efe5]"
                         >
                           <RefreshCw className="w-3.5 h-3.5" />
                           Retry
@@ -306,14 +306,14 @@ export default function DataTable({
                     key={row.id}
                     onClick={() => onRowClick && onRowClick(row)}
                     className={cn(
-                      "transition-colors border-b border-border/50",
-                      onRowClick && "cursor-pointer hover:bg-muted/50"
+                      "transition-colors border-b border-[#eae0d5]/60 last:border-0",
+                      onRowClick && "cursor-pointer hover:bg-[#f7efe5]/50"
                     )}
                   >
                     {columns.map((col) => (
                       <TableCell
                         key={`${row.id}-${col.key}`}
-                        className="py-3.5 px-4 text-sm align-middle"
+                        className="py-3 px-4 text-sm text-[#1e1b24] align-middle"
                       >
                         {col.render ? col.render(row) : row[col.key] ?? "—"}
                       </TableCell>
@@ -326,18 +326,18 @@ export default function DataTable({
 
         {/* Pagination Footer */}
         {!loading && !error && sortedData.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-border bg-card text-xs text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-[#eae0d5] bg-[#f7efe5]/50 text-xs text-slate-500">
             <div>
-              Showing <span className="font-medium text-foreground">{startRecord}</span> to{" "}
-              <span className="font-medium text-foreground">{endRecord}</span> of{" "}
-              <span className="font-medium text-foreground">{sortedData.length}</span> records
+              Showing <span className="font-semibold text-[#1e1b24]">{startRecord}</span> to{" "}
+              <span className="font-semibold text-[#1e1b24]">{endRecord}</span> of{" "}
+              <span className="font-semibold text-[#1e1b24]">{sortedData.length}</span> records
             </div>
 
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 px-2.5 text-xs"
+                className="h-8 px-2.5 text-xs border-[#eae0d5] bg-white hover:bg-[#f7efe5]"
                 disabled={currentPage <= 1}
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               >
@@ -352,7 +352,7 @@ export default function DataTable({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 px-2.5 text-xs"
+                className="h-8 px-2.5 text-xs border-[#eae0d5] bg-white hover:bg-[#f7efe5]"
                 disabled={currentPage >= totalPages}
                 onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               >
