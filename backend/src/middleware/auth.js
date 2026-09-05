@@ -1,12 +1,12 @@
-const jwt = require("jsonwebtoken");
-const pool = require("../db");
+import jwt from "jsonwebtoken";
+import pool from "../db.js";
 
 /**
  * Authentication Middleware
  * Reads 'Authorization: Bearer <token>', verifies JWT,
  * and attaches user record to req.user
  */
-const authenticate = async (req, res, next) => {
+export const authenticate = async (req, res, next) => {
   const authHeader = req.headers["authorization"] || req.headers["Authorization"];
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -26,11 +26,12 @@ const authenticate = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET;
+    const decoded = jwt.verify(token, secret);
 
     const userResult = await pool.query(
       "SELECT id, email, role, created_at, updated_at FROM users WHERE id = $1 LIMIT 1",
-      [decoded.userId]
+      [decoded.userId || decoded.id]
     );
 
     if (userResult.rows.length === 0) {
@@ -54,7 +55,7 @@ const authenticate = async (req, res, next) => {
  * Role-Based Access Control Middleware Factory
  * Checks if req.user has one of the allowed roles
  */
-const requireRole = (...allowedRoles) => {
+export const requireRole = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
@@ -74,7 +75,7 @@ const requireRole = (...allowedRoles) => {
   };
 };
 
-module.exports = {
+export default {
   authenticate,
   requireRole,
 };

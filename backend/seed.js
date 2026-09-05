@@ -1,7 +1,11 @@
-const fs = require("fs");
-const path = require("path");
-const bcrypt = require("bcrypt");
-const pool = require("./src/db");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import bcrypt from "bcrypt";
+import pool from "./src/db.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function seed() {
   console.log("🌱 Starting PeoplePay360 Database Setup & Seeding...");

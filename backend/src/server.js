@@ -1,8 +1,10 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const v1Routes = require("./routes");
-const errorHandler = require("./middleware/error.middleware");
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import cors from "cors";
+import v1Routes from "./routes/index.js";
+import errorHandler from "./middleware/error.middleware.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,4 +25,5 @@ app.listen(PORT, () => {
   console.log(`🚀 PeoplePay360 Server running on port ${PORT}`);
 });
 
-module.exports = app;
+export default app;
+export { app };
