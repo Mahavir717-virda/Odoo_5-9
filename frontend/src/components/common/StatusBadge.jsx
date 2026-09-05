@@ -30,6 +30,7 @@ const DEFAULT_STATUS_MAP = {
   // Neutral (Gray)
   draft: "neutral",
   cancelled: "neutral",
+  expired: "neutral",
 };
 
 const VARIANT_STYLES = {

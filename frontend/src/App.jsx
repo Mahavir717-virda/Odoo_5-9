@@ -20,6 +20,7 @@ import EmployeeFormPage from "./pages/employees/EmployeeFormPage";
 import EmployeeDetailsPage from "./pages/employees/EmployeeDetailsPage";
 
 import ContractsPage from "./pages/contracts/ContractsPage";
+import ContractDetailsPage from "./pages/contracts/ContractDetailsPage";
 import SchedulesPage from "./pages/schedules/SchedulesPage";
 import AttendancePage from "./pages/attendance/AttendancePage";
 
@@ -111,6 +112,14 @@ function App() {
               element={
                 <ProtectedRoute requiredPermission={PERMISSIONS.CONTRACT.VIEW}>
                   <ContractsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/contracts/:id"
+              element={
+                <ProtectedRoute requiredPermission={PERMISSIONS.CONTRACT.VIEW}>
+                  <ContractDetailsPage />
                 </ProtectedRoute>
               }
             />
