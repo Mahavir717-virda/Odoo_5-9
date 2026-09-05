@@ -8,19 +8,19 @@ import timeOffRoutes from "./timeOff.js";
 
 const router = express.Router();
 
-// Health routes (/api/v1/health, /api/v1/health/db)
+// Health routes
 router.use("/", healthRoutes);
 
-// Auth routes (/api/v1/auth/login, /api/v1/auth/me, /api/v1/auth/*-test)
+// Auth routes
 router.use("/auth", authRoutes);
 
-// Employee routes (/api/v1/employees)
+// Employee routes
 router.use("/employees", employeeRoutes);
 
-// Contract routes (/api/v1/contracts)
+// Contract routes
 router.use("/contracts", contractRoutes);
 
-// Attendance routes (/api/v1/attendance)
+// Attendance routes
 router.use("/attendance", attendanceRoutes);
 
 // Time Off routes (/api/v1/time-off)
