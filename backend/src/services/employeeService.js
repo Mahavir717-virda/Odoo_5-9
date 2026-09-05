@@ -1,6 +1,6 @@
-const crypto = require("crypto");
-const bcrypt = require("bcrypt");
-const pool = require("../db");
+import crypto from "crypto";
+import bcrypt from "bcrypt";
+import pool from "../db.js";
 
 const VALID_EMPLOYEE_TYPES = ["full_time", "part_time", "contract", "intern"];
 const VALID_STATUSES = ["active", "inactive", "terminated"];
@@ -251,19 +251,26 @@ const createEmployee = async (data) => {
 
   // Validate employee type & status
   if (!VALID_EMPLOYEE_TYPES.includes(employee_type)) {
-    const err = new Error(`Invalid employee type. Allowed: ${VALID_EMPLOYEE_TYPES.join(", ")}`);
+    const err = new Error(
+      `Invalid employee type. Allowed: ${VALID_EMPLOYEE_TYPES.join(", ")}`,
+    );
     err.statusCode = 400;
     throw err;
   }
 
   if (!VALID_STATUSES.includes(status)) {
-    const err = new Error(`Invalid status. Allowed: ${VALID_STATUSES.join(", ")}`);
+    const err = new Error(
+      `Invalid status. Allowed: ${VALID_STATUSES.join(", ")}`,
+    );
     err.statusCode = 400;
     throw err;
   }
 
   // Validate working schedule exists
-  const schedRes = await pool.query("SELECT id FROM working_schedules WHERE id = $1", [schedule_id]);
+  const schedRes = await pool.query(
+    "SELECT id FROM working_schedules WHERE id = $1",
+    [schedule_id],
+  );
   if (schedRes.rows.length === 0) {
     const err = new Error("Working schedule not found");
     err.statusCode = 400;
@@ -272,7 +279,9 @@ const createEmployee = async (data) => {
 
   // Validate manager if provided
   if (manager_id) {
-    const mgrRes = await pool.query("SELECT id FROM employees WHERE id = $1", [manager_id]);
+    const mgrRes = await pool.query("SELECT id FROM employees WHERE id = $1", [
+      manager_id,
+    ]);
     if (mgrRes.rows.length === 0) {
       const err = new Error("Manager employee record not found");
       err.statusCode = 400;
@@ -286,7 +295,10 @@ const createEmployee = async (data) => {
     await client.query("BEGIN");
 
     // Check if email already has an employee record
-    const existingEmp = await client.query("SELECT id FROM employees WHERE email = $1", [normalizedEmail]);
+    const existingEmp = await client.query(
+      "SELECT id FROM employees WHERE email = $1",
+      [normalizedEmail],
+    );
     if (existingEmp.rows.length > 0) {
       const err = new Error("Email is already in use by another employee");
       err.statusCode = 409;
@@ -295,21 +307,31 @@ const createEmployee = async (data) => {
 
     // Check if user already exists
     let userId = null;
-    const userRes = await client.query("SELECT id, role FROM users WHERE email = $1", [normalizedEmail]);
+    const userRes = await client.query(
+      "SELECT id, role FROM users WHERE email = $1",
+      [normalizedEmail],
+    );
 
     if (userRes.rows.length > 0) {
       const existingUser = userRes.rows[0];
 
       // Check if user is already linked to another employee
-      const empWithUser = await client.query("SELECT id FROM employees WHERE user_id = $1", [existingUser.id]);
+      const empWithUser = await client.query(
+        "SELECT id FROM employees WHERE user_id = $1",
+        [existingUser.id],
+      );
       if (empWithUser.rows.length > 0) {
-        const err = new Error("A user account with this email is already linked to an employee");
+        const err = new Error(
+          "A user account with this email is already linked to an employee",
+        );
         err.statusCode = 409;
         throw err;
       }
 
       if (existingUser.role !== "employee") {
-        const err = new Error("Existing user has a non-employee role and cannot be linked automatically");
+        const err = new Error(
+          "Existing user has a non-employee role and cannot be linked automatically",
+        );
         err.statusCode = 409;
         throw err;
       }
@@ -324,7 +346,7 @@ const createEmployee = async (data) => {
         `INSERT INTO users (email, password, role)
          VALUES ($1, $2, 'employee')
          RETURNING id`,
-        [normalizedEmail, hashedPassword]
+        [normalizedEmail, hashedPassword],
       );
       userId = newUserRes.rows[0].id;
     }
@@ -394,7 +416,9 @@ const updateEmployee = async (id, data) => {
     status,
   } = data;
 
-  const currentEmp = await pool.query("SELECT * FROM employees WHERE id = $1", [id]);
+  const currentEmp = await pool.query("SELECT * FROM employees WHERE id = $1", [
+    id,
+  ]);
   if (currentEmp.rows.length === 0) {
     const err = new Error("Employee not found");
     err.statusCode = 404;
@@ -403,19 +427,26 @@ const updateEmployee = async (id, data) => {
   const existing = currentEmp.rows[0];
 
   if (employee_type && !VALID_EMPLOYEE_TYPES.includes(employee_type)) {
-    const err = new Error(`Invalid employee type. Allowed: ${VALID_EMPLOYEE_TYPES.join(", ")}`);
+    const err = new Error(
+      `Invalid employee type. Allowed: ${VALID_EMPLOYEE_TYPES.join(", ")}`,
+    );
     err.statusCode = 400;
     throw err;
   }
 
   if (status && !VALID_STATUSES.includes(status)) {
-    const err = new Error(`Invalid status. Allowed: ${VALID_STATUSES.join(", ")}`);
+    const err = new Error(
+      `Invalid status. Allowed: ${VALID_STATUSES.join(", ")}`,
+    );
     err.statusCode = 400;
     throw err;
   }
 
   if (schedule_id) {
-    const schedRes = await pool.query("SELECT id FROM working_schedules WHERE id = $1", [schedule_id]);
+    const schedRes = await pool.query(
+      "SELECT id FROM working_schedules WHERE id = $1",
+      [schedule_id],
+    );
     if (schedRes.rows.length === 0) {
       const err = new Error("Working schedule not found");
       err.statusCode = 400;
@@ -429,7 +460,9 @@ const updateEmployee = async (id, data) => {
       err.statusCode = 400;
       throw err;
     }
-    const mgrRes = await pool.query("SELECT id FROM employees WHERE id = $1", [manager_id]);
+    const mgrRes = await pool.query("SELECT id FROM employees WHERE id = $1", [
+      manager_id,
+    ]);
     if (mgrRes.rows.length === 0) {
       const err = new Error("Manager employee record not found");
       err.statusCode = 400;
@@ -447,7 +480,7 @@ const updateEmployee = async (id, data) => {
     if (email && normalizedEmail !== existing.email) {
       const conflictEmp = await client.query(
         "SELECT id FROM employees WHERE email = $1 AND id != $2",
-        [normalizedEmail, id]
+        [normalizedEmail, id],
       );
       if (conflictEmp.rows.length > 0) {
         const err = new Error("Email is already in use by another employee");
@@ -458,29 +491,37 @@ const updateEmployee = async (id, data) => {
       if (existing.user_id) {
         const conflictUser = await client.query(
           "SELECT id FROM users WHERE email = $1 AND id != $2",
-          [normalizedEmail, existing.user_id]
+          [normalizedEmail, existing.user_id],
         );
         if (conflictUser.rows.length > 0) {
-          const err = new Error("Email is already in use by another user account");
+          const err = new Error(
+            "Email is already in use by another user account",
+          );
           err.statusCode = 409;
           throw err;
         }
 
         await client.query(
           "UPDATE users SET email = $1, updated_at = NOW() WHERE id = $2",
-          [normalizedEmail, existing.user_id]
+          [normalizedEmail, existing.user_id],
         );
       }
     }
 
     const updatedName = name !== undefined ? name.trim() : existing.name;
     const updatedPhone = phone !== undefined ? phone : existing.phone;
-    const updatedDepartment = department !== undefined ? department.trim() : existing.department;
-    const updatedManagerId = manager_id !== undefined ? manager_id : existing.manager_id;
-    const updatedJobPosition = job_position !== undefined ? job_position.trim() : existing.job_position;
-    const updatedEmployeeType = employee_type !== undefined ? employee_type : existing.employee_type;
-    const updatedScheduleId = schedule_id !== undefined ? schedule_id : existing.schedule_id;
-    const updatedJoiningDate = joining_date !== undefined ? joining_date : existing.joining_date;
+    const updatedDepartment =
+      department !== undefined ? department.trim() : existing.department;
+    const updatedManagerId =
+      manager_id !== undefined ? manager_id : existing.manager_id;
+    const updatedJobPosition =
+      job_position !== undefined ? job_position.trim() : existing.job_position;
+    const updatedEmployeeType =
+      employee_type !== undefined ? employee_type : existing.employee_type;
+    const updatedScheduleId =
+      schedule_id !== undefined ? schedule_id : existing.schedule_id;
+    const updatedJoiningDate =
+      joining_date !== undefined ? joining_date : existing.joining_date;
     const updatedStatus = status !== undefined ? status : existing.status;
 
     const updateQuery = `
@@ -536,7 +577,7 @@ const updateEmployee = async (id, data) => {
 const deactivateEmployee = async (id) => {
   const result = await pool.query(
     "UPDATE employees SET status = 'inactive', updated_at = NOW() WHERE id = $1 RETURNING id",
-    [id]
+    [id],
   );
 
   if (result.rows.length === 0) {
@@ -554,7 +595,7 @@ const deactivateEmployee = async (id) => {
 const reactivateEmployee = async (id) => {
   const result = await pool.query(
     "UPDATE employees SET status = 'active', updated_at = NOW() WHERE id = $1 RETURNING id",
-    [id]
+    [id],
   );
 
   if (result.rows.length === 0) {
@@ -566,7 +607,17 @@ const reactivateEmployee = async (id) => {
   return true;
 };
 
-module.exports = {
+export {
+  listEmployees,
+  getEmployeeById,
+  getMyEmployeeProfile,
+  createEmployee,
+  updateEmployee,
+  deactivateEmployee,
+  reactivateEmployee,
+};
+
+export default {
   listEmployees,
   getEmployeeById,
   getMyEmployeeProfile,
