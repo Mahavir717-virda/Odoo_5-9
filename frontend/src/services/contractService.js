@@ -218,7 +218,7 @@ export const getContractsByEmployeeId = async (employeeId) => {
   try {
     const response = await api.get(`/employees/${cleanId}/contracts`);
     const rows = response.data?.data?.contracts || (Array.isArray(response.data?.data) ? response.data.data : []);
-    if (rows && rows.length > 0) {
+    if (Array.isArray(rows)) {
       const mapped = rows.map((c) => ({
         id: String(c.id),
         contractId: `CON-${String(c.id).padStart(4, "0")}`,

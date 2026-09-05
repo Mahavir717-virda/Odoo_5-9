@@ -10,6 +10,7 @@ import payrunRoutes from "./payruns.routes.js";
 import payslipRoutes from "./payslips.routes.js";
 import timeOffRoutes from "./timeOff.routes.js";
 import reportRoutes from "./reports.routes.js";
+import workingScheduleRoutes from "./workingSchedules.routes.js";
 
 const router = express.Router();
 
@@ -21,6 +22,9 @@ router.use("/auth", authRoutes);
 
 // Employee routes
 router.use("/employees", employeeRoutes);
+
+// Working Schedule routes (/api/v1/working-schedules)
+router.use("/working-schedules", workingScheduleRoutes);
 
 // Contract routes
 router.use("/contracts", contractRoutes);
