@@ -12,9 +12,9 @@ const parseId = (id) => {
   return parsed;
 };
 
-const VIEW_ROLES = ["admin", "hr_manager", "hr_payroll_manager"];
-const MANAGE_ROLES = ["admin", "hr_manager", "hr_payroll_manager"];
-const CALC_ROLES = ["admin", "hr_payroll_manager"];
+const VIEW_ROLES = ["admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"];
+const MANAGE_ROLES = ["admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"];
+const CALC_ROLES = ["admin", "hr_payroll_manager", "hr_payroll_user"];
 
 /**
  * GET /api/v1/payruns/:payrunId/payslips

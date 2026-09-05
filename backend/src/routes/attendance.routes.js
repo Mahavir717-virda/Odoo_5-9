@@ -39,25 +39,37 @@ const getAuthenticatedEmployeeId = async (user) => {
     }
   }
 
-  // 3. Auto-provision employee profile for system user if none exists
+  // 3. Ensure a working schedule exists
+  let scheduleId = 1;
+  const schedRes = await pool.query("SELECT id FROM working_schedules ORDER BY id ASC LIMIT 1");
+  if (schedRes.rows.length > 0) {
+    scheduleId = schedRes.rows[0].id;
+  } else {
+    const newSched = await pool.query(
+      "INSERT INTO working_schedules (name, lines) VALUES ('Standard 40h (Mon-Fri)', '[]'::jsonb) RETURNING id"
+    );
+    scheduleId = newSched.rows[0].id;
+  }
+
+  // 4. Auto-provision employee profile for system user if none exists
   const displayName = email ? email.split("@")[0] : `User-${userId}`;
   const empEmail = email || `user-${userId}@system.local`;
-  const department = role === "admin" || role === "hr_manager" ? "Management" : "General";
-  const jobPosition = role ? role.replace(/_/g, " ").toUpperCase() : "Staff";
+  const department = role === "admin" || role === "hr_manager" ? "Management" : (role?.includes("payroll") ? "Payroll" : "Engineering");
+  const jobPosition = role ? role.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Staff";
 
   const insertRes = await pool.query(
     `INSERT INTO employees (user_id, name, email, department, job_position, employee_type, schedule_id, joining_date, status)
-     VALUES ($1, $2, $3, $4, $5, 'full_time', 1, NOW(), 'active')
+     VALUES ($1, $2, $3, $4, $5, 'full_time', $6, CURRENT_DATE, 'active')
+     ON CONFLICT (email) DO UPDATE SET user_id = EXCLUDED.user_id, status = 'active'
      RETURNING id`,
-    [userId, displayName, empEmail, department, jobPosition]
+    [userId, displayName, empEmail, department, jobPosition, scheduleId]
   );
   return insertRes.rows[0].id;
 };
 
 /**
  * GET /api/v1/attendance/me
- * Allowed: Any authenticated user with an employee record
- * NOTE: Registered before /:id to prevent route collision
+ * Allowed: Any authenticated user
  */
 router.get("/me", authenticate, async (req, res, next) => {
   try {
@@ -92,43 +104,28 @@ router.get("/me", authenticate, async (req, res, next) => {
 
 /**
  * POST /api/v1/attendance/check-in
- * Allowed: employee, admin, hr_manager, hr_payroll_manager
- * NOTE: Registered before /:id
+ * Allowed: any authenticated user
  */
 router.post("/check-in", authenticate, async (req, res, next) => {
   try {
-    let targetEmployeeId;
+    let targetEmployeeId = null;
 
-    if (req.user.role === "employee") {
-      targetEmployeeId = await getAuthenticatedEmployeeId(req.user);
-      if (!targetEmployeeId) {
-        return res.status(404).json({
-          success: false,
-          message: "Employee profile not found",
-        });
-      }
-    } else {
-      // Admin / HR Manager / Payroll Manager can check-in on behalf of an employee or themselves
-      if (req.body.employee_id) {
-        targetEmployeeId = parseId(req.body.employee_id);
-        if (!targetEmployeeId) {
-          return res.status(400).json({
-            success: false,
-            message: "Invalid employee ID",
-          });
-        }
-      } else {
-        targetEmployeeId = await getAuthenticatedEmployeeId(req.user);
-        if (!targetEmployeeId) {
-          return res.status(400).json({
-            success: false,
-            message: "employee_id is required",
-          });
-        }
-      }
+    if (req.body && req.body.employee_id && (req.user.role === "admin" || req.user.role === "hr_manager" || req.user.role === "hr_payroll_manager")) {
+      targetEmployeeId = parseId(req.body.employee_id);
     }
 
-    const attendance = await attendanceService.checkIn(targetEmployeeId, req.body.date);
+    if (!targetEmployeeId) {
+      targetEmployeeId = await getAuthenticatedEmployeeId(req.user);
+    }
+
+    if (!targetEmployeeId) {
+      return res.status(400).json({
+        success: false,
+        message: "Could not identify employee profile for attendance",
+      });
+    }
+
+    const attendance = await attendanceService.checkIn(targetEmployeeId, req.body?.date);
 
     return res.status(200).json({
       success: true,
@@ -142,42 +139,28 @@ router.post("/check-in", authenticate, async (req, res, next) => {
 
 /**
  * POST /api/v1/attendance/check-out
- * Allowed: employee, admin, hr_manager, hr_payroll_manager
- * NOTE: Registered before /:id
+ * Allowed: any authenticated user
  */
 router.post("/check-out", authenticate, async (req, res, next) => {
   try {
-    let targetEmployeeId;
+    let targetEmployeeId = null;
 
-    if (req.user.role === "employee") {
-      targetEmployeeId = await getAuthenticatedEmployeeId(req.user);
-      if (!targetEmployeeId) {
-        return res.status(404).json({
-          success: false,
-          message: "Employee profile not found",
-        });
-      }
-    } else {
-      if (req.body.employee_id) {
-        targetEmployeeId = parseId(req.body.employee_id);
-        if (!targetEmployeeId) {
-          return res.status(400).json({
-            success: false,
-            message: "Invalid employee ID",
-          });
-        }
-      } else {
-        targetEmployeeId = await getAuthenticatedEmployeeId(req.user);
-        if (!targetEmployeeId) {
-          return res.status(400).json({
-            success: false,
-            message: "employee_id is required",
-          });
-        }
-      }
+    if (req.body && req.body.employee_id && (req.user.role === "admin" || req.user.role === "hr_manager" || req.user.role === "hr_payroll_manager")) {
+      targetEmployeeId = parseId(req.body.employee_id);
     }
 
-    const attendance = await attendanceService.checkOut(targetEmployeeId, req.body.date);
+    if (!targetEmployeeId) {
+      targetEmployeeId = await getAuthenticatedEmployeeId(req.user);
+    }
+
+    if (!targetEmployeeId) {
+      return res.status(400).json({
+        success: false,
+        message: "Could not identify employee profile for attendance",
+      });
+    }
+
+    const attendance = await attendanceService.checkOut(targetEmployeeId, req.body?.date);
 
     return res.status(200).json({
       success: true,
@@ -191,12 +174,12 @@ router.post("/check-out", authenticate, async (req, res, next) => {
 
 /**
  * GET /api/v1/attendance
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.get(
   "/",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const {

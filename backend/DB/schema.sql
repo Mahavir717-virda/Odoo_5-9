@@ -4,6 +4,7 @@
 -- =============================================================================
 
 -- Clean Reset for Development (Reverse Dependency Order)
+DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS payslips CASCADE;
 DROP TABLE IF EXISTS payruns CASCADE;
 DROP TABLE IF EXISTS time_off_requests CASCADE;
@@ -229,6 +230,18 @@ CREATE TABLE payslips (
     UNIQUE(payrun_id, employee_id)
 );
 
+-- 13. NOTIFICATIONS
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(50) NOT NULL DEFAULT 'info' CHECK (type IN ('info', 'success', 'warning', 'error')),
+    link VARCHAR(255),
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- =============================================================================
 -- INDEXES FOR PERFORMANCE
 -- =============================================================================
@@ -252,3 +265,6 @@ CREATE INDEX idx_payruns_status ON payruns(status);
 
 CREATE INDEX idx_payslips_payrun_id ON payslips(payrun_id);
 CREATE INDEX idx_payslips_employee_id ON payslips(employee_id);
+
+CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_notifications_is_read ON notifications(is_read);

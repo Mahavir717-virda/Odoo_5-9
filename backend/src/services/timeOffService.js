@@ -1,4 +1,5 @@
 import pool from "../db.js";
+import notificationService from "./notificationService.js";
 
 /**
  * Calculate inclusive calendar days between two ISO date strings (YYYY-MM-DD)
@@ -558,6 +559,20 @@ export const createRequest = async (data) => {
   const result = await pool.query(insertQuery, [employee_id, time_off_type_id, start_date, end_date, duration, reason || null]);
   const row = result.rows[0];
 
+  // Notify HR Managers and Admins about new leave request
+  try {
+    const empInfoRes = await pool.query("SELECT name FROM employees WHERE id = $1", [employee_id]);
+    const empName = empInfoRes.rows[0]?.name || "An employee";
+    await notificationService.notifyRoles(["admin", "hr_manager"], {
+      title: "New Leave Request Submitted",
+      message: `${empName} submitted a ${duration}-day ${leaveType.name} request (${start_date} to ${end_date}).`,
+      type: "info",
+      link: "/time-off",
+    });
+  } catch (notifErr) {
+    console.warn("Failed to dispatch leave request notification:", notifErr.message);
+  }
+
   return {
     ...row,
     requested_days: Number(row.duration),
@@ -645,6 +660,23 @@ export const approveRequest = async (id, approverUserId) => {
     );
 
     await client.query("COMMIT");
+
+    // Send notification to employee
+    try {
+      const empUserRes = await pool.query("SELECT user_id, name FROM employees WHERE id = $1", [request.employee_id]);
+      if (empUserRes.rows.length > 0 && empUserRes.rows[0].user_id) {
+        await notificationService.createNotification({
+          userId: empUserRes.rows[0].user_id,
+          title: "Leave Request Approved",
+          message: `Your leave request for ${request.start_date} to ${request.end_date} (${request.duration} days) has been approved.`,
+          type: "success",
+          link: "/time-off",
+        });
+      }
+    } catch (notifErr) {
+      console.warn("Failed to dispatch leave approval notification:", notifErr.message);
+    }
+
     return updateRes.rows[0];
   } catch (error) {
     await client.query("ROLLBACK");

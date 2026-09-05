@@ -204,10 +204,10 @@ export default function MyPayslipsPage() {
             <div>
               <p className="text-xs font-medium text-muted-foreground">Gross Earnings YTD</p>
               <p className="text-xl font-bold text-foreground mt-1 font-mono">
-                {formatCurrency(summary?.grossYTD || 468000)}
+                {formatCurrency(summary?.grossYTD || 0)}
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Across {summary?.totalPayslips || 6} pay cycles
+                Across {summary?.totalPayslips || 0} pay cycles
               </p>
             </div>
             <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600">
@@ -221,7 +221,7 @@ export default function MyPayslipsPage() {
             <div>
               <p className="text-xs font-medium text-muted-foreground">Total Deductions YTD</p>
               <p className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-1 font-mono">
-                {formatCurrency(summary?.deductionsYTD || 58800)}
+                {formatCurrency(summary?.deductionsYTD || 0)}
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
                 PF, TDS & Professional Tax
@@ -238,10 +238,10 @@ export default function MyPayslipsPage() {
             <div>
               <p className="text-xs font-medium text-muted-foreground">Net Disbursed YTD</p>
               <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
-                {formatCurrency(summary?.netYTD || 409200)}
+                {formatCurrency(summary?.netYTD || 0)}
               </p>
               <p className="text-[11px] text-emerald-600 mt-0.5 font-medium">
-                100% On-time delivery
+                {summary?.totalPayslips > 0 ? "100% On-time delivery" : "No records yet"}
               </p>
             </div>
             <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">

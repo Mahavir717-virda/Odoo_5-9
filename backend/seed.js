@@ -248,13 +248,140 @@ async function seed() {
     );
     console.log("✅ Time off requests seeded.");
 
-    // 12. Payrun (Draft)
+    // 12. Payruns (1 Paid August, 1 Draft September)
+    const paidPayrunRes = await client.query(
+      `INSERT INTO payruns (name, period_start, period_end, structure_id, status, paid_at)
+       VALUES ('August 2026 Payroll', '2026-08-01', '2026-08-31', $1, 'paid', NOW() - INTERVAL '5 days')
+       RETURNING id`,
+      [standardStructureId]
+    );
+    const augustPayrunId = paidPayrunRes.rows[0].id;
+
     await client.query(
       `INSERT INTO payruns (name, period_start, period_end, structure_id, status)
        VALUES ('September 2026 Payroll', '2026-09-01', '2026-09-30', $1, 'draft')`,
       [standardStructureId]
     );
-    console.log("✅ Draft payrun seeded.");
+    console.log("✅ Payruns seeded.");
+
+    // 13. Payslips for August Payrun (Rahul, Priya, Amit)
+    const rahulId = employeeMap["rahul.sharma@peoplepay360.com"];
+    const priyaId = employeeMap["priya.patel@peoplepay360.com"];
+
+    // Find contracts
+    const rahulContractRes = await client.query("SELECT id FROM contracts WHERE employee_id = $1 LIMIT 1", [rahulId]);
+    const priyaContractRes = await client.query("SELECT id FROM contracts WHERE employee_id = $1 LIMIT 1", [priyaId]);
+    const amitContractRes = await client.query("SELECT id FROM contracts WHERE employee_id = $1 LIMIT 1", [amitId]);
+
+    const rahulContractId = rahulContractRes.rows[0]?.id;
+    const priyaContractId = priyaContractRes.rows[0]?.id;
+    const amitContractId = amitContractRes.rows[0]?.id;
+
+    if (rahulContractId && priyaContractId && amitContractId) {
+      // Payslip for Rahul (Admin)
+      await client.query(
+        `INSERT INTO payslips (payrun_id, employee_id, contract_id, worked_days, basic_salary, gross_salary, total_deductions, net_salary, status, lines)
+         VALUES ($1, $2, $3, 22.0, 50000.00, 61600.00, 6200.00, 55400.00, 'paid', $4)`,
+        [
+          augustPayrunId,
+          rahulId,
+          rahulContractId,
+          JSON.stringify([
+            { code: "BASIC", name: "Basic Salary", category: "basic", amount: 50000.0 },
+            { code: "HRA", name: "House Rent Allowance", category: "allowance", amount: 10000.0 },
+            { code: "TRANSPORT", name: "Transport Allowance", category: "allowance", amount: 1600.0 },
+            { code: "GROSS", name: "Gross Wage", category: "gross", amount: 61600.0 },
+            { code: "PF", name: "Provident Fund", category: "deduction", amount: 6000.0 },
+            { code: "PT", name: "Professional Tax", category: "deduction", amount: 200.0 },
+            { code: "NET", name: "Net Salary", category: "net", amount: 55400.0 },
+          ]),
+        ]
+      );
+
+      // Payslip for Priya (HR Manager)
+      await client.query(
+        `INSERT INTO payslips (payrun_id, employee_id, contract_id, worked_days, basic_salary, gross_salary, total_deductions, net_salary, status, lines)
+         VALUES ($1, $2, $3, 22.0, 45000.00, 55600.00, 5600.00, 50000.00, 'paid', $4)`,
+        [
+          augustPayrunId,
+          priyaId,
+          priyaContractId,
+          JSON.stringify([
+            { code: "BASIC", name: "Basic Salary", category: "basic", amount: 45000.0 },
+            { code: "HRA", name: "House Rent Allowance", category: "allowance", amount: 9000.0 },
+            { code: "TRANSPORT", name: "Transport Allowance", category: "allowance", amount: 1600.0 },
+            { code: "GROSS", name: "Gross Wage", category: "gross", amount: 55600.0 },
+            { code: "PF", name: "Provident Fund", category: "deduction", amount: 5400.0 },
+            { code: "PT", name: "Professional Tax", category: "deduction", amount: 200.0 },
+            { code: "NET", name: "Net Salary", category: "net", amount: 50000.0 },
+          ]),
+        ]
+      );
+
+      // Payslip for Amit (Employee)
+      await client.query(
+        `INSERT INTO payslips (payrun_id, employee_id, contract_id, worked_days, basic_salary, gross_salary, total_deductions, net_salary, status, lines)
+         VALUES ($1, $2, $3, 20.0, 40000.00, 49600.00, 5000.00, 44600.00, 'paid', $4)`,
+        [
+          augustPayrunId,
+          amitId,
+          amitContractId,
+          JSON.stringify([
+            { code: "BASIC", name: "Basic Salary", category: "basic", amount: 40000.0 },
+            { code: "HRA", name: "House Rent Allowance", category: "allowance", amount: 8000.0 },
+            { code: "TRANSPORT", name: "Transport Allowance", category: "allowance", amount: 1600.0 },
+            { code: "GROSS", name: "Gross Wage", category: "gross", amount: 49600.0 },
+            { code: "PF", name: "Provident Fund", category: "deduction", amount: 4800.0 },
+            { code: "PT", name: "Professional Tax", category: "deduction", amount: 200.0 },
+            { code: "NET", name: "Net Salary", category: "net", amount: 44600.0 },
+          ]),
+        ]
+      );
+      console.log("✅ Payslips seeded.");
+    }
+
+    // 14. Notifications for Demo Users
+    const notifsData = [
+      {
+        user_id: userMap["employee@gmail.com"],
+        title: "Welcome to PeoplePay360",
+        message: "Your employee profile and leave allocations have been initialized.",
+        type: "success",
+        link: "/employee-portal/my-profile",
+      },
+      {
+        user_id: userMap["hr@gmail.com"],
+        title: "Pending Leave Request",
+        message: "Amit Shah submitted a 1-day leave request for September 25, 2026.",
+        type: "info",
+        link: "/time-off",
+      },
+      {
+        user_id: userMap["payroll@gmail.com"],
+        title: "Draft Payrun Ready",
+        message: "September 2026 Payroll payrun is ready for calculation.",
+        type: "warning",
+        link: "/payruns",
+      },
+      {
+        user_id: userMap["admin@gmail.com"],
+        title: "System Initialization",
+        message: "Database schema and roles configured successfully.",
+        type: "info",
+        link: "/settings/system",
+      },
+    ];
+
+    for (const n of notifsData) {
+      if (n.user_id) {
+        await client.query(
+          `INSERT INTO notifications (user_id, title, message, type, link, is_read)
+           VALUES ($1, $2, $3, $4, $5, FALSE)`,
+          [n.user_id, n.title, n.message, n.type, n.link]
+        );
+      }
+    }
+    console.log("✅ Sample notifications seeded.");
 
     await client.query("COMMIT");
     console.log("\n🎉 PeoplePay360 Database Setup & Seeding Completed Successfully!");
