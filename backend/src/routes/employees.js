@@ -70,6 +70,89 @@ router.get(
 );
 
 /**
+ * GET /api/v1/employees/:employeeId/contracts
+ * Allowed: admin, hr_manager, hr_payroll_manager, or employee (if own contracts)
+ */
+router.get("/:employeeId/contracts", authenticate, async (req, res, next) => {
+  try {
+    const employeeId = parseId(req.params.employeeId);
+    if (!employeeId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid employee ID",
+      });
+    }
+
+    const employee = await employeeService.getEmployeeById(employeeId);
+    if (!employee) {
+      return res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+    }
+
+    if (req.user.role === "employee" && employee.user_id !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to access these contracts",
+      });
+    }
+
+    const pool = (await import("../db.js")).default;
+    const query = `
+      SELECT 
+        c.id,
+        c.employee_id,
+        e.name AS employee_name,
+        e.email AS employee_email,
+        c.start_date,
+        c.end_date,
+        c.wage,
+        c.structure_id,
+        ss.name AS structure_name,
+        c.department,
+        c.job_position,
+        c.status,
+        c.created_at,
+        c.updated_at
+      FROM contracts c
+      JOIN employees e ON c.employee_id = e.id
+      JOIN salary_structures ss ON c.structure_id = ss.id
+      WHERE c.employee_id = $1
+      ORDER BY c.start_date DESC
+    `;
+    const result = await pool.query(query, [employeeId]);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        contracts: result.rows.map((row) => ({
+          id: row.id,
+          employee_id: row.employee_id,
+          employee: {
+            id: row.employee_id,
+            name: row.employee_name,
+            email: row.employee_email,
+          },
+          start_date: row.start_date,
+          end_date: row.end_date,
+          wage: row.wage,
+          structure_id: row.structure_id,
+          structure_name: row.structure_name,
+          department: row.department,
+          job_position: row.job_position,
+          status: row.status,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+        })),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * GET /api/v1/employees/:id
  * Allowed: admin, hr_manager, hr_payroll_manager (any employee), employee (only their own)
  */
