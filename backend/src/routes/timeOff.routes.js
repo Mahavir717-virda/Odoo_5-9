@@ -123,12 +123,12 @@ router.get("/allocations/me", authenticate, async (req, res, next) => {
 
 /**
  * GET /api/v1/time-off/allocations
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.get(
   "/allocations",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const { employee_id, type_id, page, limit } = req.query;
@@ -275,12 +275,12 @@ router.get("/requests/me", authenticate, async (req, res, next) => {
 
 /**
  * GET /api/v1/time-off/requests
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.get(
   "/requests",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const { employee_id, type_id, status, from_date, to_date, page, limit } = req.query;

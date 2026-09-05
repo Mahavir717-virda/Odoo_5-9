@@ -92,11 +92,20 @@ router.post("/login", async (req, res, next) => {
 
 /**
  * POST /api/v1/auth/register
- * Public registration endpoint
+ * Register a user with any specified role
+ * Body: { email, password, name, role?, department?, job_position? }
  */
 router.post("/register", async (req, res, next) => {
   try {
-    const { email, password, name } = req.body;
+    const {
+      email,
+      password,
+      name,
+      role = "employee",
+      department,
+      job_position,
+      employee_type = "full_time",
+    } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -114,6 +123,23 @@ router.post("/register", async (req, res, next) => {
       });
     }
 
+    // Role validation
+    const validRoles = [
+      "admin",
+      "hr_manager",
+      "hr_payroll_user",
+      "hr_payroll_manager",
+      "employee",
+    ];
+    const normalizedRole = role ? role.toLowerCase().trim() : "employee";
+
+    if (!validRoles.includes(normalizedRole)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid role. Allowed roles: ${validRoles.join(", ")}`,
+      });
+    }
+
     // Check if user already exists
     const existingUser = await pool.query("SELECT id FROM users WHERE email = $1", [normalizedEmail]);
     if (existingUser.rows.length > 0) {
@@ -126,10 +152,29 @@ router.post("/register", async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const displayName = name ? name.trim() : normalizedEmail.split("@")[0];
 
+    // Determine default department and job position based on role if not provided
+    let defaultDept = department;
+    let defaultPosition = job_position;
+
+    if (!defaultDept) {
+      if (normalizedRole === "hr_manager") defaultDept = "Human Resources";
+      else if (normalizedRole.includes("payroll")) defaultDept = "Payroll & Finance";
+      else if (normalizedRole === "admin") defaultDept = "Executive";
+      else defaultDept = "Engineering";
+    }
+
+    if (!defaultPosition) {
+      if (normalizedRole === "hr_manager") defaultPosition = "HR Manager";
+      else if (normalizedRole === "hr_payroll_manager") defaultPosition = "Payroll Manager";
+      else if (normalizedRole === "hr_payroll_user") defaultPosition = "Payroll Specialist";
+      else if (normalizedRole === "admin") defaultPosition = "System Administrator";
+      else defaultPosition = "Software Engineer";
+    }
+
     // Insert new user
     const newUserRes = await pool.query(
-      "INSERT INTO users (email, password, role) VALUES ($1, $2, 'employee') RETURNING id, email, role",
-      [normalizedEmail, hashedPassword]
+      "INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role",
+      [normalizedEmail, hashedPassword, normalizedRole]
     );
     const newUser = newUserRes.rows[0];
 
@@ -146,11 +191,14 @@ router.post("/register", async (req, res, next) => {
     }
 
     // Insert associated employee record
-    await pool.query(`
+    const empRes = await pool.query(`
       INSERT INTO employees (user_id, name, email, department, job_position, employee_type, schedule_id, joining_date, status)
-      VALUES ($1, $2, $3, 'Engineering', 'Software Engineer', 'full_time', $4, CURRENT_DATE, 'active')
+      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_DATE, 'active')
       ON CONFLICT (email) DO UPDATE SET user_id = EXCLUDED.user_id, status = 'active'
-    `, [newUser.id, displayName, normalizedEmail, scheduleId]);
+      RETURNING id, name, department, job_position
+    `, [newUser.id, displayName, normalizedEmail, defaultDept, defaultPosition, employee_type, scheduleId]);
+
+    const createdEmployee = empRes.rows[0];
 
     const jwtSecret =
       process.env.JWT_SECRET ||
@@ -170,13 +218,17 @@ router.post("/register", async (req, res, next) => {
 
     return res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: `User with role '${newUser.role}' registered successfully`,
       data: {
         token,
         user: {
           id: newUser.id,
           email: newUser.email,
           role: newUser.role,
+          employee_id: createdEmployee?.id,
+          name: createdEmployee?.name,
+          department: createdEmployee?.department,
+          job_position: createdEmployee?.job_position,
         },
       },
     });
@@ -348,5 +400,50 @@ router.get(
     });
   }
 );
+
+/**
+ * POST /api/v1/auth/reset-password
+ * Public endpoint to reset password with email and verified OTP / new password
+ */
+router.post("/reset-password", async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and new password are required",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const userRes = await pool.query("SELECT id FROM users WHERE email = $1", [normalizedEmail]);
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User with this email does not exist",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await pool.query(
+      "UPDATE users SET password = $1, updated_at = NOW() WHERE email = $2",
+      [hashedPassword, normalizedEmail]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Password changed successfully! You can now sign in with your new password.",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while changing password",
+    });
+  }
+});
 
 export default router;

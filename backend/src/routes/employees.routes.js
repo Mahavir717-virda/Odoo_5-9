@@ -40,12 +40,12 @@ router.get("/me", authenticate, async (req, res, next) => {
 
 /**
  * GET /api/v1/employees
- * Allowed: admin, hr_manager, hr_payroll_manager
+ * Allowed: admin, hr_manager, hr_payroll_manager, hr_payroll_user
  */
 router.get(
   "/",
   authenticate,
-  requireRole("admin", "hr_manager", "hr_payroll_manager"),
+  requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
       const { department, status, employee_type, search } = req.query;

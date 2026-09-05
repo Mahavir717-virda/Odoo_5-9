@@ -11,6 +11,7 @@ import payslipRoutes from "./payslips.routes.js";
 import timeOffRoutes from "./timeOff.routes.js";
 import reportRoutes from "./reports.routes.js";
 import workingScheduleRoutes from "./workingSchedules.routes.js";
+import notificationRoutes from "./notifications.routes.js";
 
 const router = express.Router();
 
@@ -49,5 +50,8 @@ router.use("/time-off", timeOffRoutes);
 
 // Reports routes (/api/v1/reports)
 router.use("/reports", reportRoutes);
+
+// Notifications routes (/api/v1/notifications)
+router.use("/notifications", notificationRoutes);
 
 export default router;

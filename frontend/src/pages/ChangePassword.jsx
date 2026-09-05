@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
-const delay = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
+import api from "../services/api";
 
 function ChangePassword() {
   const navigate = useNavigate();
@@ -9,44 +8,44 @@ function ChangePassword() {
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
   const [step, setStep] = useState(1);
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    try {
-      await delay(500);
-      setMessage("OTP sent successfully! (Demo OTP is hardcoded to 123456)");
-      setStep(2);
-    } catch (error) {
-      setMessage("Failed to send OTP");
-    }
+    setIsError(false);
+    setMessage("OTP sent successfully! (Demo OTP: 123456)");
+    setStep(2);
   };
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    try {
-      await delay(500);
-      if (otp.trim() !== "123456") {
-        setMessage("Invalid OTP. For demo purposes, use OTP: 123456");
-        return;
-      }
-      setMessage("OTP verified successfully!");
-      setStep(3);
-    } catch (error) {
-      setMessage("Invalid or expired OTP");
+    setIsError(false);
+    if (otp.trim() !== "123456") {
+      setIsError(true);
+      setMessage("Invalid OTP. For demo purposes, enter OTP: 123456");
+      return;
     }
+    setMessage("OTP verified successfully!");
+    setStep(3);
   };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
+    setIsError(false);
     try {
-      await delay(500);
-      setMessage("Password changed successfully! Redirecting to login...");
+      const res = await api.post("/auth/reset-password", {
+        email: email.trim(),
+        password: newPassword,
+      });
+
+      setMessage(res.data?.message || "Password changed successfully! Redirecting to login...");
       setTimeout(() => {
         navigate("/login");
       }, 1500);
     } catch (error) {
-      setMessage("Failed to change password");
+      setIsError(true);
+      setMessage(error.response?.data?.message || "Failed to change password");
     }
   };
 
@@ -142,7 +141,13 @@ function ChangePassword() {
         )}
 
         {message && (
-          <div className="p-3 rounded-lg text-xs font-medium text-center bg-blue-50 text-blue-700 border border-blue-200">
+          <div
+            className={`p-3 rounded-lg text-xs font-medium text-center ${
+              isError
+                ? "bg-red-50 text-red-700 border border-red-200"
+                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+            }`}
+          >
             {message}
           </div>
         )}

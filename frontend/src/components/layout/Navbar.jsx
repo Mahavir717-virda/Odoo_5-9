@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getPageTitle } from "../../utils/routeTitles";
 import { PERMISSIONS } from "../../utils/permissions";
 import PermissionGuard from "../common/PermissionGuard";
+import api from "../../services/api";
 import {
   Menu,
   Search,
@@ -14,6 +15,8 @@ import {
   AlertTriangle,
   Clock,
   AlertCircle,
+  CheckCircle,
+  Info,
 } from "lucide-react";
 
 export default function Navbar({ onMobileMenuClick }) {
@@ -22,8 +25,55 @@ export default function Navbar({ onMobileMenuClick }) {
   const { user, logout } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const pageTitle = getPageTitle(location.pathname);
+
+  // Fetch real user notifications
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get("/notifications/me");
+      if (res.data?.success) {
+        setNotifications(res.data.data || []);
+        setUnreadCount(res.data.unread_count || 0);
+      }
+    } catch (err) {
+      // Fallback in case backend is offline
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 30000); // Polling every 30s
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const handleMarkAllRead = async () => {
+    try {
+      await api.patch("/notifications/read-all");
+      setUnreadCount(0);
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    } catch (err) {}
+  };
+
+  const handleNotificationClick = async (notif) => {
+    try {
+      if (!notif.is_read) {
+        await api.patch(`/notifications/${notif.id}/read`);
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === notif.id ? { ...n, is_read: true } : n))
+        );
+      }
+      setShowNotifications(false);
+      if (notif.link) {
+        navigate(notif.link);
+      }
+    } catch (err) {}
+  };
 
   const getInitials = (name) => {
     if (!name) return "U";
@@ -41,6 +91,19 @@ export default function Navbar({ onMobileMenuClick }) {
       .replace(/_/g, " ")
       .toLowerCase()
       .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
+  const getNotifIcon = (type) => {
+    switch (type) {
+      case "success":
+        return <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />;
+      case "warning":
+        return <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />;
+      case "error":
+        return <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />;
+      default:
+        return <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />;
+    }
   };
 
   const handleLogout = async () => {
@@ -93,51 +156,60 @@ export default function Navbar({ onMobileMenuClick }) {
             aria-label="Notifications"
           >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 px-1.5 py-0.2 text-[10px] font-bold bg-red-500 text-white rounded-full">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
 
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
               <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 font-semibold text-sm text-gray-800 dark:text-gray-100 flex justify-between items-center">
                 <span>Notifications</span>
-                <span className="text-xs font-normal text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
-                  4 new
-                </span>
+                {unreadCount > 0 ? (
+                  <button
+                    onClick={handleMarkAllRead}
+                    className="text-xs font-normal text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Mark all as read
+                  </button>
+                ) : (
+                  <span className="text-xs font-normal text-gray-400">All caught up</span>
+                )}
               </div>
-              <div className="max-h-64 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
-                <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex gap-3 items-start">
-                  <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs text-gray-800 dark:text-gray-200">Payroll requires validation</p>
-                    <span className="text-[10px] text-gray-400">2h ago</span>
+              <div className="max-h-72 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
+                {notifications.length === 0 ? (
+                  <div className="px-4 py-6 text-center text-xs text-gray-400">
+                    No notifications yet
                   </div>
-                </div>
-                <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex gap-3 items-start">
-                  <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs text-gray-800 dark:text-gray-200">Leave request pending approval</p>
-                    <span className="text-[10px] text-gray-400">3h ago</span>
-                  </div>
-                </div>
-                <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex gap-3 items-start">
-                  <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs text-gray-800 dark:text-gray-200">Contract expiring soon</p>
-                    <span className="text-[10px] text-gray-400">1d ago</span>
-                  </div>
-                </div>
-                <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex gap-3 items-start">
-                  <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs text-gray-800 dark:text-gray-200">Missing employee bank information</p>
-                    <span className="text-[10px] text-gray-400">2d ago</span>
-                  </div>
-                </div>
-              </div>
-              <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700 text-center">
-                <span className="text-xs text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
-                  View all notifications
-                </span>
+                ) : (
+                  notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      onClick={() => handleNotificationClick(n)}
+                      className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex gap-3 items-start cursor-pointer transition-colors ${
+                        !n.is_read ? "bg-blue-50/50 dark:bg-blue-900/10" : ""
+                      }`}
+                    >
+                      {getNotifIcon(n.type)}
+                      <div className="flex-1">
+                        <p className={`text-xs ${!n.is_read ? "font-semibold text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
+                          {n.title}
+                        </p>
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
+                          {n.message}
+                        </p>
+                        <span className="text-[9px] text-gray-400 mt-1 block">
+                          {new Date(n.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                      {!n.is_read && (
+                        <span className="w-2 h-2 rounded-full bg-blue-600 mt-1.5 shrink-0"></span>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}

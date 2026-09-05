@@ -89,11 +89,11 @@ function SignIn() {
           <p className="font-semibold text-slate-800 border-b border-slate-200 pb-1 mb-1">
             Demo Credentials:
           </p>
-          <p><span className="font-medium text-slate-700">Admin:</span> admin@peoplepay360.com / admin123</p>
-          <p><span className="font-medium text-slate-700">HR Manager:</span> hr.manager@peoplepay360.com / hr123</p>
-          <p><span className="font-medium text-slate-700">HR Payroll User:</span> hr.payroll@peoplepay360.com / payroll123</p>
-          <p><span className="font-medium text-slate-700">HR Payroll Manager:</span> hr.payrollmgr@peoplepay360.com / payrollmgr123</p>
-          <p><span className="font-medium text-slate-700">Employee:</span> employee@peoplepay360.com / emp123</p>
+          <p><span className="font-medium text-slate-700">Admin:</span> admin@gmail.com / Password123!</p>
+          <p><span className="font-medium text-slate-700">HR Manager:</span> hr@gmail.com / Password123!</p>
+          <p><span className="font-medium text-slate-700">HR Payroll User:</span> hrpayrolluser@gmail.com / SecurePassword123!</p>
+          <p><span className="font-medium text-slate-700">HR Payroll Manager:</span> payrolluser@gmail.com / Password123!</p>
+          <p><span className="font-medium text-slate-700">Employee:</span> employee@gmail.com / Password123</p>
         </div>
 
         {/* Feedback Message & Links */}
