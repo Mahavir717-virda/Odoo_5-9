@@ -125,7 +125,7 @@ export default function EmployeeDetailsPage() {
 
   // Lazy-load employee contracts when Contracts tab becomes active for the first time
   useEffect(() => {
-    if (activeTab === "contracts" && !contractsLoaded && !contractsLoading && id) {
+    if (activeTab === "contracts" && !contractsLoaded && id) {
       let isMounted = true;
       setContractsLoading(true);
 
@@ -135,13 +135,16 @@ export default function EmployeeDetailsPage() {
           if (isMounted) {
             setEmployeeContracts(data);
             setContractsLoaded(true);
-            setContractsLoading(false);
           }
         })
         .catch((err) => {
           console.error("Failed to load employee contracts:", err);
           if (isMounted) {
             setContractsLoaded(true);
+          }
+        })
+        .finally(() => {
+          if (isMounted) {
             setContractsLoading(false);
           }
         });
@@ -150,7 +153,7 @@ export default function EmployeeDetailsPage() {
         isMounted = false;
       };
     }
-  }, [activeTab, contractsLoaded, contractsLoading, id]);
+  }, [activeTab, contractsLoaded, id]);
 
   // Load employee data and relation counts
   useEffect(() => {
