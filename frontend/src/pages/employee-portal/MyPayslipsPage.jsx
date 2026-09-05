@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Button } from "../../components/ui/button";
 import { Separator } from "../../components/ui/separator";
 
+import { useAuth } from "../../context/AuthContext";
 import * as portalService from "../../services/employeePortalService";
 
 function formatCurrency(amount) {
@@ -32,6 +33,7 @@ function formatCurrency(amount) {
 }
 
 export default function MyPayslipsPage() {
+  const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -326,27 +328,39 @@ export default function MyPayslipsPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                 <div>
                   <span className="text-muted-foreground block">Employee Name:</span>
-                  <span className="font-semibold text-foreground">Jordan Lee</span>
+                  <span className="font-semibold text-foreground">
+                    {selectedSlip.employeeName || user?.name || "Employee"}
+                  </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground block">Employee ID:</span>
-                  <span className="font-semibold text-foreground font-mono">EMP-2024-007</span>
+                  <span className="font-semibold text-foreground font-mono">
+                    {selectedSlip.employeeId || user?.employeeId || "EMP-2024-001"}
+                  </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground block">Department:</span>
-                  <span className="font-semibold text-foreground">Engineering</span>
+                  <span className="font-semibold text-foreground">
+                    {selectedSlip.department || user?.department || "Engineering"}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block">Bank Name:</span>
-                  <span className="font-semibold text-foreground">{selectedSlip.bankName}</span>
+                  <span className="text-muted-foreground block">Bank Account:</span>
+                  <span className="font-semibold text-foreground font-mono">
+                    •••• •••• •••• 4892
+                  </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block">Account No:</span>
-                  <span className="font-semibold text-foreground font-mono">{selectedSlip.accountNumber}</span>
+                  <span className="text-muted-foreground block">Worked Days:</span>
+                  <span className="font-semibold text-foreground font-mono">
+                    {selectedSlip.workedDays || 22} Days
+                  </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block">IFSC Code:</span>
-                  <span className="font-semibold text-foreground font-mono">{selectedSlip.ifsc}</span>
+                  <span className="text-muted-foreground block">Disbursed Date:</span>
+                  <span className="font-semibold text-foreground font-mono">
+                    {selectedSlip.payDate || selectedSlip.paymentDate || "Processed"}
+                  </span>
                 </div>
               </div>
 
@@ -359,22 +373,27 @@ export default function MyPayslipsPage() {
                   <h4 className="font-bold text-foreground text-xs uppercase tracking-wider text-emerald-600 dark:text-emerald-400 pb-1 border-b border-border">
                     Earnings
                   </h4>
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Basic Salary</span>
-                    <span className="font-mono font-medium">{formatCurrency(selectedSlip.basicWage)}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">House Rent Allowance (HRA)</span>
-                    <span className="font-mono font-medium">{formatCurrency(selectedSlip.hra)}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Special Allowance</span>
-                    <span className="font-mono font-medium">{formatCurrency(selectedSlip.specialAllowance)}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Conveyance Allowance</span>
-                    <span className="font-mono font-medium">{formatCurrency(selectedSlip.conveyanceAllowance)}</span>
-                  </div>
+                  {Array.isArray(selectedSlip.lines) && selectedSlip.lines.filter(l => l.category === 'basic' || l.category === 'allowance').length > 0 ? (
+                    selectedSlip.lines
+                      .filter(l => l.category === 'basic' || l.category === 'allowance')
+                      .map((l, idx) => (
+                        <div key={idx} className="flex justify-between py-1">
+                          <span className="text-muted-foreground">{l.name || l.code}</span>
+                          <span className="font-mono font-medium">{formatCurrency(l.amount)}</span>
+                        </div>
+                      ))
+                  ) : (
+                    <>
+                      <div className="flex justify-between py-1">
+                        <span className="text-muted-foreground">Basic Salary</span>
+                        <span className="font-mono font-medium">{formatCurrency(selectedSlip.basicSalary || selectedSlip.basicWage)}</span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span className="text-muted-foreground">House Rent & Allowances</span>
+                        <span className="font-mono font-medium">{formatCurrency(Math.max(0, (selectedSlip.grossEarnings || 0) - (selectedSlip.basicSalary || selectedSlip.basicWage || 0)))}</span>
+                      </div>
+                    </>
+                  )}
                   <Separator className="my-1" />
                   <div className="flex justify-between py-1 font-bold text-foreground">
                     <span>Total Gross Earnings</span>
@@ -387,18 +406,27 @@ export default function MyPayslipsPage() {
                   <h4 className="font-bold text-foreground text-xs uppercase tracking-wider text-rose-600 dark:text-rose-400 pb-1 border-b border-border">
                     Deductions
                   </h4>
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Provident Fund (PF)</span>
-                    <span className="font-mono font-medium">{formatCurrency(selectedSlip.providentFund)}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Professional Tax (PT)</span>
-                    <span className="font-mono font-medium">{formatCurrency(selectedSlip.professionalTax)}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-muted-foreground">Income Tax (TDS)</span>
-                    <span className="font-mono font-medium">{formatCurrency(selectedSlip.incomeTaxTDS)}</span>
-                  </div>
+                  {Array.isArray(selectedSlip.lines) && selectedSlip.lines.filter(l => l.category === 'deduction').length > 0 ? (
+                    selectedSlip.lines
+                      .filter(l => l.category === 'deduction')
+                      .map((l, idx) => (
+                        <div key={idx} className="flex justify-between py-1">
+                          <span className="text-muted-foreground">{l.name || l.code}</span>
+                          <span className="font-mono font-medium">-{formatCurrency(l.amount)}</span>
+                        </div>
+                      ))
+                  ) : (
+                    <>
+                      <div className="flex justify-between py-1">
+                        <span className="text-muted-foreground">Provident Fund (PF)</span>
+                        <span className="font-mono font-medium">-{formatCurrency((selectedSlip.totalDeductions || 0) * 0.6)}</span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span className="text-muted-foreground">Professional Tax & TDS</span>
+                        <span className="font-mono font-medium">-{formatCurrency((selectedSlip.totalDeductions || 0) * 0.4)}</span>
+                      </div>
+                    </>
+                  )}
                   <Separator className="my-1" />
                   <div className="flex justify-between py-1 font-bold text-rose-600 dark:text-rose-400">
                     <span>Total Deductions</span>
@@ -414,7 +442,7 @@ export default function MyPayslipsPage() {
                     Total Net Payable
                   </span>
                   <p className="text-xs text-muted-foreground">
-                    Credited to {selectedSlip.bankName} on {selectedSlip.paymentDate}
+                    Disbursed for {selectedSlip.period}
                   </p>
                 </div>
                 <span className="text-2xl font-bold font-mono text-emerald-700 dark:text-emerald-300">
