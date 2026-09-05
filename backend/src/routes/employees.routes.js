@@ -117,7 +117,7 @@ router.get("/:employeeId/contracts", authenticate, async (req, res, next) => {
         c.updated_at
       FROM contracts c
       JOIN employees e ON c.employee_id = e.id
-      JOIN salary_structures ss ON c.structure_id = ss.id
+      LEFT JOIN salary_structures ss ON c.structure_id = ss.id
       WHERE c.employee_id = $1
       ORDER BY c.start_date DESC
     `;
