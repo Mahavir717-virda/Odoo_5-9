@@ -22,6 +22,7 @@ import { Separator } from "../../components/ui/separator";
 
 import { useAuth } from "../../context/AuthContext";
 import * as portalService from "../../services/employeePortalService";
+import { downloadPayslipPDF } from "../../utils/payslipPdfGenerator";
 
 function formatCurrency(amount) {
   if (amount == null) return "—";
@@ -60,9 +61,10 @@ export default function MyPayslipsPage() {
     fetchPayslips();
   }, []);
 
-  const handleDownloadSimulation = (slip) => {
+  const handleDownloadPDF = (slip) => {
     setDownloadToast(true);
-    setTimeout(() => setDownloadToast(false), 3500);
+    downloadPayslipPDF(slip, user);
+    setTimeout(() => setDownloadToast(false), 3000);
   };
 
   const { summary, payslips = [] } = data || {};
@@ -170,7 +172,7 @@ export default function MyPayslipsPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDownloadSimulation(row)}
+              onClick={() => handleDownloadPDF(row)}
               className="h-7 px-2 text-xs gap-1 text-muted-foreground hover:text-foreground"
             >
               <Download className="w-3 h-3" />
@@ -455,11 +457,11 @@ export default function MyPayslipsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleDownloadSimulation(selectedSlip)}
+                onClick={() => handleDownloadPDF(selectedSlip)}
                 className="text-xs gap-1.5"
               >
                 <Printer className="w-3.5 h-3.5" />
-                Print / PDF
+                Print / Save PDF
               </Button>
 
               <Button

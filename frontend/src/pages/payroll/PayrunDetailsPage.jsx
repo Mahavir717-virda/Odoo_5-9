@@ -14,6 +14,8 @@ import {
   Printer,
   FileText,
   CreditCard,
+  Pencil,
+  X,
 } from "lucide-react";
 
 import PageHeader from "../../components/common/PageHeader";
@@ -21,6 +23,7 @@ import DataTable from "../../components/common/DataTable";
 import StatusBadge from "../../components/common/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 import { Separator } from "../../components/ui/separator";
 
 import * as payrollManagerService from "../../services/payrollManagerService";
@@ -45,26 +48,38 @@ export default function PayrunDetailsPage() {
   const [error, setError] = useState(null);
   const [toastMessage, setToastMessage] = useState("");
 
-  const loadPayrun = async () => {
-    setLoading(true);
+  // Edit Payrun Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editStart, setEditStart] = useState("");
+  const [editEnd, setEditEnd] = useState("");
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState(null);
+
+  const loadPayrun = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     setError(null);
     try {
       const [prData, slipsData] = await Promise.all([
         payrollManagerService.getPayrunById(id),
-        payrollManagerService.listPayslips({ payrun_id: id, limit: 100 }).catch(() => ({ data: [] })),
+        payrollManagerService.listPayslips({ payrun_id: id, limit: 100 }),
       ]);
 
-      setPayrun(prData);
-      setPayslips(slipsData.data || []);
+      if (prData) setPayrun(prData);
+      const rows = slipsData?.data || (Array.isArray(slipsData) ? slipsData : []);
+      setPayslips(rows);
+      return { prData, slipsData: rows };
     } catch (err) {
+      console.error("Failed to load payrun details:", err);
       setError(err.message || "Failed to load payrun details");
+      return null;
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadPayrun();
+    loadPayrun(true);
   }, [id]);
 
   const showToast = (msg) => {
@@ -77,7 +92,7 @@ export default function PayrunDetailsPage() {
     try {
       const res = await payrollManagerService.computePayrun(id);
       showToast(res.message || "Payroll calculated successfully!");
-      loadPayrun();
+      await loadPayrun(false);
     } catch (err) {
       alert(err.message || "Payroll calculation failed.");
     } finally {
@@ -91,7 +106,7 @@ export default function PayrunDetailsPage() {
     try {
       await payrollManagerService.validatePayrun(id);
       showToast("Payrun validated successfully.");
-      loadPayrun();
+      await loadPayrun(false);
     } catch (err) {
       alert(err.message || "Validation failed.");
     } finally {
@@ -105,11 +120,39 @@ export default function PayrunDetailsPage() {
     try {
       await payrollManagerService.markPayrunPaid(id);
       showToast("Payrun marked as Paid & Disbursed!");
-      loadPayrun();
+      await loadPayrun(false);
     } catch (err) {
       alert(err.message || "Payment disbursement confirmation failed.");
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editName.trim()) {
+      setEditError("Payrun name is required.");
+      return;
+    }
+    if (!editStart || !editEnd) {
+      setEditError("Period start and end dates are required.");
+      return;
+    }
+    setEditSubmitting(true);
+    setEditError(null);
+    try {
+      await payrollManagerService.updatePayrun(id, {
+        name: editName.trim(),
+        period_start: editStart,
+        period_end: editEnd,
+      });
+      showToast("Payrun details updated successfully.");
+      setIsEditModalOpen(false);
+      await loadPayrun(false);
+    } catch (err) {
+      setEditError(err.response?.data?.message || err.message || "Failed to update payrun.");
+    } finally {
+      setEditSubmitting(false);
     }
   };
 
@@ -264,40 +307,46 @@ export default function PayrunDetailsPage() {
 
         {/* Workflow Action Buttons */}
         <div className="flex items-center gap-2">
-          {status === "draft" && (
+          {status !== "paid" && (
             <Button
+              variant="outline"
               size="sm"
-              disabled={actionLoading}
-              onClick={handleCompute}
-              className="text-xs gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
+              onClick={() => {
+                setEditName(payrun.name || "");
+                setEditStart(payrun.period_start ? payrun.period_start.split("T")[0] : "");
+                setEditEnd(payrun.period_end ? payrun.period_end.split("T")[0] : "");
+                setIsEditModalOpen(true);
+              }}
+              className="text-xs gap-1.5"
             >
-              <Play className="w-3.5 h-3.5 fill-white" />
-              {actionLoading ? "Computing..." : "Compute Payroll"}
+              <Pencil className="w-3.5 h-3.5" />
+              Edit Batch
             </Button>
           )}
 
-          {status === "computed" && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={actionLoading}
-                onClick={handleCompute}
-                className="text-xs gap-1.5"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                Re-Compute
-              </Button>
-              <Button
-                size="sm"
-                disabled={actionLoading}
-                onClick={handleValidate}
-                className="text-xs gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Validate Payrun
-              </Button>
-            </>
+          {status !== "paid" && (
+            <Button
+              size="sm"
+              variant={payslips.length > 0 ? "outline" : "default"}
+              disabled={actionLoading}
+              onClick={handleCompute}
+              className="text-xs gap-1.5"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${actionLoading ? "animate-spin" : ""}`} />
+              {payslips.length > 0 ? "Re-Compute" : "Compute Payroll"}
+            </Button>
+          )}
+
+          {status !== "paid" && status !== "validated" && payslips.length > 0 && (
+            <Button
+              size="sm"
+              disabled={actionLoading}
+              onClick={handleValidate}
+              className="text-xs gap-1.5 bg-[#7743DB] hover:bg-[#6635c2] text-white shadow-xs"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Validate Payrun
+            </Button>
           )}
 
           {status === "validated" && (
@@ -446,6 +495,69 @@ export default function PayrunDetailsPage() {
           />
         </CardContent>
       </Card>
+
+      {/* Edit Payrun Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <h3 className="text-base font-bold text-foreground">Edit Payrun Batch</h3>
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveEdit} className="space-y-3 text-xs">
+              <div>
+                <label className="font-semibold block mb-1">Batch Name</label>
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="e.g. October 2026 Regular"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-semibold block mb-1">Period Start</label>
+                  <Input
+                    type="date"
+                    value={editStart}
+                    onChange={(e) => setEditStart(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold block mb-1">Period End</label>
+                  <Input
+                    type="date"
+                    value={editEnd}
+                    onChange={(e) => setEditEnd(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              {editError && <p className="text-destructive font-medium text-xs">{editError}</p>}
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" size="sm" disabled={editSubmitting}>
+                  {editSubmitting ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

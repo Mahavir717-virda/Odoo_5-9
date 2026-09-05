@@ -17,6 +17,8 @@ import {
   X,
   Phone,
   UserCheck,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   listUsers,
@@ -32,10 +34,23 @@ export default function UsersSettingsPage() {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Filters
+  // Pagination & Filters
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Debounce search input (300ms)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [search]);
 
   // Create Modal State
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -68,12 +83,16 @@ export default function UsersSettingsPage() {
     try {
       setLoading(true);
       setError("");
-      const data = await listUsers({
+      const res = await listUsers({
         role: roleFilter !== "all" ? roleFilter : undefined,
         status: statusFilter !== "all" ? statusFilter : undefined,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
+        page,
+        limit: 25,
       });
-      setUsers(data);
+      setUsers(res.users || []);
+      setTotalCount(res.total || 0);
+      setTotalPages(res.totalPages || 1);
     } catch (err) {
       console.error("Failed to load users:", err);
       setError(err.response?.data?.message || "Failed to load system users.");
@@ -84,7 +103,7 @@ export default function UsersSettingsPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, [roleFilter, statusFilter]);
+  }, [roleFilter, statusFilter, debouncedSearch, page]);
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
@@ -167,19 +186,7 @@ export default function UsersSettingsPage() {
     }
   };
 
-  // Filter users by search term
-  const filteredUsers = users.filter((u) => {
-    const term = search.toLowerCase();
-    return (
-      u.name.toLowerCase().includes(term) ||
-      u.email.toLowerCase().includes(term) ||
-      u.employeeCode.toLowerCase().includes(term) ||
-      u.department.toLowerCase().includes(term)
-    );
-  });
-
   // KPI Calculations
-  const totalCount = users.length;
   const activeCount = users.filter((u) => u.status === "Active").length;
   const adminCount = users.filter((u) => u.role === "ADMIN" || u.role.includes("MANAGER")).length;
   const employeeCount = users.filter((u) => u.role === "EMPLOYEE" || u.role === "HR_PAYROLL_USER").length;
@@ -365,7 +372,7 @@ export default function UsersSettingsPage() {
             <RefreshCw className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-3" />
             <p className="text-sm text-slate-500">Loading system users...</p>
           </div>
-        ) : filteredUsers.length === 0 ? (
+        ) : users.length === 0 ? (
           <div className="p-12 text-center">
             <Users className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
             <h3 className="text-base font-semibold text-slate-900 dark:text-white">No users found</h3>
@@ -376,81 +383,112 @@ export default function UsersSettingsPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/75 dark:bg-slate-900/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  <th className="py-3.5 px-4 pl-6">User / Identity</th>
-                  <th className="py-3.5 px-4">Employee ID</th>
-                  <th className="py-3.5 px-4">Department & Position</th>
-                  <th className="py-3.5 px-4">Security Role</th>
-                  <th className="py-3.5 px-4 text-center">Status</th>
-                  <th className="py-3.5 px-4 pr-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
-                {filteredUsers.map((u) => (
-                  <tr
-                    key={u.id}
-                    className="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition group"
-                  >
-                    <td className="py-3.5 px-4 pl-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold text-xs flex items-center justify-center shrink-0">
-                          {u.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-900 dark:text-white">{u.name}</p>
-                          <p className="text-xs text-slate-400 font-mono">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 font-mono text-xs font-medium text-slate-600 dark:text-slate-300">
-                      {u.employeeCode}
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      <p className="font-medium text-slate-900 dark:text-white text-xs">{u.jobPosition}</p>
-                      <p className="text-[11px] text-slate-400">{u.department}</p>
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      {getRoleBadge(u.role)}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-center">
-                      <button
-                        onClick={() => handleStatusToggle(u)}
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold cursor-pointer transition ${
-                          u.status === "Active"
-                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                            : "bg-slate-100 text-slate-500 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-                        }`}
-                        title="Click to toggle status"
-                      >
-                        {u.status === "Active" ? (
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                        ) : (
-                          <XCircle className="w-3.5 h-3.5" />
-                        )}
-                        {u.status}
-                      </button>
-                    </td>
-
-                    <td className="py-3.5 px-4 pr-6 text-right">
-                      <button
-                        onClick={() => openEditModal(u)}
-                        className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
-                        title="Edit User"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                    </td>
+          <div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/75 dark:bg-slate-900/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <th className="py-3.5 px-4 pl-6">User / Identity</th>
+                    <th className="py-3.5 px-4">Employee ID</th>
+                    <th className="py-3.5 px-4">Department & Position</th>
+                    <th className="py-3.5 px-4">Security Role</th>
+                    <th className="py-3.5 px-4 text-center">Status</th>
+                    <th className="py-3.5 px-4 pr-6 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
+                  {users.map((u) => (
+                    <tr
+                      key={u.id}
+                      className="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition group"
+                    >
+                      <td className="py-3.5 px-4 pl-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold text-xs flex items-center justify-center shrink-0">
+                            {u.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-900 dark:text-white">{u.name}</p>
+                            <p className="text-xs text-slate-400 font-mono">{u.email}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4 font-mono text-xs font-medium text-slate-600 dark:text-slate-300">
+                        {u.employeeCode}
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <p className="font-medium text-slate-900 dark:text-white text-xs">{u.jobPosition}</p>
+                        <p className="text-[11px] text-slate-400">{u.department}</p>
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        {getRoleBadge(u.role)}
+                      </td>
+
+                      <td className="py-3.5 px-4 text-center">
+                        <button
+                          onClick={() => handleStatusToggle(u)}
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold cursor-pointer transition ${
+                            u.status === "Active"
+                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                              : "bg-slate-100 text-slate-500 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                          }`}
+                          title="Click to toggle status"
+                        >
+                          {u.status === "Active" ? (
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          ) : (
+                            <XCircle className="w-3.5 h-3.5" />
+                          )}
+                          {u.status}
+                        </button>
+                      </td>
+
+                      <td className="py-3.5 px-4 pr-6 text-right">
+                        <button
+                          onClick={() => openEditModal(u)}
+                          className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
+                          title="Edit User"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+              <span>
+                Showing {totalCount > 0 ? (page - 1) * 25 + 1 : 0} to{" "}
+                {Math.min(page * 25, totalCount)} of {totalCount.toLocaleString()} user accounts
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  Previous
+                </button>
+                <span className="font-medium text-slate-700 dark:text-slate-300 px-2">
+                  Page {page} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                >
+                  Next
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

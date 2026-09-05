@@ -15,8 +15,10 @@ import {
   Calendar,
   Layers,
   ArrowUpRight,
+  Download,
 } from "lucide-react";
 import { listPayslips, listPayruns } from "../../services/payrollManagerService";
+import { downloadPayslipPDF } from "../../utils/payslipPdfGenerator";
 
 export default function PayslipsListPage() {
   const navigate = useNavigate();
@@ -379,13 +381,37 @@ export default function PayslipsListPage() {
                       </td>
 
                       <td className="py-3.5 px-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
-                        <Link
-                          to={`/payroll/payslips/${slip.id}`}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          Details
-                        </Link>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Link
+                            to={`/payroll/payslips/${slip.id}`}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            Details
+                          </Link>
+                          <button
+                            onClick={() =>
+                              downloadPayslipPDF({
+                                employeeName: empName,
+                                employeeCode: empCode,
+                                department: slip.department || "General",
+                                period: slip.payrun_name || "Monthly Cycle",
+                                payslipNumber: slip.number || `SLIP-${slip.id}`,
+                                paymentDate: slip.paid_at || slip.period_end,
+                                basicSalary: basicWage,
+                                grossEarnings: grossWage,
+                                totalDeductions: totalDeductions,
+                                netPay: netWage,
+                                status: slip.status || "Paid",
+                                lines: slip.lines || [],
+                              })
+                            }
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition cursor-pointer"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            PDF
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

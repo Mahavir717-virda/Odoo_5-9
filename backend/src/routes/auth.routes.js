@@ -284,6 +284,16 @@ router.get("/users", authenticate, requireRole("admin", "ADMIN"), async (req, re
     }
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 25));
+    const offset = (page - 1) * limit;
+
+    const countRes = await pool.query(
+      `SELECT COUNT(u.id) AS total FROM users u LEFT JOIN employees e ON e.user_id = u.id ${where}`,
+      values
+    );
+    const total = parseInt(countRes.rows[0]?.total || 0, 10);
+
     const query = `
       SELECT
         u.id AS user_id,
@@ -300,10 +310,21 @@ router.get("/users", authenticate, requireRole("admin", "ADMIN"), async (req, re
       FROM users u
       LEFT JOIN employees e ON e.user_id = u.id
       ${where}
-      ORDER BY e.name ASC NULLS LAST
+      ORDER BY u.id ASC
+      LIMIT $${idx} OFFSET $${idx + 1}
     `;
-    const result = await pool.query(query, values);
-    return res.status(200).json({ success: true, data: { users: result.rows } });
+    const result = await pool.query(query, [...values, limit, offset]);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        users: result.rows,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error('List users error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });

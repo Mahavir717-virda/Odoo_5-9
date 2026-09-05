@@ -7,7 +7,11 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "seed": "node seed.js"
+    "seed": "node seed_master.js",
+    "seed:master": "node seed_master.js",
+    "seed:attendance": "node seed_bulk_data.js --type=attendance --count=5000",
+    "seed:employees": "node seed_bulk_data.js --type=employees --count=5000",
+    "seed:all": "node seed_bulk_data.js --all --count=5000"
   },
   "keywords": [
     "peoplepay360",

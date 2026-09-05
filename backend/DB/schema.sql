@@ -243,10 +243,19 @@ CREATE TABLE notifications (
 );
 
 -- =============================================================================
--- INDEXES FOR PERFORMANCE
+-- INDEXES FOR PERFORMANCE & FAST FULL-TEXT/PARTIAL SEARCH
 -- =============================================================================
-CREATE INDEX IF NOT EXISTS idx_employees_department ON employees(department);
-CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status);
+-- PostgreSQL Trigram Extension for sub-millisecond search across 5,000+ records
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- GIN Trigram Search Indexes for partial and fuzzy matching
+CREATE INDEX IF NOT EXISTS idx_employees_name_trgm ON employees USING gin (name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_employees_email_trgm ON employees USING gin (email gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_employees_name_lower ON employees(LOWER(name));
+CREATE INDEX IF NOT EXISTS idx_employees_email_lower ON employees(LOWER(email));
+
+-- Composite multi-column indexes for fast multi-filter queries
+CREATE INDEX IF NOT EXISTS idx_employees_dept_status ON employees(department, status);
 CREATE INDEX IF NOT EXISTS idx_employees_manager_id ON employees(manager_id);
 
 CREATE INDEX IF NOT EXISTS idx_contracts_employee_id ON contracts(employee_id);
@@ -256,10 +265,12 @@ CREATE INDEX IF NOT EXISTS idx_contracts_emp_period ON contracts(employee_id, st
 
 CREATE INDEX IF NOT EXISTS idx_attendance_employee_id ON attendance(employee_id);
 CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(attendance_date);
+CREATE INDEX IF NOT EXISTS idx_attendance_date_status ON attendance(attendance_date, status);
 CREATE INDEX IF NOT EXISTS idx_attendance_emp_date ON attendance(employee_id, attendance_date);
 
 CREATE INDEX IF NOT EXISTS idx_time_off_requests_employee_id ON time_off_requests(employee_id);
 CREATE INDEX IF NOT EXISTS idx_time_off_requests_status ON time_off_requests(status);
+CREATE INDEX IF NOT EXISTS idx_time_off_status_start ON time_off_requests(status, start_date DESC);
 CREATE INDEX IF NOT EXISTS idx_time_off_emp_dates ON time_off_requests(employee_id, status, start_date, end_date);
 
 CREATE INDEX IF NOT EXISTS idx_payruns_period_start ON payruns(period_start);
