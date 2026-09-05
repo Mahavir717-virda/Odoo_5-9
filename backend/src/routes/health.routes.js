@@ -1,5 +1,5 @@
-const express = require("express");
-const pool = require("../db");
+import express from "express";
+import pool from "../db.js";
 
 const router = express.Router();
 
@@ -28,4 +28,4 @@ router.get("/health/db", async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;
