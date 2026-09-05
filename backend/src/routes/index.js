@@ -6,6 +6,8 @@ import contractRoutes from "./contracts.js";
 import attendanceRoutes from "./attendance.js";
 import salaryRulesRoutes from "./salaryRules.js";
 import salaryStructuresRoutes from "./salaryStructures.js";
+import payrunRoutes from "./payruns.js";
+import payslipRoutes from "./payslips.js";
 import timeOffRoutes from "./timeOff.js";
 
 const router = express.Router();
@@ -30,6 +32,12 @@ router.use("/salary-rules", salaryRulesRoutes);
 
 // Salary Structure routes (/api/v1/salary-structures)
 router.use("/salary-structures", salaryStructuresRoutes);
+
+// Payrun routes (/api/v1/payruns)
+router.use("/payruns", payrunRoutes);
+
+// Payslip routes (/api/v1/payslips)
+router.use("/payslips", payslipRoutes);
 
 // Time Off routes (/api/v1/time-off)
 router.use("/time-off", timeOffRoutes);
