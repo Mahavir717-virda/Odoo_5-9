@@ -73,7 +73,8 @@ export default function MyAttendancePage() {
       }));
       fetchAttendance();
     } catch (err) {
-      console.error(err);
+      console.error("Punch action error:", err);
+      alert(err.response?.data?.message || err.message || "Failed to complete punch action.");
     } finally {
       setPunchLoading(false);
     }
