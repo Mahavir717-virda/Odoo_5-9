@@ -1,6 +1,6 @@
-const express = require("express");
-const healthRoutes = require("./health.routes");
-const authRoutes = require("./auth");
+import express from "express";
+import healthRoutes from "./health.routes.js";
+import authRoutes from "./auth.js";
 
 const router = express.Router();
 
@@ -10,4 +10,4 @@ router.use("/", healthRoutes);
 // Auth routes (/api/v1/auth/login, /api/v1/auth/me, /api/v1/auth/*-test)
 router.use("/auth", authRoutes);
 
-module.exports = router;
+export default router;

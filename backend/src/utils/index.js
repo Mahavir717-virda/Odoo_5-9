@@ -1,2 +1,2 @@
 // Utility functions placeholder
-module.exports = {};
+export default {};
