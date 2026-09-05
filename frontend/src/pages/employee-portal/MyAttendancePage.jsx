@@ -89,19 +89,26 @@ export default function MyAttendancePage() {
         key: "date",
         header: "Date",
         sortable: true,
-        render: (row) => (
-          <div className="flex items-center gap-2 font-medium text-foreground">
-            <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-            <span>
-              {new Date(row.date).toLocaleDateString("en-US", {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </span>
-          </div>
-        ),
+        render: (row) => {
+          if (!row.date) return "—";
+          const dateStr = String(row.date).includes("T") ? row.date : `${row.date}T00:00:00`;
+          const d = new Date(dateStr);
+          return (
+            <div className="flex items-center gap-2 font-medium text-foreground">
+              <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+              <span>
+                {isNaN(d.getTime())
+                  ? row.date
+                  : d.toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+              </span>
+            </div>
+          );
+        },
       },
       {
         key: "checkIn",
@@ -201,6 +208,12 @@ export default function MyAttendancePage() {
                   ? `Shift Started: ${punchState?.clockInTime}`
                   : "Ready to Start Today's Shift"}
               </h2>
+              {punchState?.lastShiftText && (
+                <p className="text-xs text-slate-300 mt-1 flex items-center gap-1.5 font-mono">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400" />
+                  {punchState.lastShiftText}
+                </p>
+              )}
             </div>
           </div>
 

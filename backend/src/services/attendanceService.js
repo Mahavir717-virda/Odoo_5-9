@@ -362,9 +362,21 @@ export const checkIn = async (employeeId, date = null) => {
     throw err;
   }
 
-  const targetDate = date || new Date().toISOString().slice(0, 10);
+  // Check if employee has an active open check-in (without check_out)
+  const openCheckRes = await pool.query(
+    "SELECT * FROM attendance WHERE employee_id = $1 AND check_in IS NOT NULL AND check_out IS NULL ORDER BY check_in DESC LIMIT 1",
+    [employeeId]
+  );
 
-  // Check if attendance already exists for this date
+  if (openCheckRes.rows.length > 0) {
+    const err = new Error("Employee is already checked in.");
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const targetDate = date || new Date().toLocaleDateString("en-CA");
+
+  // Check if attendance already exists for target date
   const existingRes = await pool.query(
     "SELECT * FROM attendance WHERE employee_id = $1 AND attendance_date = $2",
     [employeeId, targetDate]
@@ -416,20 +428,41 @@ export const checkOut = async (employeeId, date = null) => {
     throw err;
   }
 
-  const targetDate = date || new Date().toISOString().slice(0, 10);
+  let record = null;
 
-  const existingRes = await pool.query(
-    "SELECT * FROM attendance WHERE employee_id = $1 AND attendance_date = $2",
-    [employeeId, targetDate]
-  );
+  if (date) {
+    const existingRes = await pool.query(
+      "SELECT * FROM attendance WHERE employee_id = $1 AND attendance_date = $2",
+      [employeeId, date]
+    );
+    if (existingRes.rows.length > 0) {
+      record = existingRes.rows[0];
+    }
+  } else {
+    // Find latest open check-in record
+    const openRes = await pool.query(
+      "SELECT * FROM attendance WHERE employee_id = $1 AND check_in IS NOT NULL AND check_out IS NULL ORDER BY check_in DESC LIMIT 1",
+      [employeeId]
+    );
+    if (openRes.rows.length > 0) {
+      record = openRes.rows[0];
+    } else {
+      const targetDate = new Date().toLocaleDateString("en-CA");
+      const todayRes = await pool.query(
+        "SELECT * FROM attendance WHERE employee_id = $1 AND attendance_date = $2",
+        [employeeId, targetDate]
+      );
+      if (todayRes.rows.length > 0) {
+        record = todayRes.rows[0];
+      }
+    }
+  }
 
-  if (existingRes.rows.length === 0) {
-    const err = new Error("No attendance record found for this date. Please check in first.");
+  if (!record) {
+    const err = new Error("No active shift found. Please check in first.");
     err.statusCode = 404;
     throw err;
   }
-
-  const record = existingRes.rows[0];
 
   if (!record.check_in) {
     const err = new Error("Cannot check out because check-in record is missing.");
@@ -438,7 +471,7 @@ export const checkOut = async (employeeId, date = null) => {
   }
 
   if (record.check_out) {
-    const err = new Error("Employee has already checked out for this date.");
+    const err = new Error("Employee has already checked out for this shift.");
     err.statusCode = 409;
     throw err;
   }
