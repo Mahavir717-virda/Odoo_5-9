@@ -11,6 +11,7 @@ import {
   Eye,
   Pencil,
   UserX,
+  Trash2,
   RefreshCw,
   AlertCircle,
 } from "lucide-react";
@@ -185,6 +186,24 @@ export default function EmployeesListPage() {
     setManagerId("all");
   };
 
+  // Deactivate or reactivate an employee
+  const handleDeactivate = async (emp) => {
+    const isInactive = emp.status?.toLowerCase() === "inactive";
+    const action = isInactive ? "reactivate" : "deactivate";
+    if (!window.confirm(`${isInactive ? "Reactivate" : "Deactivate"} ${emp.firstName} ${emp.lastName}?`)) return;
+    try {
+      if (isInactive) {
+        await employeeService.reactivateEmployee(emp.id);
+      } else {
+        await employeeService.deactivateEmployee(emp.id);
+      }
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (err) {
+      alert(err.message || `Failed to ${action} employee.`);
+    }
+  };
+
+
   // Columns configuration for DataTable
   const columns = useMemo(
     () => [
@@ -268,7 +287,7 @@ export default function EmployeesListPage() {
                   <span className="sr-only">Actions</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-36">
+              <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuItem
                   onClick={() => navigate(`/employees/${row.id}`)}
                   className="text-xs cursor-pointer gap-2"
@@ -283,6 +302,15 @@ export default function EmployeesListPage() {
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     Edit
+                  </DropdownMenuItem>
+                )}
+                {can("employee.delete") && (
+                  <DropdownMenuItem
+                    onClick={() => handleDeactivate(row)}
+                    className="text-xs cursor-pointer gap-2 text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    {row.status?.toLowerCase() === "inactive" ? "Reactivate" : "Deactivate"}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>

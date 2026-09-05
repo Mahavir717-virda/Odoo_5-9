@@ -47,6 +47,7 @@ import {
 
 import * as employeeService from "../../services/employeeService";
 import * as contractService from "../../services/contractService";
+import api from "../../services/api";
 
 /**
  * Format ISO date string into readable format (e.g. "Jan 15, 2024")
@@ -123,6 +124,21 @@ export default function EmployeeDetailsPage() {
   const [contractsLoading, setContractsLoading] = useState(false);
   const [contractsLoaded, setContractsLoaded] = useState(false);
 
+  // Attendance tab
+  const [attendance, setAttendance] = useState([]);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceLoaded, setAttendanceLoaded] = useState(false);
+
+  // Time Off tab
+  const [timeOffRequests, setTimeOffRequests] = useState([]);
+  const [timeOffLoading, setTimeOffLoading] = useState(false);
+  const [timeOffLoaded, setTimeOffLoaded] = useState(false);
+
+  // Payroll tab
+  const [payslips, setPayslips] = useState([]);
+  const [payslipsLoading, setPayslipsLoading] = useState(false);
+  const [payslipsLoaded, setPayslipsLoaded] = useState(false);
+
   // Lazy-load employee contracts when Contracts tab becomes active for the first time
   useEffect(() => {
     if (activeTab === "contracts" && !contractsLoaded && id) {
@@ -154,6 +170,39 @@ export default function EmployeeDetailsPage() {
       };
     }
   }, [activeTab, contractsLoaded, id]);
+
+  // Attendance tab fetch
+  useEffect(() => {
+    if (activeTab === "attendance" && !attendanceLoaded && id) {
+      setAttendanceLoading(true);
+      api.get(`/attendance?employee_id=${id}&limit=50`)
+        .then((r) => { setAttendance(r.data?.data || []); setAttendanceLoaded(true); })
+        .catch(() => setAttendanceLoaded(true))
+        .finally(() => setAttendanceLoading(false));
+    }
+  }, [activeTab, attendanceLoaded, id]);
+
+  // Time Off tab fetch
+  useEffect(() => {
+    if (activeTab === "timeoff" && !timeOffLoaded && id) {
+      setTimeOffLoading(true);
+      api.get(`/time-off/requests?employee_id=${id}&limit=50`)
+        .then((r) => { setTimeOffRequests(r.data?.data || []); setTimeOffLoaded(true); })
+        .catch(() => setTimeOffLoaded(true))
+        .finally(() => setTimeOffLoading(false));
+    }
+  }, [activeTab, timeOffLoaded, id]);
+
+  // Payroll tab fetch
+  useEffect(() => {
+    if (activeTab === "payroll" && !payslipsLoaded && id) {
+      setPayslipsLoading(true);
+      api.get(`/payslips?employee_id=${id}&limit=50`)
+        .then((r) => { setPayslips(r.data?.data || []); setPayslipsLoaded(true); })
+        .catch(() => setPayslipsLoaded(true))
+        .finally(() => setPayslipsLoading(false));
+    }
+  }, [activeTab, payslipsLoaded, id]);
 
   // Load employee data and relation counts
   useEffect(() => {
@@ -666,29 +715,144 @@ export default function EmployeeDetailsPage() {
 
             {/* 5. ATTENDANCE TAB */}
             {activeTab === "attendance" && (
-              <EmployeeTabPlaceholder
-                moduleName="Attendance"
-                phaseLabel="Phase 2"
-                employeeName={fullName}
-              />
+              <Card className="border-border bg-card">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold">Attendance Records — {fullName}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {attendanceLoading ? (
+                    <p className="text-xs text-muted-foreground py-6 text-center">Loading...</p>
+                  ) : attendance.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-6 text-center">No attendance records found.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs border-collapse">
+                        <thead>
+                          <tr className="border-b border-border text-muted-foreground">
+                            <th className="py-2 px-3 text-left font-medium">Date</th>
+                            <th className="py-2 px-3 text-left font-medium">Check In</th>
+                            <th className="py-2 px-3 text-left font-medium">Check Out</th>
+                            <th className="py-2 px-3 text-left font-medium">Hours</th>
+                            <th className="py-2 px-3 text-left font-medium">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/40">
+                          {attendance.map((a) => (
+                            <tr key={a.id} className="hover:bg-muted/30">
+                              <td className="py-2 px-3 font-mono">{a.date ? new Date(a.date).toLocaleDateString() : "—"}</td>
+                              <td className="py-2 px-3">{a.check_in ? new Date(a.check_in).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</td>
+                              <td className="py-2 px-3">{a.check_out ? new Date(a.check_out).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</td>
+                              <td className="py-2 px-3 font-mono">{a.worked_hours ? `${Number(a.worked_hours).toFixed(1)}h` : "—"}</td>
+                              <td className="py-2 px-3">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                  a.status === "present" ? "bg-emerald-100 text-emerald-700" :
+                                  a.status === "absent" ? "bg-rose-100 text-rose-700" :
+                                  "bg-amber-100 text-amber-700"
+                                }`}>{a.status || "—"}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )}
 
             {/* 6. TIME OFF TAB */}
             {activeTab === "timeoff" && (
-              <EmployeeTabPlaceholder
-                moduleName="Time Off"
-                phaseLabel="Phase 3"
-                employeeName={fullName}
-              />
+              <Card className="border-border bg-card">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold">Time Off Requests — {fullName}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {timeOffLoading ? (
+                    <p className="text-xs text-muted-foreground py-6 text-center">Loading...</p>
+                  ) : timeOffRequests.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-6 text-center">No time off requests found.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs border-collapse">
+                        <thead>
+                          <tr className="border-b border-border text-muted-foreground">
+                            <th className="py-2 px-3 text-left font-medium">Leave Type</th>
+                            <th className="py-2 px-3 text-left font-medium">From</th>
+                            <th className="py-2 px-3 text-left font-medium">To</th>
+                            <th className="py-2 px-3 text-left font-medium">Days</th>
+                            <th className="py-2 px-3 text-left font-medium">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/40">
+                          {timeOffRequests.map((r) => (
+                            <tr key={r.id} className="hover:bg-muted/30">
+                              <td className="py-2 px-3 font-medium">{r.time_off_type_name || r.type_name || "Leave"}</td>
+                              <td className="py-2 px-3 font-mono">{r.start_date ? formatDate(r.start_date) : "—"}</td>
+                              <td className="py-2 px-3 font-mono">{r.end_date ? formatDate(r.end_date) : "—"}</td>
+                              <td className="py-2 px-3">{r.days_requested ?? r.duration ?? "—"}</td>
+                              <td className="py-2 px-3">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                  r.status === "approved" ? "bg-emerald-100 text-emerald-700" :
+                                  r.status === "rejected" ? "bg-rose-100 text-rose-700" :
+                                  r.status === "cancelled" ? "bg-slate-100 text-slate-600" :
+                                  "bg-amber-100 text-amber-700"
+                                }`}>{r.status || "pending"}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )}
 
             {/* 7. PAYROLL TAB */}
             {activeTab === "payroll" && (
-              <EmployeeTabPlaceholder
-                moduleName="Payroll"
-                phaseLabel="Phase 4"
-                employeeName={fullName}
-              />
+              <Card className="border-border bg-card">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold">Payslips — {fullName}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {payslipsLoading ? (
+                    <p className="text-xs text-muted-foreground py-6 text-center">Loading...</p>
+                  ) : payslips.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-6 text-center">No payslips found.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs border-collapse">
+                        <thead>
+                          <tr className="border-b border-border text-muted-foreground">
+                            <th className="py-2 px-3 text-left font-medium">Payslip #</th>
+                            <th className="py-2 px-3 text-left font-medium">Pay Period</th>
+                            <th className="py-2 px-3 text-right font-medium">Gross</th>
+                            <th className="py-2 px-3 text-right font-medium">Net Pay</th>
+                            <th className="py-2 px-3 text-left font-medium">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/40">
+                          {payslips.map((p) => (
+                            <tr key={p.id} className="hover:bg-muted/30">
+                              <td className="py-2 px-3 font-mono font-bold">{p.payslip_number || p.reference || `#${p.id}`}</td>
+                              <td className="py-2 px-3">{p.pay_period_start ? `${formatDate(p.pay_period_start)} – ${formatDate(p.pay_period_end)}` : "—"}</td>
+                              <td className="py-2 px-3 text-right font-mono">{p.gross_salary != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.gross_salary) : "—"}</td>
+                              <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">{p.net_salary != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.net_salary) : "—"}</td>
+                              <td className="py-2 px-3">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                  p.status === "paid" ? "bg-emerald-100 text-emerald-700" :
+                                  p.status === "draft" ? "bg-slate-100 text-slate-600" :
+                                  "bg-amber-100 text-amber-700"
+                                }`}>{p.status || "draft"}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )}
           </motion.div>
         </AnimatePresence>
