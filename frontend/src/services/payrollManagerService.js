@@ -113,6 +113,11 @@ export const validatePayrun = async (id) => {
   return response.data?.data;
 };
 
+export const resetPayrunToDraft = async (id) => {
+  const response = await api.post(`/payruns/${id}/reset-to-draft`);
+  return response.data?.data || response.data;
+};
+
 export const markPayrunPaid = async (id) => {
   const response = await api.patch(`/payruns/${id}/pay`);
   return response.data?.data;

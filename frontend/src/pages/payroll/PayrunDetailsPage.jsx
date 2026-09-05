@@ -15,6 +15,7 @@ import {
   FileText,
   CreditCard,
   Pencil,
+  RotateCcw,
   X,
 } from "lucide-react";
 
@@ -109,6 +110,20 @@ export default function PayrunDetailsPage() {
       await loadPayrun(false);
     } catch (err) {
       alert(err.message || "Validation failed.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleResetToDraft = async () => {
+    if (!window.confirm("Reset this payroll batch to Draft? This will unlock it for editing and re-computation.")) return;
+    setActionLoading(true);
+    try {
+      await payrollManagerService.resetPayrunToDraft(id);
+      showToast("Payrun state successfully changed to Draft.");
+      await loadPayrun(false);
+    } catch (err) {
+      alert(err.message || "Failed to reset payrun to draft.");
     } finally {
       setActionLoading(false);
     }
@@ -366,6 +381,19 @@ export default function PayrunDetailsPage() {
               <CheckCircle2 className="w-4 h-4" />
               <span>Payment Disbursed</span>
             </div>
+          )}
+
+          {status !== "draft" && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={actionLoading}
+              onClick={handleResetToDraft}
+              className="text-xs gap-1.5 border-amber-500/30 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Set to Draft
+            </Button>
           )}
         </div>
       </div>

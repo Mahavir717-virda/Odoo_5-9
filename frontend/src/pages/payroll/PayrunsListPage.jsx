@@ -153,11 +153,14 @@ export default function PayrunsListPage() {
         key: "payslips_count",
         header: "Generated Slips",
         sortable: true,
-        render: (row) => (
-          <span className="text-xs font-mono font-bold text-foreground">
-            {row.payslips_count !== undefined ? row.payslips_count : (row.status === "draft" ? "0" : "—")}
-          </span>
-        ),
+        render: (row) => {
+          const count = row.payslip_count ?? row.payslips_count;
+          return (
+            <span className="text-xs font-mono font-bold text-foreground">
+              {count !== undefined && count !== null ? count : (row.status === "draft" ? "0" : "—")}
+            </span>
+          );
+        },
       },
       {
         key: "status",

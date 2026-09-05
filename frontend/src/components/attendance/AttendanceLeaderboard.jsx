@@ -69,7 +69,7 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
         month: selectedMonth,
         year: selectedYear,
         department: selectedDept,
-        limit: 50,
+        limit: 500,
       });
       setLeaderboardData(data);
     } catch (err) {

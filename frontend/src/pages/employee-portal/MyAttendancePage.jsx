@@ -33,6 +33,7 @@ const MONTH_OPTIONS = [
   { value: "2026-09", label: "September 2026 (Current)" },
   { value: "2026-08", label: "August 2026" },
   { value: "2026-07", label: "July 2026" },
+  { value: "all", label: "All Months (Overall)" },
 ];
 
 export default function MyAttendancePage() {
@@ -42,9 +43,9 @@ export default function MyAttendancePage() {
   const [error, setError] = useState(null);
   const [punchLoading, setPunchLoading] = useState(false);
 
-  // Filters
+  // Filters - Default to current active month so summary matches monthly leaderboard
   const [statusFilter, setStatusFilter] = useState("all");
-  const [monthFilter, setMonthFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState("2026-09");
 
   const fetchAttendance = () => {
     setLoading(true);

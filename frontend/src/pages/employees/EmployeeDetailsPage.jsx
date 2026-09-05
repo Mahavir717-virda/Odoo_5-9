@@ -20,6 +20,7 @@ import {
   UserCheck,
   ShieldCheck,
   UserX,
+  Trophy,
 } from "lucide-react";
 
 import { usePermissions } from "../../hooks/usePermissions";
@@ -47,6 +48,7 @@ import {
 
 import * as employeeService from "../../services/employeeService";
 import * as contractService from "../../services/contractService";
+import { getLeaderboard } from "../../services/managerAttendanceService";
 import api from "../../services/api";
 
 /**
@@ -138,6 +140,30 @@ export default function EmployeeDetailsPage() {
   const [payslips, setPayslips] = useState([]);
   const [payslipsLoading, setPayslipsLoading] = useState(false);
   const [payslipsLoaded, setPayslipsLoaded] = useState(false);
+
+  // Monthly leaderboard rank
+  const [rankInfo, setRankInfo] = useState(null);
+
+  useEffect(() => {
+    if (!id) return;
+    const now = new Date();
+    getLeaderboard({ month: now.getMonth() + 1, year: now.getFullYear(), limit: 500 })
+      .then((data) => {
+        const total = data?.rankings?.length || 0;
+        const match = data?.rankings?.find((r) => r.employee_id === Number(id));
+        if (match) {
+          setRankInfo({
+            rank: match.rank,
+            total,
+            totalHours: match.total_worked_hours,
+            tier: match.perks?.tier || null,
+          });
+        } else {
+          setRankInfo({ rank: null, total, totalHours: 0, tier: null });
+        }
+      })
+      .catch(() => {});
+  }, [id]);
 
   // Lazy-load employee contracts when Contracts tab becomes active for the first time
   useEffect(() => {
@@ -365,12 +391,30 @@ export default function EmployeeDetailsPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             {/* Left: Avatar & Identity */}
             <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-xs shrink-0">
-                <AvatarImage src={employee.avatarUrl} alt={fullName} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative shrink-0">
+                <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-xs">
+                  <AvatarImage src={employee.avatarUrl} alt={fullName} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                {rankInfo?.rank && (
+                  <div
+                    className={`absolute -bottom-1 -right-1 flex items-center justify-center w-6 h-6 rounded-full text-[9px] font-black shadow-md ring-2 ring-background ${
+                      rankInfo.tier === "gold"
+                        ? "bg-amber-400 text-amber-900"
+                        : rankInfo.tier === "silver"
+                        ? "bg-slate-300 text-slate-800"
+                        : rankInfo.tier === "bronze"
+                        ? "bg-orange-400 text-orange-900"
+                        : "bg-primary/10 text-primary"
+                    }`}
+                    title={`Leaderboard rank #${rankInfo.rank}`}
+                  >
+                    #{rankInfo.rank}
+                  </div>
+                )}
+              </div>
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2.5">
@@ -387,9 +431,33 @@ export default function EmployeeDetailsPage() {
                   </span>
                 </p>
 
-                <p className="text-xs text-muted-foreground/80 font-mono mt-0.5">
-                  {employee.employeeId}
-                </p>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <span className="text-xs text-muted-foreground/80 font-mono">
+                    {employee.employeeId}
+                  </span>
+                  {rankInfo && (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md border border-border/50">
+                      <Trophy
+                        className={`w-3 h-3 ${
+                          rankInfo.tier === "gold"
+                            ? "text-amber-500"
+                            : rankInfo.tier === "silver"
+                            ? "text-slate-400"
+                            : rankInfo.tier === "bronze"
+                            ? "text-orange-500"
+                            : "text-primary"
+                        }`}
+                      />
+                      {rankInfo.rank != null ? (
+                        <span>
+                          Rank <strong className="text-foreground font-semibold">#{rankInfo.rank}</strong> of {rankInfo.total} ({rankInfo.totalHours}h logged)
+                        </span>
+                      ) : (
+                        <span>No hours logged this month</span>
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 

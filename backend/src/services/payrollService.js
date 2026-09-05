@@ -41,7 +41,7 @@ export const listPayruns = async ({
   let whereClause = "WHERE 1=1";
   const params = [];
 
-  if (status) {
+  if (status && status !== "all") {
     params.push(status.toLowerCase().trim());
     whereClause += ` AND pr.status = $${params.length}`;
   }
@@ -688,10 +688,8 @@ export const finalizePayrun = async (id) => {
     throw err;
   }
 
-  if (payrun.payslip_count === 0) {
-    const err = new Error("Cannot finalize payrun with zero calculated payslips. Run calculate first.");
-    err.statusCode = 400;
-    throw err;
+  if (!payrun.payslip_count || parseInt(payrun.payslip_count, 10) === 0) {
+    await calculatePayrun(parsedId);
   }
 
   const client = await pool.connect();
@@ -807,6 +805,50 @@ export const markPayrunPaid = async (id) => {
 };
 
 /**
+ * Reset Payrun to Draft (transitions payrun and payslips to draft state)
+ */
+export const resetPayrunToDraft = async (id) => {
+  const parsedId = parseId(id);
+  if (!parsedId) {
+    const err = new Error("Invalid payrun ID");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const payrun = await getPayrunById(parsedId);
+  if (!payrun) {
+    const err = new Error("Payrun not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // Reset payslips to draft
+    await client.query(
+      "UPDATE payslips SET status = 'draft', updated_at = NOW() WHERE payrun_id = $1",
+      [parsedId]
+    );
+
+    // Reset payrun to draft
+    const payrunUpdateRes = await client.query(
+      "UPDATE payruns SET status = 'draft', paid_at = NULL, updated_at = NOW() WHERE id = $1 RETURNING id, name, status, period_start, period_end, paid_at, updated_at",
+      [parsedId]
+    );
+
+    await client.query("COMMIT");
+    return payrunUpdateRes.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+/**
  * Delete a Payrun (and its associated payslips)
  */
 export const deletePayrun = async (id) => {
@@ -876,7 +918,7 @@ export const listPayslips = async ({
     whereClause += ` AND ps.employee_id = $${params.length}`;
   }
 
-  if (status) {
+  if (status && status !== "all") {
     params.push(status.toLowerCase().trim());
     whereClause += ` AND ps.status = $${params.length}`;
   }
@@ -1211,6 +1253,7 @@ export default {
   updatePayrun,
   calculatePayrun,
   finalizePayrun,
+  resetPayrunToDraft,
   markPayrunPaid,
   deletePayrun,
   listPayslips,

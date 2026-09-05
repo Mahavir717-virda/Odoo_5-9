@@ -422,11 +422,41 @@ router.get(
   }
 );
 
+// Simple in-memory rate limiter: max 5 attempts per 15 minutes per IP
+const passwordResetAttempts = new Map();
+const RESET_LIMIT = 5;
+const RESET_WINDOW_MS = 15 * 60 * 1000;
+
+const resetPasswordRateLimiter = (req, res, next) => {
+  const ip = req.ip || req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "unknown";
+  const now = Date.now();
+  const clientData = passwordResetAttempts.get(ip) || { count: 0, resetTime: now + RESET_WINDOW_MS };
+
+  if (now > clientData.resetTime) {
+    clientData.count = 1;
+    clientData.resetTime = now + RESET_WINDOW_MS;
+  } else {
+    clientData.count += 1;
+  }
+
+  passwordResetAttempts.set(ip, clientData);
+
+  if (clientData.count > RESET_LIMIT) {
+    const retryAfterMins = Math.ceil((clientData.resetTime - now) / 60000);
+    return res.status(429).json({
+      success: false,
+      message: `Too many password reset attempts. Please try again in ${retryAfterMins} minute${retryAfterMins > 1 ? "s" : ""}.`,
+    });
+  }
+
+  next();
+};
+
 /**
- * POST /api/v1/auth/reset-password
+ * POST /api/v1/auth/reset-password (and /change-password)
  * Public endpoint to reset password with email and verified OTP / new password
  */
-router.post("/reset-password", async (req, res, next) => {
+const handlePasswordReset = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -465,6 +495,9 @@ router.post("/reset-password", async (req, res, next) => {
       message: "Internal server error while changing password",
     });
   }
-});
+};
+
+router.post("/reset-password", resetPasswordRateLimiter, handlePasswordReset);
+router.post("/change-password", resetPasswordRateLimiter, handlePasswordReset);
 
 export default router;

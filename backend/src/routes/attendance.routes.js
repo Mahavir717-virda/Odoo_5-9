@@ -80,7 +80,7 @@ router.get("/leaderboard", authenticate, async (req, res, next) => {
       month,
       year,
       department: department && department !== "all" ? department : undefined,
-      limit,
+      limit: limit || 500,
       currentEmployeeId: currentEmpId,
     });
 
@@ -106,7 +106,7 @@ router.get("/leaderboard", authenticate, async (req, res, next) => {
           month,
           year,
           department: myDepartment,
-          limit: 100,
+          limit: 500,
         });
         const deptMatch = deptBoard.rankings.find((r) => r.employee_id === currentEmpId);
         if (deptMatch) {

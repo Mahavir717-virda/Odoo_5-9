@@ -44,6 +44,7 @@ export default function PayrunWizardPage() {
   const [selectedEmpIds, setSelectedEmpIds] = useState(new Set());
   const [empSearch, setEmpSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("all");
+  const [visibleLimit, setVisibleLimit] = useState(50);
 
   const [loading, setLoading] = useState(true);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
@@ -66,7 +67,7 @@ export default function PayrunWizardPage() {
       try {
         const [structuresData, empRes] = await Promise.all([
           payrollManagerService.listSalaryStructures().catch(() => []),
-          employeeService.getEmployees({ status: "active", limit: 200 }).catch(() => ({ employees: [] })),
+          employeeService.getEmployees({ status: "active", limit: 50 }).catch(() => []),
         ]);
 
         setStructures(structuresData || []);
@@ -74,10 +75,10 @@ export default function PayrunWizardPage() {
           setStructureId(String(structuresData[0].id));
         }
 
-        const empList = empRes.employees || [];
+        const empList = Array.isArray(empRes) ? empRes : (empRes?.employees || empRes?.data || []);
         setEmployees(empList);
-        // Default select all active employees
-        setSelectedEmpIds(new Set(empList.map((e) => String(e.id))));
+        // Start with 0 selected so the user can choose in Step 2 or click Select All
+        setSelectedEmpIds(new Set());
       } catch (err) {
         setFormError(err.message || "Failed to load initial wizard data");
       } finally {
@@ -134,6 +135,11 @@ export default function PayrunWizardPage() {
       return matchesSearch && matchesDept;
     });
   }, [employees, empSearch, deptFilter]);
+
+  // Windowed visible employees to prevent UI lag
+  const visibleEmployees = useMemo(() => {
+    return filteredEmployees.slice(0, visibleLimit);
+  }, [filteredEmployees, visibleLimit]);
 
   // Departments list for filter
   const departments = useMemo(() => {
@@ -406,66 +412,88 @@ export default function PayrunWizardPage() {
 
             {/* Employees List with Checkboxes */}
             <div className="border border-border rounded-xl divide-y divide-border/60 max-h-96 overflow-y-auto bg-background/50">
-              {filteredEmployees.length === 0 ? (
+              {visibleEmployees.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground text-xs">
                   No active employees found matching your criteria.
                 </div>
               ) : (
-                filteredEmployees.map((emp) => {
-                  const isSelected = selectedEmpIds.has(String(emp.id));
-                  return (
-                    <div
-                      key={emp.id}
-                      onClick={() => toggleEmployee(emp.id)}
-                      className={`p-3.5 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
-                        isSelected
-                          ? "bg-primary/5 dark:bg-primary/10 hover:bg-primary/10"
-                          : "hover:bg-muted/40"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => {}} // handled by parent div
-                          className="w-4 h-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer"
-                        />
-                        <div>
-                          <p className="text-xs font-semibold text-foreground flex items-center gap-2">
-                            {emp.name}
-                            <span className="text-[10px] font-normal text-muted-foreground px-1.5 py-0.5 rounded-full bg-muted">
-                              {emp.employeeId || `EMP-${emp.id}`}
-                            </span>
-                          </p>
-                          <p className="text-[11px] text-muted-foreground mt-0.5">
-                            {emp.email}
-                          </p>
+                <>
+                  {visibleEmployees.map((emp) => {
+                    const isSelected = selectedEmpIds.has(String(emp.id));
+                    return (
+                      <div
+                        key={emp.id}
+                        onClick={() => toggleEmployee(emp.id)}
+                        className={`p-3.5 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
+                          isSelected
+                            ? "bg-primary/5 dark:bg-primary/10 hover:bg-primary/10"
+                            : "hover:bg-muted/40"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}} // handled by parent div
+                            className="w-4 h-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer"
+                          />
+                          <div>
+                            <p className="text-xs font-semibold text-foreground flex items-center gap-2">
+                              {emp.name}
+                              <span className="text-[10px] font-normal text-muted-foreground px-1.5 py-0.5 rounded-full bg-muted">
+                                {emp.employeeId || `EMP-${emp.id}`}
+                              </span>
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">
+                                <CheckCircle2 className="w-2.5 h-2.5" /> Validated
+                              </span>
+                            </p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                              {emp.email}
+                            </p>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-4 text-right">
-                        <div className="hidden sm:block text-[11px] text-muted-foreground">
-                          <span className="inline-flex items-center gap-1">
-                            <Building2 className="w-3 h-3 text-muted-foreground" />
-                            {emp.department || "General"}
-                          </span>
-                        </div>
-                        <div className="hidden sm:block text-[11px] text-muted-foreground">
-                          <span className="inline-flex items-center gap-1">
-                            <Briefcase className="w-3 h-3 text-muted-foreground" />
-                            {emp.jobPosition || "Staff"}
-                          </span>
+                        <div className="flex items-center gap-4 text-right">
+                          <div className="hidden sm:block text-[11px] text-muted-foreground">
+                            <span className="inline-flex items-center gap-1">
+                              <Building2 className="w-3 h-3 text-muted-foreground" />
+                              {emp.department || "General"}
+                            </span>
+                          </div>
+                          <div className="hidden sm:block text-[11px] text-muted-foreground">
+                            <span className="inline-flex items-center gap-1">
+                              <Briefcase className="w-3 h-3 text-muted-foreground" />
+                              {emp.jobPosition || "Staff"}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                    );
+                  })}
+
+                  {filteredEmployees.length > visibleLimit && (
+                    <div className="p-2.5 text-center bg-muted/20 border-t border-border">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setVisibleLimit((prev) => prev + 50);
+                        }}
+                        className="text-xs text-primary hover:text-primary font-medium"
+                      >
+                        Load Next 50 Employees (Showing {visibleEmployees.length} of {filteredEmployees.length})
+                      </Button>
                     </div>
-                  );
-                })
+                  )}
+                </>
               )}
             </div>
 
             <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
               <span>
-                Showing {filteredEmployees.length} of {employees.length} active employees
+                Showing {visibleEmployees.length} of {filteredEmployees.length} validated active employees
               </span>
               <span className="font-semibold text-foreground">
                 {selectedEmpIds.size} selected for this payrun

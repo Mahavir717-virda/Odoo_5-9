@@ -578,7 +578,7 @@ export const getMonthlyLeaderboard = async ({
   const now = new Date();
   const targetYear = parseInt(year, 10) || now.getFullYear();
   const targetMonth = parseInt(month, 10) || now.getMonth() + 1;
-  const parsedLimit = Math.min(100, Math.max(5, parseInt(limit, 10) || 50));
+  const parsedLimit = Math.min(1000, Math.max(5, parseInt(limit, 10) || 500));
 
   const cacheKey = `${targetYear}-${targetMonth}-${department || "all"}-${parsedLimit}`;
   const cached = leaderboardCache.get(cacheKey);

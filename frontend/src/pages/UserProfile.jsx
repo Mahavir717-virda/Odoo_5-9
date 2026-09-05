@@ -44,38 +44,38 @@ export default function UserProfile() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Leaderboard rank state
-  const [rankInfo, setRankInfo] = useState(null); // { rank, total, totalHours, tier }
+  const [rankInfo, setRankInfo] = useState(null);
 
-  /** Fetch this month's leaderboard and extract the current user's rank */
-  const fetchMyRank = async () => {
+  /**
+   * Fetch this month's rank for the logged-in user.
+   * The backend already resolves the match server-side via req.user → myRank.
+   * We just read data.myRank directly — no client-side ID matching needed.
+   */
+  const fetchMyRank = async (profileData = profile) => {
     try {
       const now = new Date();
       const data = await getLeaderboard({
         month: now.getMonth() + 1,
         year: now.getFullYear(),
-        limit: 200, // fetch enough to include all employees
+        limit: 500,
       });
-      const rankings = data?.rankings || [];
-      const total = rankings.length;
-      // Match by employee_id (preferred) or email
-      const mine = rankings.find(
-        (r) =>
-          r.employee_id === profile?.id ||
-          r.employee_email?.toLowerCase() === user?.email?.toLowerCase()
+      const totalEmployees = data?.rankings?.length || 0;
+      const myRank = data?.myRank || data?.rankings?.find(
+        (r) => r.employee_id === profileData?.id || (profileData?.email && r.employee_email?.toLowerCase() === profileData.email.toLowerCase())
       );
-      if (mine) {
+
+      if (myRank) {
         setRankInfo({
-          rank: mine.rank,
-          total,
-          totalHours: mine.total_worked_hours,
-          tier: mine.perks?.tier || null,
+          rank: myRank.rank,
+          total: totalEmployees,
+          totalHours: myRank.total_worked_hours,
+          tier: myRank.perks?.tier || null,
         });
       } else {
-        // Employee exists but has 0 hours — show unranked
-        setRankInfo({ rank: null, total, totalHours: 0, tier: null });
+        setRankInfo({ rank: null, total: totalEmployees, totalHours: 0, tier: null });
       }
     } catch {
-      // Silently ignore — rank is non-critical
+      // Silently ignore — rank is non-critical UI info
     }
   };
 
@@ -87,6 +87,7 @@ export default function UserProfile() {
         setProfile(data);
         setPhone(data.phone || "+1 (555) 019-2834");
         setAddress(data.address || "742 Evergreen Terrace, Springfield");
+        fetchMyRank(data);
       } catch (err) {
         console.error("Failed to load profile:", err);
       } finally {
@@ -94,14 +95,11 @@ export default function UserProfile() {
       }
     };
     loadProfile();
+    fetchMyRank();
   }, []);
 
-  // Fetch rank once profile is loaded, then keep it live via WebSocket
+  // Keep rank live via WebSocket — reconnects automatically on disconnect
   useEffect(() => {
-    if (!profile && !user) return;
-    fetchMyRank();
-
-    // Subscribe to the same leaderboard WebSocket
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.hostname}:5000/ws`;
     let ws = null;
@@ -126,7 +124,7 @@ export default function UserProfile() {
       if (reconnectTimer) clearTimeout(reconnectTimer);
       if (ws) { ws.onclose = null; ws.close(); }
     };
-  }, [profile, user]);
+  }, []);
 
   const getInitials = (name) => {
     if (!name) return "U";
