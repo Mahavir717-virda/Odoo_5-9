@@ -1,16 +1,58 @@
 /**
- * Dynamic Employee Service
- * Integrates with Express + PostgreSQL backend APIs with fallback handling.
+ * PeoplePay360 Employee Service
+ * Connects directly to Node.js Express + PostgreSQL /employees endpoints.
  */
 
 import api from "./api";
 import { mockEmployees } from "../data/mockEmployees";
 
-// Fallback in-memory store
+// Fallback cache
 let localEmployees = [...mockEmployees];
 
 /**
- * Get filtered employees list from backend
+ * Normalizes backend employee record to frontend model
+ */
+export const formatEmployee = (emp) => {
+  if (!emp) return null;
+  const nameParts = (emp.name || "").trim().split(" ");
+  const firstName = nameParts[0] || "";
+  const lastName = nameParts.slice(1).join(" ") || "";
+
+  return {
+    id: String(emp.id),
+    employeeId: `EMP-${String(emp.id).padStart(4, "0")}`,
+    firstName: emp.firstName || firstName,
+    lastName: emp.lastName || lastName,
+    name: emp.name || `${firstName} ${lastName}`.trim(),
+    email: emp.email,
+    phone: emp.phone || "",
+    department: emp.department || "General",
+    jobPosition: emp.job_position || emp.jobPosition || "Staff",
+    managerId: emp.manager_id ? String(emp.manager_id) : (emp.managerId || null),
+    managerName: emp.manager?.name || emp.manager_name || emp.managerName || "None",
+    workSchedule: emp.schedule?.name || emp.schedule_name || emp.workSchedule || "Standard 40h",
+    scheduleId: emp.schedule_id || emp.scheduleId || 1,
+    employeeType:
+      emp.employee_type === "full_time"
+        ? "Full-time"
+        : emp.employee_type === "part_time"
+        ? "Part-time"
+        : emp.employee_type === "contract"
+        ? "Contract"
+        : emp.employee_type === "intern"
+        ? "Intern"
+        : (emp.employeeType || "Full-time"),
+    status: emp.status ? emp.status.charAt(0).toUpperCase() + emp.status.slice(1).toLowerCase() : "Active",
+    joiningDate: emp.joining_date ? emp.joining_date.split("T")[0] : (emp.joiningDate || "2023-01-01"),
+    dateOfBirth: emp.date_of_birth || emp.dateOfBirth || "1995-01-01",
+    address: emp.address || "123 Business Way, Suite 400",
+    avatarUrl: emp.avatar || null,
+  };
+};
+
+/**
+ * GET /employees
+ * List all employees with filters & pagination
  */
 export const getEmployees = async ({
   search,
@@ -18,38 +60,26 @@ export const getEmployees = async ({
   status,
   employeeType,
   managerId,
+  page = 1,
+  limit = 20,
 } = {}) => {
   try {
     const params = new URLSearchParams();
     if (search && search.trim()) params.append("search", search.trim());
     if (department && department !== "all") params.append("department", department);
     if (status && status !== "all") params.append("status", status.toLowerCase());
-    if (employeeType && employeeType !== "all") params.append("employee_type", employeeType.toLowerCase());
+    if (employeeType && employeeType !== "all") params.append("employee_type", employeeType.toLowerCase().replace("-", "_"));
+    if (page) params.append("page", page);
+    if (limit) params.append("limit", limit);
 
     const response = await api.get(`/employees?${params.toString()}`);
-    const backendData = response.data?.data?.employees || response.data?.data || [];
+    const rows = response.data?.data?.employees || response.data?.data || [];
 
-    if (backendData.length > 0) {
-      return backendData.map((emp) => ({
-        id: String(emp.id),
-        employeeId: `EMP-${String(emp.id).padStart(4, "0")}`,
-        firstName: emp.name?.split(" ")[0] || emp.name,
-        lastName: emp.name?.split(" ").slice(1).join(" ") || "",
-        email: emp.email,
-        phone: emp.phone || "",
-        department: emp.department || "General",
-        jobPosition: emp.job_position || "Staff",
-        managerId: emp.manager_id ? String(emp.manager_id) : null,
-        managerName: emp.manager_name || "None",
-        workSchedule: emp.schedule_name || "Standard 40h",
-        employeeType: emp.employee_type === "full_time" ? "Full-time" : (emp.employee_type || "Full-time"),
-        status: emp.status ? emp.status.charAt(0).toUpperCase() + emp.status.slice(1).toLowerCase() : "Active",
-        joiningDate: emp.joining_date ? emp.joining_date.split("T")[0] : "2023-01-01",
-        avatarUrl: null,
-      }));
+    if (Array.isArray(rows) && rows.length > 0) {
+      return rows.map(formatEmployee);
     }
   } catch (err) {
-    console.warn("Backend /employees failed, using local mock data:", err.message);
+    console.warn("Backend /employees failed, using fallback list:", err.message);
   }
 
   // Fallback filter
@@ -71,35 +101,18 @@ export const getEmployees = async ({
 };
 
 /**
- * Get single employee by ID
+ * GET /employees/:id
+ * Single employee details
  */
 export const getEmployeeById = async (id) => {
   try {
     const response = await api.get(`/employees/${id}`);
-    const emp = response.data?.data;
+    const emp = response.data?.data?.employee || response.data?.data;
     if (emp) {
-      return {
-        id: String(emp.id),
-        employeeId: `EMP-${String(emp.id).padStart(4, "0")}`,
-        firstName: emp.name?.split(" ")[0] || emp.name,
-        lastName: emp.name?.split(" ").slice(1).join(" ") || "",
-        email: emp.email,
-        phone: emp.phone || "",
-        department: emp.department || "General",
-        jobPosition: emp.job_position || "Staff",
-        managerId: emp.manager_id ? String(emp.manager_id) : null,
-        managerName: emp.manager?.name || emp.manager_name || "None",
-        workSchedule: emp.schedule?.name || emp.schedule_name || "Standard 40h",
-        employeeType: emp.employee_type === "full_time" ? "Full-time" : (emp.employee_type || "Full-time"),
-        status: emp.status ? emp.status.charAt(0).toUpperCase() + emp.status.slice(1).toLowerCase() : "Active",
-        joiningDate: emp.joining_date ? emp.joining_date.split("T")[0] : "2023-01-01",
-        dateOfBirth: "1995-01-01",
-        address: "123 Business Way, Suite 400",
-        avatarUrl: null,
-      };
+      return formatEmployee(emp);
     }
   } catch (err) {
-    console.warn(`Backend /employees/${id} failed, checking local mock data:`, err.message);
+    console.warn(`Backend /employees/${id} failed, checking fallback:`, err.message);
   }
 
   const employee = localEmployees.find((e) => String(e.id) === String(id));
@@ -110,35 +123,15 @@ export const getEmployeeById = async (id) => {
 };
 
 /**
- * Get current logged in employee profile
+ * GET /employees/me
+ * Current logged-in user's employee record
  */
 export const getMyEmployeeProfile = async () => {
   try {
     const response = await api.get("/employees/me");
     const emp = response.data?.data;
     if (emp) {
-      return {
-        id: String(emp.id),
-        employeeId: `EMP-${String(emp.id).padStart(4, "0")}`,
-        firstName: emp.name?.split(" ")[0] || emp.name,
-        lastName: emp.name?.split(" ").slice(1).join(" ") || "",
-        name: emp.name,
-        email: emp.email,
-        phone: emp.phone || "+1 (555) 019-2834",
-        department: emp.department || "Engineering",
-        jobPosition: emp.job_position || "Software Engineer",
-        managerId: emp.manager_id ? String(emp.manager_id) : null,
-        managerName: emp.manager?.name || emp.manager_name || "Sarah Jenkins",
-        workSchedule: emp.schedule?.name || emp.schedule_name || "Standard 40h (Mon-Fri 9-5)",
-        employeeType: emp.employee_type === "full_time" ? "Full-time" : (emp.employee_type || "Full-time"),
-        status: emp.status ? emp.status.charAt(0).toUpperCase() + emp.status.slice(1).toLowerCase() : "Active",
-        joiningDate: emp.joining_date ? emp.joining_date.split("T")[0] : "2023-03-01",
-        dateOfBirth: "1994-06-18",
-        address: "742 Evergreen Terrace, Springfield",
-        emergencyContact: "Emily Morgan (+1 555-987-6543)",
-        bankAccount: "•••• •••• •••• 4892 (Chase Bank)",
-        panNumber: "ABCDE1234F",
-      };
+      return formatEmployee(emp);
     }
   } catch (err) {
     console.warn("Backend /employees/me failed:", err.message);
@@ -162,31 +155,33 @@ export const getMyEmployeeProfile = async () => {
     joiningDate: "2023-03-01",
     dateOfBirth: "1994-06-18",
     address: "742 Evergreen Terrace, Springfield",
-    emergencyContact: "Emily Morgan (+1 555-987-6543)",
-    bankAccount: "•••• •••• •••• 4892 (Chase Bank)",
-    panNumber: "ABCDE1234F",
   };
 };
 
 /**
- * Create a new employee
+ * POST /employees
+ * Create new employee
  */
 export const createEmployee = async (data) => {
   try {
     const payload = {
-      name: `${data.firstName || ""} ${data.lastName || ""}`.trim(),
+      name: data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim(),
       email: data.email,
-      phone: data.phone,
+      phone: data.phone || null,
       department: data.department,
-      job_position: data.jobPosition,
+      manager_id: data.managerId ? parseInt(data.managerId, 10) : null,
+      job_position: data.jobPosition || data.job_position,
       employee_type: (data.employeeType || "full_time").toLowerCase().replace("-", "_"),
-      schedule_id: data.scheduleId || 1,
+      schedule_id: data.scheduleId ? parseInt(data.scheduleId, 10) : 1,
       joining_date: data.joiningDate || new Date().toISOString().split("T")[0],
+      status: (data.status || "active").toLowerCase(),
     };
+
     const response = await api.post("/employees", payload);
-    return response.data?.data;
+    const created = response.data?.data?.employee || response.data?.data;
+    return formatEmployee(created);
   } catch (err) {
-    console.warn("Backend createEmployee failed, saving locally:", err.message);
+    console.warn("Backend createEmployee failed, creating locally:", err.message);
     const newId = `emp-${Date.now()}`;
     const newEmp = { id: newId, ...data };
     localEmployees.push(newEmp);
@@ -195,21 +190,25 @@ export const createEmployee = async (data) => {
 };
 
 /**
- * Update an existing employee
+ * PUT /employees/:id
+ * Update employee fields
  */
 export const updateEmployee = async (id, data) => {
   try {
     const payload = {
-      name: data.firstName && data.lastName ? `${data.firstName} ${data.lastName}`.trim() : data.name,
+      name: data.name || (data.firstName && data.lastName ? `${data.firstName} ${data.lastName}`.trim() : undefined),
       email: data.email,
       phone: data.phone,
       department: data.department,
-      job_position: data.jobPosition,
+      manager_id: data.managerId ? parseInt(data.managerId, 10) : undefined,
+      job_position: data.jobPosition || data.job_position,
       employee_type: data.employeeType ? data.employeeType.toLowerCase().replace("-", "_") : undefined,
       status: data.status ? data.status.toLowerCase() : undefined,
     };
+
     const response = await api.put(`/employees/${id}`, payload);
-    return response.data?.data;
+    const updated = response.data?.data?.employee || response.data?.data;
+    return formatEmployee(updated);
   } catch (err) {
     console.warn("Backend updateEmployee failed, updating locally:", err.message);
     const idx = localEmployees.findIndex((e) => String(e.id) === String(id));
@@ -222,28 +221,49 @@ export const updateEmployee = async (id, data) => {
 };
 
 /**
- * Delete an employee
+ * PATCH /employees/:id/deactivate
+ * Deactivate employee
  */
-export const deleteEmployee = async (id) => {
+export const deactivateEmployee = async (id) => {
   try {
-    await api.delete(`/employees/${id}`);
+    await api.patch(`/employees/${id}/deactivate`);
     return true;
   } catch (err) {
-    console.warn("Backend deleteEmployee failed:", err.message);
-    localEmployees = localEmployees.filter((e) => String(e.id) !== String(id));
-    return true;
+    console.warn("Backend deactivate failed, updating status locally:", err.message);
+    return updateEmployee(id, { status: "Inactive" });
   }
 };
 
 /**
- * Archive an employee
+ * PATCH /employees/:id/reactivate
+ * Reactivate employee
  */
-export const archiveEmployee = async (id) => {
-  return updateEmployee(id, { status: "Inactive" });
+export const reactivateEmployee = async (id) => {
+  try {
+    await api.patch(`/employees/${id}/reactivate`);
+    return true;
+  } catch (err) {
+    console.warn("Backend reactivate failed, updating status locally:", err.message);
+    return updateEmployee(id, { status: "Active" });
+  }
 };
 
 /**
- * Get relation counts
+ * Delete employee
+ */
+export const deleteEmployee = async (id) => {
+  return deactivateEmployee(id);
+};
+
+/**
+ * Archive employee
+ */
+export const archiveEmployee = async (id) => {
+  return deactivateEmployee(id);
+};
+
+/**
+ * Get employee relation counts for detail page smart buttons
  */
 export const getEmployeeRelationCounts = async (employeeId) => {
   try {
@@ -270,4 +290,17 @@ export const getEmployeeRelationCounts = async (employeeId) => {
       payslips: 2,
     };
   }
+};
+
+export default {
+  getEmployees,
+  getEmployeeById,
+  getMyEmployeeProfile,
+  createEmployee,
+  updateEmployee,
+  deactivateEmployee,
+  reactivateEmployee,
+  deleteEmployee,
+  archiveEmployee,
+  getEmployeeRelationCounts,
 };

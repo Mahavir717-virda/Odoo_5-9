@@ -194,18 +194,26 @@ export default function EmployeeDetailsPage() {
     };
   }, [id]);
 
-  // Handle Archive action
-  const handleArchive = async () => {
-    if (!window.confirm("Archive this employee? This will mark their status as Inactive.")) {
-      return;
-    }
-
-    try {
-      await employeeService.archiveEmployee(id);
-      setEmployee((prev) => (prev ? { ...prev, status: "Inactive" } : null));
-      alert("Employee archived successfully.");
-    } catch (err) {
-      alert(err.message || "Failed to archive employee.");
+  // Handle Deactivate / Reactivate actions
+  const handleToggleStatus = async () => {
+    const isInactive = employee?.status?.toLowerCase() === "inactive";
+    if (isInactive) {
+      try {
+        await employeeService.reactivateEmployee(id);
+        setEmployee((prev) => (prev ? { ...prev, status: "Active" } : null));
+      } catch (err) {
+        alert(err.message || "Failed to reactivate employee.");
+      }
+    } else {
+      if (!window.confirm("Deactivate this employee? This will mark their status as Inactive.")) {
+        return;
+      }
+      try {
+        await employeeService.deactivateEmployee(id);
+        setEmployee((prev) => (prev ? { ...prev, status: "Inactive" } : null));
+      } catch (err) {
+        alert(err.message || "Failed to deactivate employee.");
+      }
     }
   };
 
@@ -340,11 +348,11 @@ export default function EmployeeDetailsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleArchive}
+                  onClick={handleToggleStatus}
                   className="text-xs gap-1.5 text-muted-foreground hover:text-destructive hover:border-destructive/30"
                 >
                   <Archive className="w-3.5 h-3.5" />
-                  Archive
+                  {employee?.status?.toLowerCase() === "inactive" ? "Reactivate" : "Deactivate"}
                 </Button>
               )}
 

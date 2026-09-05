@@ -41,6 +41,9 @@ export function AuthProvider({ children }) {
 
   const register = async (formData) => {
     const newUser = await authService.registerUser(formData);
+    if (newUser) {
+      setUser(newUser);
+    }
     return newUser;
   };
 
