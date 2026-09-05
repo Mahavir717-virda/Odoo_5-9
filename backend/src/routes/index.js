@@ -4,12 +4,17 @@ import authRoutes from "./auth.js";
 import employeeRoutes from "./employees.js";
 import contractRoutes from "./contracts.js";
 import attendanceRoutes from "./attendance.js";
+
+import timeOffRoutes from "./timeOff.js";
+import payslipRoutes from "./payslips.js";
+
 import salaryRulesRoutes from "./salaryRules.js";
 import salaryStructuresRoutes from "./salaryStructures.js";
 import payrunRoutes from "./payruns.js";
 import payslipRoutes from "./payslips.js";
 import timeOffRoutes from "./timeOff.js";
 import reportRoutes from "./reports.js";
+
 
 const router = express.Router();
 
@@ -47,3 +52,4 @@ router.use("/time-off", timeOffRoutes);
 router.use("/reports", reportRoutes);
 
 export default router;
+
