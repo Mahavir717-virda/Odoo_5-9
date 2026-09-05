@@ -30,12 +30,7 @@ import {
 
 import * as portalService from "../../services/employeePortalService";
 
-const LEAVE_TYPE_OPTIONS = [
-  { value: "Paid Annual Leave", label: "Paid Annual Leave (AL)" },
-  { value: "Sick Leave", label: "Sick Leave (SL)" },
-  { value: "Casual Leave", label: "Casual Leave (CL)" },
-  { value: "Compensatory Off", label: "Compensatory Off (CO)" },
-];
+// LEAVE_TYPE_OPTIONS removed — now loaded dynamically from backend
 
 export default function MyTimeOffPage() {
   const [data, setData] = useState(null);
@@ -48,8 +43,8 @@ export default function MyTimeOffPage() {
   const [requestSuccess, setRequestSuccess] = useState(false);
   const [formError, setFormError] = useState(null);
 
-  // Form State
-  const [leaveType, setLeaveType] = useState("Paid Annual Leave");
+  // Form State — leaveType stores the type id as string
+  const [leaveType, setLeaveType] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [reason, setReason] = useState("");
@@ -71,6 +66,13 @@ export default function MyTimeOffPage() {
   useEffect(() => {
     fetchLeaves();
   }, []);
+
+  // Set default leaveType once types are loaded
+  useEffect(() => {
+    if (data?.types?.length > 0 && !leaveType) {
+      setLeaveType(String(data.types[0].id));
+    }
+  }, [data?.types]);
 
   // Calculate day count
   const calculatedDays = useMemo(() => {
@@ -99,14 +101,10 @@ export default function MyTimeOffPage() {
 
     setSubmitting(true);
     try {
-      // Find type ID if available from backend data
       const typeObj = (data?.types || []).find(
-        (t) => t.name.toLowerCase() === leaveType.toLowerCase() || t.id === Number(leaveType)
-      ) || (data?.balances || []).find(
-        (b) => b.type.toLowerCase() === leaveType.toLowerCase()
+        (t) => String(t.id) === String(leaveType)
       );
-
-      const typeId = typeObj?.typeId || typeObj?.id || 1;
+      const typeId = typeObj?.id || parseInt(leaveType, 10) || 1;
 
       await portalService.submitTimeOffRequest({
         typeId,
@@ -268,8 +266,6 @@ export default function MyTimeOffPage() {
       {/* Leave Balances Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {balances.map((b) => {
-          const percentUsed = Math.round((b.used / b.total) * 100);
-
           return (
             <Card
               key={b.id}
@@ -281,21 +277,21 @@ export default function MyTimeOffPage() {
                     {b.type}
                   </span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                    {b.code}
+                    {b.unit || "days"}
                   </span>
                 </div>
 
                 <div className="flex items-baseline justify-between">
                   <div>
                     <span className="text-2xl font-bold text-foreground">
-                      {b.remaining}
+                      {b.remaining ?? 0}
                     </span>
                     <span className="text-xs text-muted-foreground ml-1">
-                      / {b.total} days left
+                      / {b.allocated ?? b.total ?? 0} {b.unit || "days"} left
                     </span>
                   </div>
                   <span className="text-[11px] text-muted-foreground">
-                    {b.used} used
+                    {b.used ?? 0} used
                   </span>
                 </div>
 
@@ -303,7 +299,7 @@ export default function MyTimeOffPage() {
                 <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                   <div
                     className="bg-primary h-1.5 rounded-full transition-all duration-300"
-                    style={{ width: `${100 - percentUsed}%` }}
+                    style={{ width: `${b.allocated > 0 ? Math.min(100, Math.round(((b.allocated - (b.used ?? 0)) / b.allocated) * 100)) : 0}%` }}
                   />
                 </div>
               </CardContent>
@@ -371,11 +367,16 @@ export default function MyTimeOffPage() {
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {LEAVE_TYPE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                          {opt.label}
-                        </SelectItem>
-                      ))}
+                      {(data?.types || []).length > 0
+                        ? (data.types.map((t) => (
+                          <SelectItem key={t.id} value={String(t.id)} className="text-xs">
+                            {t.name} ({t.unit})
+                          </SelectItem>
+                        )))
+                        : (
+                          <SelectItem value="1" className="text-xs">Paid Annual Leave (days)</SelectItem>
+                        )
+                      }
                     </SelectContent>
                   </Select>
                 </FormField>

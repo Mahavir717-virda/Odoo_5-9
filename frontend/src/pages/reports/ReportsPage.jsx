@@ -28,6 +28,7 @@ export default function ReportsPage() {
   // Filters
   const [periodStart, setPeriodStart] = useState("");
   const [periodEnd, setPeriodEnd] = useState("");
+  const [deptFilter, setDeptFilter] = useState("all");
 
   // Data states
   const [summaryData, setSummaryData] = useState(null);
@@ -77,14 +78,29 @@ export default function ReportsPage() {
   const handleResetFilter = () => {
     setPeriodStart("");
     setPeriodEnd("");
-    setTimeout(() => {
-      fetchReports();
-    }, 0);
+    setDeptFilter("all");
+    // Fetch with cleared values immediately
+    setLoading(true);
+    setError("");
+    Promise.all([
+      getPayrollSummaryReport({}).catch(() => null),
+      getDepartmentCostReport({}).catch(() => []),
+    ]).then(([summaryRes, deptRes]) => {
+      setSummaryData(summaryRes);
+      setDeptCostData(Array.isArray(deptRes) ? deptRes : []);
+    }).catch(() => {}).finally(() => setLoading(false));
   };
 
   const handlePrint = () => {
     window.print();
   };
+
+  // Dept cost data filtered client-side by department
+  const filteredDeptCostData = deptFilter === "all"
+    ? deptCostData
+    : deptCostData.filter((d) =>
+        (d.department_name || d.name || "").toLowerCase() === deptFilter.toLowerCase()
+      );
 
   // Safe KPI calculations from summaryData or calculated fallbacks
   const totalGross = parseFloat(
@@ -162,6 +178,24 @@ export default function ReportsPage() {
               className="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
             />
           </div>
+
+          {deptCostData.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Department:</span>
+              <select
+                value={deptFilter}
+                onChange={(e) => setDeptFilter(e.target.value)}
+                className="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+              >
+                <option value="all">All Departments</option>
+                {deptCostData.map((d, i) => (
+                  <option key={i} value={d.department_name || d.name}>
+                    {d.department_name || d.name || "General"}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <button
             type="submit"
@@ -410,7 +444,7 @@ export default function ReportsPage() {
               <RefreshCw className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-3" />
               <p className="text-sm text-slate-500">Loading department cost breakdown...</p>
             </div>
-          ) : deptCostData.length === 0 ? (
+          ) : filteredDeptCostData.length === 0 ? (
             <div className="p-12 text-center">
               <Building2 className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
               <h4 className="text-base font-semibold text-slate-900 dark:text-white">
@@ -434,7 +468,7 @@ export default function ReportsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
-                  {deptCostData.map((dept, idx) => {
+                  {filteredDeptCostData.map((dept, idx) => {
                     const deptGross = parseFloat(dept.total_gross_cost || dept.gross_wages || dept.total_gross || 0);
                     const deptNet = parseFloat(dept.total_net_cost || dept.net_wages || dept.total_net || 0);
                     const headcount = parseInt(dept.headcount || dept.employee_count || 1, 10);

@@ -261,10 +261,10 @@ export default function MyAttendancePage() {
             <div>
               <p className="text-xs font-medium text-muted-foreground">Total Hours</p>
               <p className="text-xl font-bold text-foreground mt-1">
-                {monthlySummary?.totalHours || "168h 15m"}
+                {monthlySummary?.totalHours || "0h 00m"}
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Avg: {monthlySummary?.averageDailyHours || "8h 24m"}/day
+                Avg: {monthlySummary?.averageDailyHours || "0h"}/day
               </p>
             </div>
             <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600">
@@ -278,12 +278,12 @@ export default function MyAttendancePage() {
             <div>
               <p className="text-xs font-medium text-muted-foreground">Days Present</p>
               <p className="text-xl font-bold text-foreground mt-1">
-                {monthlySummary?.presentDays || 20}{" "}
-                <span className="text-xs font-normal text-muted-foreground">/ 22</span>
+                {monthlySummary?.presentDays ?? 0}{" "}
+                <span className="text-xs font-normal text-muted-foreground">/ {monthlySummary?.totalDays ?? 0} total</span>
               </p>
               <div className="flex items-center gap-1 text-[11px] text-emerald-600 mt-0.5">
                 <CheckCircle2 className="w-3 h-3" />
-                <span>91% Attendance</span>
+                <span>{monthlySummary?.totalDays > 0 ? Math.round(((monthlySummary.presentDays + (monthlySummary.lateDays || 0)) / monthlySummary.totalDays) * 100) : 0}% Attendance</span>
               </div>
             </div>
             <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
@@ -297,7 +297,7 @@ export default function MyAttendancePage() {
             <div>
               <p className="text-xs font-medium text-muted-foreground">Late Arrivals</p>
               <p className="text-xl font-bold text-foreground mt-1">
-                {monthlySummary?.lateDays || 2}
+                {monthlySummary?.lateDays ?? 0}
               </p>
               <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5">
                 Within acceptable threshold
@@ -314,7 +314,7 @@ export default function MyAttendancePage() {
             <div>
               <p className="text-xs font-medium text-muted-foreground">Overtime Hours</p>
               <p className="text-xl font-bold text-foreground mt-1">
-                {monthlySummary?.overtimeHours || "3h 45m"}
+                {monthlySummary?.overtimeHours || "0h 00m"}
               </p>
               <p className="text-[11px] text-purple-600 dark:text-purple-400 mt-0.5">
                 Compensable
