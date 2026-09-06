@@ -51,7 +51,7 @@ export const checkContractOverlap = async (
 /**
  * List all contracts with basic employee and salary structure info
  */
-export const listContracts = async ({ employee_id, status, department, search }) => {
+export const listContracts = async ({ employee_id, status, department, search, limit = 100, offset = 0 }) => {
   let query = `
     SELECT 
       c.id,
@@ -105,6 +105,16 @@ export const listContracts = async ({ employee_id, status, department, search })
   }
 
   query += ` ORDER BY c.start_date DESC, c.id DESC`;
+
+  if (limit && Number(limit) > 0) {
+    params.push(Number(limit));
+    query += ` LIMIT $${params.length}`;
+  }
+
+  if (offset && Number(offset) > 0) {
+    params.push(Number(offset));
+    query += ` OFFSET $${params.length}`;
+  }
 
   const result = await pool.query(query, params);
 

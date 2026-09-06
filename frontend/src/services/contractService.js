@@ -63,12 +63,16 @@ export const getContracts = async ({
   employeeId,
   department,
   status,
+  limit = 100,
+  page = 1,
 } = {}) => {
   const params = new URLSearchParams();
   if (search && search.trim()) params.append("search", search.trim());
   if (employeeId && employeeId !== "all") params.append("employee_id", normalizeId(employeeId));
   if (department && department !== "all") params.append("department", department);
   if (status && status !== "all") params.append("status", status.toLowerCase());
+  if (limit) params.append("limit", limit);
+  if (page && page > 1) params.append("offset", (page - 1) * limit);
 
   const response = await api.get(`/contracts?${params.toString()}`);
   const rows = response.data?.data?.contracts || response.data?.data;

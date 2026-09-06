@@ -45,13 +45,15 @@ router.get(
   requireRole("admin", "hr_manager", "hr_payroll_manager", "hr_payroll_user"),
   async (req, res, next) => {
     try {
-      const { employee_id, status, department, search } = req.query;
+      const { employee_id, status, department, search, limit, offset } = req.query;
 
       const contracts = await contractService.listContracts({
         employee_id: employee_id ? parseId(employee_id) : undefined,
         status,
         department,
         search,
+        limit: limit !== undefined ? parseInt(limit, 10) : 100,
+        offset: offset !== undefined ? parseInt(offset, 10) : 0,
       });
 
       return res.status(200).json({
