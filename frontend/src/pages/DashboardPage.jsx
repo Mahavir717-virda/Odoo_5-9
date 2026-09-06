@@ -32,7 +32,7 @@ import StatusBadge from "../components/common/StatusBadge";
 import * as portalService from "../services/employeePortalService";
 import { listPayruns } from "../services/payrollManagerService";
 import { listRequests } from "../services/managerTimeOffService";
-import { getEmployees } from "../services/employeeService";
+import api from "../services/api";
 import AttendanceLeaderboard from "../components/attendance/AttendanceLeaderboard";
 
 /**
@@ -84,16 +84,17 @@ export default function Dashboard() {
       setDashboardData(essData);
 
       if (!isEmployeeRole) {
-        // Load manager-level counts
-        const [empRes, leaveRes, payrunRes] = await Promise.all([
-          getEmployees().catch(() => []),
+        // Load manager-level counts efficiently using server KPI aggregation
+        const [dashReport, leaveRes, payrunRes] = await Promise.all([
+          api.get("/reports/dashboard").catch(() => ({ data: { data: {} } })),
           listRequests({ status: "pending" }).catch(() => ({ data: [] })),
           listPayruns({ limit: 10 }).catch(() => ({ data: [] })),
         ]);
 
+        const rData = dashReport.data?.data || {};
         setManagerMetrics({
-          totalEmployees: Array.isArray(empRes) ? empRes.length : 0,
-          pendingLeaves: Array.isArray(leaveRes.data) ? leaveRes.data.length : 0,
+          totalEmployees: rData.employees?.total_employees || 0,
+          pendingLeaves: rData.leave?.pending_leave_requests || (Array.isArray(leaveRes.data) ? leaveRes.data.length : 0),
           activePayruns: Array.isArray(payrunRes.data) ? payrunRes.data.length : 0,
         });
       }

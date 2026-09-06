@@ -64,6 +64,7 @@ export const getEmployees = async ({
   if (department && department !== "all") params.append("department", department);
   if (status && status !== "all") params.append("status", status.toLowerCase());
   if (employeeType && employeeType !== "all") params.append("employee_type", employeeType.toLowerCase().replace("-", "_"));
+  if (managerId && managerId !== "all") params.append("manager_id", managerId);
   if (page) params.append("page", page);
   if (limit) params.append("limit", limit);
 

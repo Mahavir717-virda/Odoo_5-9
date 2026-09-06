@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users,
@@ -123,25 +123,19 @@ export default function EmployeesListPage() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // Initial load to discover manager list
+  // Derive manager options from fetched employees
   useEffect(() => {
-    let isMounted = true;
-    employeeService
-      .getEmployees()
-      .then((allData) => {
-        if (isMounted) {
-          const managers = deriveManagerOptions(allData);
-          setManagerOptions(managers);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load initial manager options:", err);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    if (employees.length > 0) {
+      const managers = deriveManagerOptions(employees);
+      if (managers.length > 0) {
+        setManagerOptions((prev) => {
+          const map = new Map(prev.map((m) => [m.value, m]));
+          managers.forEach((m) => map.set(m.value, m));
+          return Array.from(map.values());
+        });
+      }
+    }
+  }, [employees]);
 
   // Fetch filtered employees
   useEffect(() => {

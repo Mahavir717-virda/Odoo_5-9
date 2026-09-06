@@ -81,12 +81,12 @@ export default function ContractFormPage() {
   const [submitError, setSubmitError] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // Load available employees on mount
+  // Load available employees on mount (limit 100 active employees)
   useEffect(() => {
     let isMounted = true;
     setLoadingEmployees(true);
     employeeService
-      .getEmployees()
+      .getEmployees({ limit: 100, status: "Active" })
       .then((data) => {
         if (isMounted) {
           setEmployees(data || []);

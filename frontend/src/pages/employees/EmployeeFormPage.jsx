@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -138,10 +138,10 @@ export default function EmployeeFormPage() {
       });
   }, []);
 
-  // Fetch all employees for manager dropdown
+  // Fetch managers for manager dropdown
   useEffect(() => {
     employeeService
-      .getEmployees()
+      .getEmployees({ limit: 50, status: "Active" })
       .then((emps) => {
         // Exclude current employee if editing to avoid circular manager loop
         const filtered = isEditMode ? emps.filter((e) => e.id !== id) : emps;
