@@ -141,7 +141,8 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
           <>
             <NavItem to="/dashboard" icon={LayoutDashboard} label="Dashboard" exact />
             <SectionLabel>My Workspace</SectionLabel>
-            <NavItem to="/profile"      icon={User}     label="My Profile" />
+            <NavItem to="/profile"       icon={User}     label="My Profile" />
+            <NavItem to="/calendar"      icon={Calendar} label="Calendar" />
             <NavItem to="/my-attendance" icon={Clock}    label="My Attendance" />
             <NavItem to="/my-time-off"  icon={Calendar} label="My Time Off" />
             <NavItem to="/my-payslips"  icon={FileText}  label="My Payslips" />
@@ -157,12 +158,13 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
                 icon={User}
                 label="My Workspace"
                 isActiveSection={
-                  location.pathname.startsWith("/my-") || location.pathname === "/profile"
+                  location.pathname.startsWith("/my-") || location.pathname === "/profile" || location.pathname === "/calendar"
                 }
               />
               {(openSections.workspace || (!showLabel)) && (
                 <div className={`mt-1 space-y-1 ${showLabel ? "pl-4" : ""}`}>
                   <NavItem to="/profile"       icon={User}     label="My Profile" />
+                  <NavItem to="/calendar"      icon={Calendar} label="Calendar" />
                   <NavItem to="/my-attendance"  icon={Clock}    label="My Attendance" />
                   <NavItem to="/my-time-off"   icon={Calendar} label="My Time Off" />
                   <NavItem to="/my-payslips"   icon={FileText}  label="My Payslips" />

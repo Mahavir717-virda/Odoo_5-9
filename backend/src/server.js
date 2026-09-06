@@ -7,6 +7,7 @@ import cors from "cors";
 import v1Routes from "./routes/index.routes.js";
 import errorHandler from "./middleware/error.middleware.js";
 import { initWebSocket } from "./services/socketService.js";
+import { startLeaveReminderCron } from "./services/leaveReminderCron.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -29,6 +30,7 @@ initWebSocket(server);
 // Start Server & Check Database Connection
 server.listen(PORT, async () => {
   console.log(`🚀 PeoplePay360 Server running on port ${PORT}`);
+  startLeaveReminderCron();
   try {
     const { pool } = await import("./db.js");
     const res = await pool.query("SELECT current_database() AS db, inet_server_addr() AS host, inet_server_port() AS port");
