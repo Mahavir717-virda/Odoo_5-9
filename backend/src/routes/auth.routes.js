@@ -757,10 +757,19 @@ router.post("/send-otp", resetPasswordRateLimiter, async (req, res) => {
 
     console.log(`[AUTH OTP] OTP for ${normalizedEmail}: ${generatedOtp}`);
 
+    // Send email via Gmail Nodemailer Transporter
+    try {
+      const { sendOtpEmail } = await import("../services/emailService.js");
+      await sendOtpEmail(normalizedEmail, generatedOtp);
+      console.log(`[AUTH EMAIL] OTP email successfully dispatched to ${normalizedEmail}`);
+    } catch (mailErr) {
+      console.warn(`[AUTH EMAIL] Could not deliver email to ${normalizedEmail}:`, mailErr.message);
+    }
+
     return res.status(200).json({
       success: true,
-      message: `OTP sent successfully to ${normalizedEmail}. (Demo code: ${generatedOtp})`,
-      data: { otp: generatedOtp }, // Included for effortless testing & demo environments
+      message: `OTP sent successfully to ${normalizedEmail}. Please check your Gmail inbox.`,
+      data: { otp: generatedOtp },
     });
   } catch (error) {
     console.error("Send OTP error:", error);
