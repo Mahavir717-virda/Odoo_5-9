@@ -9,7 +9,7 @@ const VALID_STATUSES = ["active", "inactive", "terminated"];
 /**
  * List employees with optional filters: department, status, employee_type, search
  */
-const listEmployees = async ({ department, status, employee_type, search }) => {
+const listEmployees = async ({ department, status, employee_type, manager_id, search, limit = 100, offset = 0 }) => {
   let query = `
       SELECT 
         e.id,
@@ -51,6 +51,11 @@ const listEmployees = async ({ department, status, employee_type, search }) => {
     query += ` AND e.employee_type = $${params.length}`;
   }
 
+  if (manager_id) {
+    params.push(manager_id);
+    query += ` AND e.manager_id = $${params.length}`;
+  }
+
   if (search) {
     params.push(`%${search}%`);
     const pIdx = params.length;
@@ -63,6 +68,16 @@ const listEmployees = async ({ department, status, employee_type, search }) => {
   }
 
   query += ` ORDER BY e.id ASC`;
+
+  if (limit && Number(limit) > 0) {
+    params.push(Number(limit));
+    query += ` LIMIT $${params.length}`;
+  }
+
+  if (offset && Number(offset) > 0) {
+    params.push(Number(offset));
+    query += ` OFFSET $${params.length}`;
+  }
 
   const result = await pool.query(query, params);
 
