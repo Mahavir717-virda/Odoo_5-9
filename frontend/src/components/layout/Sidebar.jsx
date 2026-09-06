@@ -129,8 +129,8 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
     >
       {/* ── Brand Header ── */}
       <div className="h-16 flex items-center px-4 shrink-0 border-b border-slate-200/80">
-        <Link to="/dashboard" className="flex items-center justify-center overflow-hidden py-1">
-          <Logo size={showLabel ? 38 : 28} lightText={false} />
+        <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden py-1">
+          <Logo size={showLabel ? 36 : 28} showText={showLabel} lightText={false} />
         </Link>
       </div>
 
