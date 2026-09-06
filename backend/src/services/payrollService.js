@@ -1246,6 +1246,60 @@ export const recalculatePayslip = async (id) => {
   }
 };
 
+/**
+ * Automatically recompute all active draft/computed payslips that depend on a modified salary structure
+ */
+export const recalculateDraftPayslipsForStructure = async (structureId) => {
+  try {
+    const sId = parseId(structureId);
+    if (!sId) return;
+
+    // Find all unfinalized payslips (status IN ('draft', 'computed')) under this structure
+    const query = `
+      SELECT ps.id AS payslip_id, ps.payrun_id
+      FROM payslips ps
+      JOIN contracts c ON ps.contract_id = c.id
+      JOIN payruns pr ON ps.payrun_id = pr.id
+      WHERE (c.structure_id = $1 OR pr.structure_id = $1)
+        AND ps.status IN ('draft', 'computed')
+        AND pr.status IN ('draft', 'computed')
+    `;
+    const res = await pool.query(query, [sId]);
+
+    for (const row of res.rows) {
+      try {
+        await recalculatePayslip(row.payslip_id);
+      } catch (recalcErr) {
+        console.warn(`[Auto-Recalc] Failed to recompute payslip #${row.payslip_id}:`, recalcErr.message);
+      }
+    }
+  } catch (err) {
+    console.error(`[Auto-Recalc] Error in recalculateDraftPayslipsForStructure:`, err);
+  }
+};
+
+/**
+ * Automatically recompute all active draft/computed payslips that depend on a modified salary rule
+ */
+export const recalculateDraftPayslipsForRule = async (ruleId) => {
+  try {
+    const rId = parseId(ruleId);
+    if (!rId) return;
+
+    // Find all structures that include this rule
+    const structRes = await pool.query(
+      "SELECT id FROM salary_structures WHERE $1 = ANY(rule_ids)",
+      [rId]
+    );
+
+    for (const s of structRes.rows) {
+      await recalculateDraftPayslipsForStructure(s.id);
+    }
+  } catch (err) {
+    console.error(`[Auto-Recalc] Error in recalculateDraftPayslipsForRule:`, err);
+  }
+};
+
 export default {
   listPayruns,
   getPayrunById,
@@ -1261,4 +1315,6 @@ export default {
   getEmployeePayslips,
   getPayrunPayslips,
   recalculatePayslip,
+  recalculateDraftPayslipsForStructure,
+  recalculateDraftPayslipsForRule,
 };

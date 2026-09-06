@@ -328,6 +328,16 @@ export const updateSalaryStructure = async (id, data) => {
 
   const rules = await fetchRulesForIds(row.rule_ids || []);
 
+  // Auto-detect and recalculate unfinalized payslips under this structure
+  try {
+    const { recalculateDraftPayslipsForStructure } = await import("./payrollService.js");
+    const { broadcastLeaderboardUpdate } = await import("./socketService.js");
+    recalculateDraftPayslipsForStructure(parsedId).catch((e) => console.warn(e.message));
+    broadcastLeaderboardUpdate({ type: "STRUCTURE_UPDATED", structureId: parsedId });
+  } catch (recalcErr) {
+    console.warn("Could not trigger auto-recalc for structure:", recalcErr.message);
+  }
+
   return {
     id: row.id,
     name: row.name,
