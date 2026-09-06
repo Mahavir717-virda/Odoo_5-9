@@ -4,11 +4,10 @@
  */
 
 import api from "./api";
-import { mockSchedules } from "../data/mockSchedules";
 import { calculateWeeklyHours } from "../utils/scheduleCalculations";
 
 // In-memory fallback
-let localSchedules = [...mockSchedules];
+let localSchedules = [];
 
 /**
  * Decorate a raw schedule object with live-calculated fields

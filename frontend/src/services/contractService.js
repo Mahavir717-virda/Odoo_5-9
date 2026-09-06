@@ -4,12 +4,8 @@
  */
 
 import api from "./api";
-import { mockContracts } from "../data/mockContracts";
-import { mockEmployees } from "../data/mockEmployees";
 
-const empMap = new Map(
-  mockEmployees.map((e) => [String(e.id), `${e.firstName} ${e.lastName}`])
-);
+const empMap = new Map();
 
 export const normalizeId = (id) => String(id || "").trim().replace(/^(emp|con)-/i, "");
 
@@ -91,7 +87,7 @@ function enforceSingleActiveContract(contractsList) {
 }
 
 // In-memory fallback
-let localContracts = [...mockContracts];
+let localContracts = [];
 
 export const getContracts = async ({
   search,

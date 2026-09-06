@@ -4,10 +4,9 @@
  */
 
 import api from "./api";
-import { mockEmployees } from "../data/mockEmployees";
-
+ 
 // Fallback cache
-let localEmployees = [...mockEmployees];
+let localEmployees = [];
 
 /**
  * Normalizes backend employee record to frontend model
