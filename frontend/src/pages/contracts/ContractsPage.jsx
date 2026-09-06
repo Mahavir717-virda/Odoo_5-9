@@ -33,35 +33,7 @@ const STATUS_OPTIONS = [
   { value: "Cancelled", label: "Cancelled" },
 ];
 
-/**
- * Format currency to Indian Rupee (INR)
- */
-function formatCurrency(amount) {
-  if (amount == null) return "â€”";
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-/**
- * Format ISO date string into readable format (e.g. "Jan 15, 2024")
- */
-function formatDate(dateString) {
-  if (!dateString) return "â€”";
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return dateString;
-  }
-}
+import { formatCurrency, formatDate } from "../../utils/formatters";
 
 export default function ContractsPage() {
   const navigate = useNavigate();

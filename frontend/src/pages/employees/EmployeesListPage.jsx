@@ -257,7 +257,7 @@ export default function EmployeesListPage() {
         key: "managerName",
         header: "Manager",
         sortable: true,
-        render: (row) => row.managerName || <span className="text-muted-foreground">â€”</span>,
+        render: (row) => row.managerName || <span className="text-muted-foreground">—</span>,
       },
       {
         key: "workSchedule",

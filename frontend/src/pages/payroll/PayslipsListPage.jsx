@@ -19,6 +19,25 @@ import {
   Download,
 } from "lucide-react";
 import { listPayslips, listPayruns } from "../../services/payrollManagerService";
+import { formatCurrency } from "../../utils/formatters";
+
+const STAGGER_CONTAINER_VARIANTS = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.06,
+    },
+  },
+};
+
+const CARD_ANIMATION_VARIANTS = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.25, ease: "easeOut" },
+  },
+};
 
 export default function PayslipsListPage() {
   const navigate = useNavigate();
@@ -366,19 +385,19 @@ export default function PayslipsListPage() {
                       </td>
 
                       <td className="py-3.5 px-4 text-right font-medium text-slate-600 dark:text-slate-300">
-                        ${basicWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        {formatCurrency(basicWage)}
                       </td>
 
                       <td className="py-3.5 px-4 text-right font-medium text-slate-900 dark:text-white">
-                        ${grossWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        {formatCurrency(grossWage)}
                       </td>
 
                       <td className="py-3.5 px-4 text-right font-medium text-rose-600 dark:text-rose-400">
-                        -${totalDeductions.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        -{formatCurrency(totalDeductions)}
                       </td>
 
                       <td className="py-3.5 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
-                        ${netWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        {formatCurrency(netWage)}
                       </td>
 
                       <td className="py-3.5 px-4 text-center">

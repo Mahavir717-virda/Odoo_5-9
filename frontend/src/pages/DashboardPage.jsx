@@ -143,7 +143,7 @@ export default function Dashboard() {
     year: "numeric",
   });
 
-  const { punchState, stats, recentAttendance, recentLeaves, holidays } =
+  const { punchState, stats, recentAttendance, recentLeaves, holidays, isInactive } =
     dashboardData || {};
 
   if (loading) {
@@ -176,12 +176,19 @@ export default function Dashboard() {
               <span className="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-semibold uppercase tracking-wider">
                 {formatRole(user?.role)}
               </span>
+              {isInactive && (
+                <span className="px-2 py-0.5 rounded-full bg-rose-500/80 text-white text-[10px] font-semibold uppercase tracking-wider">
+                  Deactivated Account
+                </span>
+              )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
               Good day, {user?.name || "Team Member"}!
             </h1>
             <p className="text-sky-100/90 text-sm mt-1 max-w-md">
-              {isEmployeeRole
+              {isInactive
+                ? "Your employee account is currently deactivated. Attendance logging and self-service requests are stopped."
+                : isEmployeeRole
                 ? "Welcome to your PeoplePay360 self-service workspace. Track your daily hours, leave allowances, and payslips."
                 : "Manage company payroll cycles, time off approvals, employee attendance, and your personal portal."}
             </p>
@@ -193,7 +200,9 @@ export default function Dashboard() {
               <div className="flex items-center gap-2">
                 <span
                   className={`w-2.5 h-2.5 rounded-full ${
-                    punchState?.isClockedIn
+                    isInactive
+                      ? "bg-slate-400"
+                      : punchState?.isClockedIn
                       ? punchState?.isOnBreak
                         ? "bg-amber-300 animate-pulse"
                         : "bg-emerald-300 animate-pulse"
@@ -201,7 +210,9 @@ export default function Dashboard() {
                   }`}
                 />
                 <span className="text-xs font-semibold uppercase tracking-wider text-sky-100">
-                  {punchState?.isClockedIn
+                  {isInactive
+                    ? "Access Stopped"
+                    : punchState?.isClockedIn
                     ? punchState?.isOnBreak
                       ? "On Break"
                       : "Checked In"
@@ -209,14 +220,25 @@ export default function Dashboard() {
                 </span>
               </div>
               <p className="text-base font-mono font-bold mt-0.5 text-white">
-                {punchState?.isClockedIn
+                {isInactive
+                  ? "Account Inactive"
+                  : punchState?.isClockedIn
                   ? `Since ${punchState?.clockInTime}`
                   : "Not Clocked In"}
               </p>
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              {punchState?.isClockedIn ? (
+              {isInactive ? (
+                <Button
+                  size="sm"
+                  disabled
+                  className="bg-white/30 text-white text-xs gap-1.5 font-medium rounded-full px-4 cursor-not-allowed opacity-80"
+                >
+                  <AlertCircle className="w-3.5 h-3.5 text-rose-200" />
+                  Clock Disabled
+                </Button>
+              ) : punchState?.isClockedIn ? (
                 <>
                   {punchState?.isOnBreak ? (
                     <Button

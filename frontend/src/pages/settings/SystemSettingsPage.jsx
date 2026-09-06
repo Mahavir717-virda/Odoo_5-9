@@ -250,9 +250,9 @@ export default function SystemSettingsPage() {
                     className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   >
                     <option value="USD">USD ($ - US Dollar)</option>
-                    <option value="EUR">EUR (â‚¬ - Euro)</option>
-                    <option value="GBP">GBP (Â£ - British Pound)</option>
-                    <option value="INR">INR (â‚¹ - Indian Rupee)</option>
+                    <option value="EUR">EUR (€ - Euro)</option>
+                    <option value="GBP">GBP (£ - British Pound)</option>
+                    <option value="INR">INR (₹ - Indian Rupee)</option>
                   </select>
                 </div>
 

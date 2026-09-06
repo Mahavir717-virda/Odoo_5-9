@@ -638,6 +638,16 @@ const deactivateEmployee = async (id) => {
     throw err;
   }
 
+  // Stop any active open attendance check-ins immediately
+  await pool.query(
+    `UPDATE attendance
+     SET check_out = COALESCE(check_out, NOW()),
+         worked_hours = COALESCE(worked_hours, EXTRACT(EPOCH FROM (NOW() - check_in))/3600),
+         updated_at = NOW()
+     WHERE employee_id = $1 AND check_out IS NULL`,
+    [id]
+  );
+
   return true;
 };
 

@@ -93,7 +93,7 @@ export const getDashboard = async () => {
  * 2. GET /api/v1/reports/payroll-summary
  * Summary of payruns, payslips, gross, deductions, and net amounts
  */
-export const getPayrollSummary = async ({ payrun_id, from_date, to_date }) => {
+export const getPayrollSummary = async ({ payrun_id, from_date, to_date, department }) => {
   let payrunWhere = "WHERE 1=1";
   const payrunParams = [];
 
@@ -110,12 +110,17 @@ export const getPayrollSummary = async ({ payrun_id, from_date, to_date }) => {
 
   if (from_date) {
     payrunParams.push(from_date);
-    payrunWhere += ` AND pr.period_start >= $${payrunParams.length}`;
+    payrunWhere += ` AND pr.period_end >= $${payrunParams.length}`;
   }
 
   if (to_date) {
     payrunParams.push(to_date);
-    payrunWhere += ` AND pr.period_end <= $${payrunParams.length}`;
+    payrunWhere += ` AND pr.period_start <= $${payrunParams.length}`;
+  }
+
+  if (department && department !== "all") {
+    payrunParams.push(department.toLowerCase().trim());
+    payrunWhere += ` AND LOWER(TRIM(e.department)) = $${payrunParams.length}`;
   }
 
   const query = `
@@ -130,6 +135,7 @@ export const getPayrollSummary = async ({ payrun_id, from_date, to_date }) => {
       COALESCE(SUM(ps.net_salary), 0)::numeric(12,2) AS total_net
     FROM payruns pr
     LEFT JOIN payslips ps ON pr.id = ps.payrun_id
+    LEFT JOIN employees e ON ps.employee_id = e.id
     ${payrunWhere}
   `;
 
@@ -386,12 +392,12 @@ export const getDepartmentCost = async ({ period_start, period_end } = {}) => {
 
   if (period_start) {
     params.push(period_start);
-    whereConditions.push(`pr.period_start >= $${params.length}`);
+    whereConditions.push(`pr.period_end >= $${params.length}`);
   }
 
   if (period_end) {
     params.push(period_end);
-    whereConditions.push(`pr.period_end <= $${params.length}`);
+    whereConditions.push(`pr.period_start <= $${params.length}`);
   }
 
   const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
@@ -403,8 +409,8 @@ export const getDepartmentCost = async ({ period_start, period_end } = {}) => {
       COALESCE(SUM(ps.gross_salary), 0)::numeric(12,2) AS total_gross_cost,
       COALESCE(SUM(ps.net_salary), 0)::numeric(12,2) AS total_net_cost
     FROM employees e
-    LEFT JOIN payslips ps ON e.id = ps.employee_id
-    LEFT JOIN payruns pr ON ps.payrun_id = pr.id
+    JOIN payslips ps ON e.id = ps.employee_id
+    JOIN payruns pr ON ps.payrun_id = pr.id
     ${whereClause}
     GROUP BY COALESCE(NULLIF(TRIM(e.department), ''), 'General')
     ORDER BY total_gross_cost DESC, department_name ASC

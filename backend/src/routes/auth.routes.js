@@ -32,7 +32,10 @@ router.post("/login", async (req, res, next) => {
     }
 
     const userResult = await pool.query(
-      "SELECT id, email, password, role FROM users WHERE email = $1 LIMIT 1",
+      `SELECT u.id, u.email, u.password, u.role, e.status AS employee_status
+       FROM users u
+       LEFT JOIN employees e ON e.user_id = u.id
+       WHERE u.email = $1 LIMIT 1`,
       [normalizedEmail]
     );
 
@@ -44,6 +47,14 @@ router.post("/login", async (req, res, next) => {
     }
 
     const user = userResult.rows[0];
+
+    // Check if account is deactivated
+    if (user.employee_status && user.employee_status.toLowerCase() !== "active") {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is deactivated. Please contact your administrator.",
+      });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -328,6 +339,158 @@ router.get("/users", authenticate, requireRole("admin", "ADMIN"), async (req, re
   } catch (error) {
     console.error('List users error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+/**
+ * POST /api/v1/auth/users
+ * Admin-only: Create a new user and linked employee
+ */
+router.post("/users", authenticate, requireRole("admin", "ADMIN"), async (req, res) => {
+  try {
+    const { name, email, password, role = "employee", department = "General", jobPosition = "Staff", phone } = req.body;
+    if (!email || !password || !name) {
+      return res.status(400).json({ success: false, message: "Name, email, and password are required." });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ success: false, message: "Invalid email format." });
+    }
+
+    // Check conflict
+    const existing = await pool.query("SELECT id FROM users WHERE email = $1", [normalizedEmail]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ success: false, message: "A user with this email already exists." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const normalizedRole = role.toLowerCase().trim();
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const userRes = await client.query(
+        "INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role",
+        [normalizedEmail, hashedPassword, normalizedRole]
+      );
+      const newUser = userRes.rows[0];
+
+      // Create linked employee if default schedule exists
+      const schedRes = await client.query("SELECT id FROM working_schedules LIMIT 1");
+      const scheduleId = schedRes.rows[0]?.id || 1;
+
+      await client.query(
+        `INSERT INTO employees (user_id, name, email, phone, department, job_position, employee_type, schedule_id, joining_date, status)
+         VALUES ($1, $2, $3, $4, $5, $6, 'full_time', $7, CURRENT_DATE, 'active')`,
+        [newUser.id, name.trim(), normalizedEmail, phone || null, department.trim(), jobPosition.trim(), scheduleId]
+      );
+
+      await client.query("COMMIT");
+      return res.status(201).json({
+        success: true,
+        message: "User created successfully",
+        data: { user: newUser },
+      });
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Admin create user error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+/**
+ * PUT /api/v1/auth/users/:id
+ * Admin-only: Update user details, role, and linked employee info
+ */
+router.put("/users/:id", authenticate, requireRole("admin", "ADMIN"), async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId) || userId <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid user ID" });
+    }
+
+    const { name, department, jobPosition, phone, status, role } = req.body;
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      if (role) {
+        const normalizedRole = role.toLowerCase().trim();
+        await client.query("UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2", [normalizedRole, userId]);
+      }
+
+      // Update linked employee
+      const empStatus = status ? status.toLowerCase() : undefined;
+      await client.query(
+        `UPDATE employees
+         SET name = COALESCE($1, name),
+             department = COALESCE($2, department),
+             job_position = COALESCE($3, job_position),
+             phone = COALESCE($4, phone),
+             status = COALESCE($5, status),
+             updated_at = NOW()
+         WHERE user_id = $6`,
+        [name ? name.trim() : null, department ? department.trim() : null, jobPosition ? jobPosition.trim() : null, phone, empStatus, userId]
+      );
+
+      // If deactivated, close active attendance sessions
+      if (empStatus === "inactive" || empStatus === "terminated") {
+        await client.query(
+          `UPDATE attendance
+           SET check_out = COALESCE(check_out, NOW()),
+               worked_hours = COALESCE(worked_hours, EXTRACT(EPOCH FROM (NOW() - check_in))/3600),
+               updated_at = NOW()
+           WHERE employee_id IN (SELECT id FROM employees WHERE user_id = $1)
+             AND check_out IS NULL`,
+          [userId]
+        );
+      }
+
+      await client.query("COMMIT");
+      return res.status(200).json({ success: true, message: "User updated successfully" });
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Admin update user error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+/**
+ * DELETE /api/v1/auth/users/:id
+ * Admin-only: Delete or deactivate user
+ */
+router.delete("/users/:id", authenticate, requireRole("admin", "ADMIN"), async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId) || userId <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid user ID" });
+    }
+
+    if (userId === req.user.id) {
+      return res.status(400).json({ success: false, message: "You cannot delete your own admin account." });
+    }
+
+    // Set employee status to inactive and delete/deactivate user
+    await pool.query("UPDATE employees SET status = 'inactive', updated_at = NOW() WHERE user_id = $1", [userId]);
+    await pool.query("DELETE FROM users WHERE id = $1", [userId]);
+
+    return res.status(200).json({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Admin delete user error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
