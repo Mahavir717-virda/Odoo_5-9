@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Calendar,
   CheckCircle2,
@@ -73,7 +73,7 @@ export default function TimeOffRequestsPage() {
       const [reqRes, typesRes, empRes] = await Promise.all([
         managerTimeOffService.listRequests({ status: statusFilter, limit: 100 }),
         managerTimeOffService.listTimeOffTypes().catch(() => []),
-        employeeService.getEmployees().catch(() => []),
+        employeeService.getEmployees({ limit: 100, status: "Active" }).catch(() => []),
       ]);
 
       setRequests(reqRes.data || []);

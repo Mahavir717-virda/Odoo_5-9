@@ -396,7 +396,7 @@ export default function UsersSettingsPage() {
             <RefreshCw className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-3" />
             <p className="text-sm text-slate-500">Loading system users...</p>
           </div>
-        ) : filteredUsers.length === 0 ? (
+        ) : users.length === 0 ? (
           <div className="p-12 text-center">
             <Users className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
             <h3 className="text-base font-semibold text-slate-900 dark:text-white">No users found</h3>
@@ -420,7 +420,7 @@ export default function UsersSettingsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
-                {filteredUsers.map((u) => (
+                {users.map((u) => (
                   <tr
                     key={u.id}
                     className="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition group"

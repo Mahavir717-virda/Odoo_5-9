@@ -88,7 +88,7 @@ export default function AttendancePage() {
           date: dateFilter || undefined,
           limit: 100,
         }),
-        employeeService.getEmployees().catch(() => []),
+        employeeService.getEmployees({ limit: 100, status: "Active" }).catch(() => []),
       ]);
 
       setRecords(attRes.data || []);
