@@ -56,58 +56,6 @@ export const loginUser = async (email, password) => {
 };
 
 /**
- * Authenticate via Google SSO Token
- */
-export const googleAuth = async ({ credential, email, name }) => {
-  const response = await api.post("/auth/google-auth", {
-    credential,
-    email,
-    name,
-  });
-
-  const { token, user } = response.data.data;
-  if (token) {
-    localStorage.setItem("token", token);
-    localStorage.setItem("authToken", token);
-  }
-
-  let profileName = name || user.email.split("@")[0];
-  let employeeId = null;
-  let department = "";
-  let jobPosition = "";
-  let avatar = "";
-
-  try {
-    const profileRes = await api.get("/employees/me");
-    if (profileRes.data?.data) {
-      const emp = profileRes.data.data;
-      profileName = emp.name || profileName;
-      employeeId = emp.id;
-      department = emp.department;
-      jobPosition = emp.job_position;
-      avatar = emp.avatar || "";
-    }
-  } catch {
-    // Continue with base user info
-  }
-
-  const normalizedUser = {
-    id: user.id,
-    employeeId: employeeId || user.id,
-    email: user.email,
-    name: profileName,
-    role: (user.role || "EMPLOYEE").toUpperCase(),
-    department,
-    jobPosition,
-    avatar,
-    token,
-  };
-
-  localStorage.setItem("authUser", JSON.stringify(normalizedUser));
-  return normalizedUser;
-};
-
-/**
  * Fetch current authenticated user session from backend
  */
 export const getCurrentUser = async () => {

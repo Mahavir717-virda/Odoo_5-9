@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 import Logo from "../components/common/Logo";
 import { Eye, EyeOff, ArrowRight, Lock, Mail } from "lucide-react";
 
@@ -198,7 +197,6 @@ function SignIn() {
           </div>
 
           <div className="flex justify-center">
-            <GoogleSignInButton />
           </div>
 
           {/* Demo Credentials */}
