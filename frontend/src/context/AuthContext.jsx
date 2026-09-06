@@ -47,6 +47,13 @@ export function AuthProvider({ children }) {
     return newUser;
   };
 
+  const loginWithGoogle = async (googlePayload) => {
+    const userData = await authService.googleAuth(googlePayload);
+    setUser(userData);
+    localStorage.setItem("authUser", JSON.stringify(userData));
+    return userData;
+  };
+
   const logout = async () => {
     await authService.logoutUser();
     localStorage.removeItem("authUser");
@@ -59,6 +66,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(user),
     loading,
     login,
+    loginWithGoogle,
     register,
     logout,
   };

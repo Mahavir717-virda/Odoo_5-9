@@ -1,35 +1,62 @@
-import { useEffect, useRef } from "react";
-import axios from "axios";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 function GoogleSignInButton() {
   const buttonRef = useRef(null);
   const navigate = useNavigate();
+  const { loginWithGoogle } = useAuth();
+  const [authError, setAuthError] = useState("");
+
+  const handleGoogleResponse = async (response) => {
+    try {
+      setAuthError("");
+      const user = await loginWithGoogle({
+        credential: response.credential,
+      });
+
+      // Role-based destination
+      const role = user?.role?.toUpperCase();
+      if (role === "EMPLOYEE") {
+        navigate("/portal/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      setAuthError(error.message || "Google sign-in failed. Please try again.");
+    }
+  };
 
   useEffect(() => {
     // Wait for the Google script to load
     const initGoogle = () => {
-      if (!window.google) return;
+      if (!window.google || !window.google.accounts?.id || !buttonRef.current) return;
 
-      window.google.accounts.id.initialize({
-        client_id: "246599226169-ep9862s8m1d8d6b2rk8jdhqmfrq66tpa.apps.googleusercontent.com",
-        callback: handleGoogleResponse,
-      });
+      try {
+        window.google.accounts.id.initialize({
+          client_id: "246599226169-ep9862s8m1d8d6b2rk8jdhqmfrq66tpa.apps.googleusercontent.com",
+          callback: handleGoogleResponse,
+        });
 
-      window.google.accounts.id.renderButton(buttonRef.current, {
-        theme: "outline",
-        size: "large",
-        width: 250,
-      });
+        buttonRef.current.innerHTML = "";
+        window.google.accounts.id.renderButton(buttonRef.current, {
+          theme: "outline",
+          size: "large",
+          width: 280,
+          text: "continue_with",
+          shape: "rectangular",
+        });
+      } catch (e) {
+        console.warn("Google identity init error:", e);
+      }
     };
 
-    // If Google script is already loaded, init immediately
-    if (window.google) {
+    if (window.google?.accounts?.id) {
       initGoogle();
     } else {
-      // Otherwise wait for it to load
       const interval = setInterval(() => {
-        if (window.google) {
+        if (window.google?.accounts?.id) {
           clearInterval(interval);
           initGoogle();
         }
@@ -38,26 +65,14 @@ function GoogleSignInButton() {
     }
   }, []);
 
-  const handleGoogleResponse = async (response) => {
-    try {
-      const res = await axios.post("/users/google-auth", {
-        credential: response.credential,
-      });
-
-      const userEmail = res.data?.data?.user?.email;
-      localStorage.setItem("userEmail", userEmail);
-      navigate("/Dashboard");
-    } catch (error) {
-      console.log("Google sign-in error:", error.response?.data || error.message);
-    }
-  };
-
   return (
-    <div>
-      <div style={{ textAlign: "center", margin: "15px 0", color: "#888" }}>
-        — OR —
-      </div>
-      <div ref={buttonRef}></div>
+    <div className="w-full flex flex-col items-center">
+      <div ref={buttonRef} className="min-h-[40px] flex items-center justify-center"></div>
+      {authError && (
+        <p className="mt-2 text-xs text-rose-600 text-center font-medium">
+          {authError}
+        </p>
+      )}
     </div>
   );
 }
