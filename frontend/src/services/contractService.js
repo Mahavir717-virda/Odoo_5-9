@@ -5,6 +5,7 @@
 
 import api from "./api";
 
+const empMap = new Map();
 export const normalizeId = (id) => String(id || "").trim().replace(/^(emp|con)-/i, "");
 
 export const isSameId = (a, b) => {
@@ -57,6 +58,9 @@ function enforceSingleActiveContract(contractsList) {
   // Return in descending chronological order
   return result.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
 }
+
+// In-memory fallback
+let localContracts = [];
 
 export const getContracts = async ({
   search,

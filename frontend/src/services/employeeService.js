@@ -3,8 +3,9 @@
  * Connects directly to Node.js Express + PostgreSQL /employees endpoints.
  */
 
-import api from "./api";
-
+import api from "./api"; 
+// Fallback cache
+let localEmployees = [];
 /**
  * Normalizes backend employee record to frontend model
  */

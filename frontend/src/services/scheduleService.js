@@ -6,6 +6,9 @@
 import api from "./api";
 import { calculateWeeklyHours } from "../utils/scheduleCalculations";
 
+// In-memory fallback
+let localSchedules = [];
+
 /**
  * Decorate a raw schedule object with live-calculated fields
  */
