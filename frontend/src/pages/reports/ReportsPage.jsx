@@ -127,7 +127,7 @@ export default function ReportsPage() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Payroll Reports & Analytics
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
               Live BI Metrics
             </span>
           </div>
@@ -142,12 +142,12 @@ export default function ReportsPage() {
             disabled={loading}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#7743db]" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#0f766e]" : ""}`} />
             Refresh
           </button>
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Printer className="w-4 h-4" />
             Print / Export Report
@@ -199,7 +199,7 @@ export default function ReportsPage() {
 
           <button
             type="submit"
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white transition shadow-sm"
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white transition shadow-sm"
           >
             Filter Analytics
           </button>
@@ -279,11 +279,11 @@ export default function ReportsPage() {
             <h3 className="text-2xl font-bold text-slate-900 mt-1">
               ${avgSalary.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
-            <p className="text-xs text-[#7743db] mt-0.5 font-medium">
+            <p className="text-xs text-[#0f766e] mt-0.5 font-medium">
               Across {totalPayslips} generated payslips
             </p>
           </div>
-          <div className="p-3 bg-[#f6f2fd] rounded-xl text-[#7743db]">
+          <div className="p-3 bg-[#f0fdfa] rounded-xl text-[#0f766e]">
             <Users className="w-6 h-6" />
           </div>
         </div>
@@ -295,7 +295,7 @@ export default function ReportsPage() {
           onClick={() => setActiveTab("summary")}
           className={`pb-3 px-4 text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
             activeTab === "summary"
-              ? "border-indigo-600 text-[#7743db]"
+              ? "border-indigo-600 text-[#0f766e]"
               : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -307,7 +307,7 @@ export default function ReportsPage() {
           onClick={() => setActiveTab("department")}
           className={`pb-3 px-4 text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
             activeTab === "department"
-              ? "border-indigo-600 text-[#7743db]"
+              ? "border-indigo-600 text-[#0f766e]"
               : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -411,7 +411,7 @@ export default function ReportsPage() {
 
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-xs text-slate-500">Avg Cost / Worker</span>
-                <p className="text-xl font-bold text-[#7743db] mt-1">
+                <p className="text-xl font-bold text-[#0f766e] mt-1">
                   ${(totalGross > 0 && totalPayslips > 0 ? totalGross / totalPayslips : 0).toLocaleString("en-US", {
                     maximumFractionDigits: 0,
                   })}
@@ -441,7 +441,7 @@ export default function ReportsPage() {
 
           {loading ? (
             <div className="p-12 text-center">
-              <RefreshCw className="w-8 h-8 animate-spin text-[#7743db] mx-auto mb-3" />
+              <RefreshCw className="w-8 h-8 animate-spin text-[#0f766e] mx-auto mb-3" />
               <p className="text-sm text-slate-500">Loading department cost breakdown...</p>
             </div>
           ) : filteredDeptCostData.length === 0 ? (
@@ -478,7 +478,7 @@ export default function ReportsPage() {
                     return (
                       <tr key={dept.department_id || idx} className="hover:bg-slate-50/80">
                         <td className="py-3.5 px-4 pl-6 font-semibold text-slate-900 flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-[#7743db] flex-shrink-0" />
+                          <Building2 className="w-4 h-4 text-[#0f766e] flex-shrink-0" />
                           {dept.department_name || dept.name || "General"}
                         </td>
 
@@ -498,7 +498,7 @@ export default function ReportsPage() {
                           ${avgCost.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                         </td>
 
-                        <td className="py-3.5 px-4 pr-6 text-right font-bold text-[#7743db]">
+                        <td className="py-3.5 px-4 pr-6 text-right font-bold text-[#0f766e]">
                           {percent}%
                         </td>
                       </tr>

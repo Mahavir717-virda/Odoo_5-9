@@ -15,12 +15,12 @@ export default function PageHeader({ title, subtitle, actions, className }) {
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#eae0d5]",
+        "flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#e2e8f0]",
         className
       )}
     >
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-[#1e1b24]">
+        <h1 className="text-xl font-bold tracking-tight text-[#0f172a]">
           {title}
         </h1>
         {subtitle && (

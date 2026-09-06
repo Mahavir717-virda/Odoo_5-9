@@ -4,22 +4,22 @@ import { cva } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7743db] focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
   {
     variants: {
       variant: {
         default:
-          "bg-[#7743db] text-white shadow-sm shadow-[#7743db]/20 hover:bg-[#6334b8] active:bg-[#4f2795]",
+          "bg-teal-700 text-white shadow-sm hover:bg-teal-800 active:bg-teal-900",
         destructive:
           "bg-red-600 text-white shadow-sm hover:bg-red-700 active:bg-red-800",
         outline:
-          "border border-[#eae0d5] bg-white text-[#1e1b24] shadow-xs hover:bg-[#f7efe5] hover:text-[#1e1b24] active:bg-[#ede3d5]",
+          "border border-slate-200 bg-white text-slate-800 shadow-xs hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100",
         secondary:
-          "bg-[#f7efe5] text-[#1e1b24] border border-[#eae0d5] shadow-xs hover:bg-[#ede3d5] active:bg-[#e2d5c3]",
+          "bg-slate-100 text-slate-800 border border-slate-200 shadow-xs hover:bg-slate-200 active:bg-slate-300",
         ghost:
-          "text-slate-700 hover:bg-[#f7efe5] hover:text-[#1e1b24] active:bg-[#ede3d5]",
+          "text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200",
         link:
-          "text-[#7743db] underline-offset-4 hover:underline hover:text-[#6334b8]",
+          "text-teal-700 underline-offset-4 hover:underline hover:text-teal-800",
         success:
           "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 active:bg-emerald-800",
         warning:

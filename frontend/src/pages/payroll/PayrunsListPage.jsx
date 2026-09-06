@@ -155,7 +155,7 @@ export default function PayrunsListPage() {
         sortable: true,
         render: (row) => (
           <span className="text-xs font-mono font-bold text-foreground">
-            {row.payslips_count !== undefined ? row.payslips_count : (row.status === "draft" ? "0" : "â€”")}
+            {row.payslips_count !== undefined ? row.payslips_count : (row.status === "draft" ? "0" : "—")}
           </span>
         ),
       },
@@ -239,9 +239,9 @@ export default function PayrunsListPage() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-slate-500">Computed / Ready</p>
-              <p className="text-2xl font-bold text-[#7743db] mt-0.5">{stats.computed}</p>
+              <p className="text-2xl font-bold text-[#0f766e] mt-0.5">{stats.computed}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-[#f6f2fd] text-[#7743db]">
+            <div className="p-2.5 rounded-lg bg-[#f0fdfa] text-[#0f766e]">
               <Play className="w-5 h-5" />
             </div>
           </CardContent>
@@ -251,9 +251,9 @@ export default function PayrunsListPage() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Validated</p>
-              <p className="text-2xl font-bold text-[#7743db] mt-0.5">{stats.validated}</p>
+              <p className="text-2xl font-bold text-[#0f766e] mt-0.5">{stats.validated}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-[#f6f2fd] text-[#7743db]">
+            <div className="p-2.5 rounded-lg bg-[#f0fdfa] text-[#0f766e]">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </CardContent>

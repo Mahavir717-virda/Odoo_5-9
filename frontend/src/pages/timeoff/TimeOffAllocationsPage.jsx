@@ -249,7 +249,7 @@ export default function TimeOffAllocationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-[#f6f2fd] text-[#7743db]">
+            <div className="p-2 rounded-xl bg-[#f0fdfa] text-[#0f766e]">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
@@ -268,12 +268,12 @@ export default function TimeOffAllocationsPage() {
             disabled={refreshing}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin text-[#7743db]" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin text-[#0f766e]" : ""}`} />
             Refresh
           </button>
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Plus className="w-4 h-4" />
             Grant Allocation
@@ -291,9 +291,9 @@ export default function TimeOffAllocationsPage() {
         <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Active Allocations</p>
-            <p className="text-2xl font-bold mt-1 text-[#7743db]">{stats.count}</p>
+            <p className="text-2xl font-bold mt-1 text-[#0f766e]">{stats.count}</p>
           </div>
-          <div className="p-3 rounded-xl bg-[#f6f2fd] text-[#7743db]">
+          <div className="p-3 rounded-xl bg-[#f0fdfa] text-[#0f766e]">
             <Layers className="w-5 h-5" />
           </div>
         </motion.div>
@@ -339,14 +339,14 @@ export default function TimeOffAllocationsPage() {
             placeholder="Search by employee, leave type or department..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           />
         </div>
         <div className="flex gap-3 flex-wrap sm:flex-nowrap">
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           >
             <option value="all">All Leave Types</option>
             {types.map((t) => (
@@ -358,7 +358,7 @@ export default function TimeOffAllocationsPage() {
           <select
             value={empFilter}
             onChange={(e) => setEmpFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           >
             <option value="all">All Employees</option>
             {employees.map((e) => (
@@ -387,7 +387,7 @@ export default function TimeOffAllocationsPage() {
             sortable: true,
             render: (a) => (
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#ede5fb] text-[#7743db] font-bold text-xs flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[#ccfbf1] text-[#0f766e] font-bold text-xs flex items-center justify-center shrink-0">
                   {a.employeeName.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -403,7 +403,7 @@ export default function TimeOffAllocationsPage() {
             sortable: true,
             render: (a) => (
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
                   <Calendar className="w-3.5 h-3.5" />
                   {a.typeName}
                 </span>
@@ -479,7 +479,7 @@ export default function TimeOffAllocationsPage() {
                   e.stopPropagation();
                   openEdit(a);
                 }}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-[#7743db] hover:bg-slate-100 transition"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-[#0f766e] hover:bg-slate-100 transition"
                 title="Edit allocation"
               >
                 <Pencil className="w-3.5 h-3.5" />
@@ -508,7 +508,7 @@ export default function TimeOffAllocationsPage() {
             {/* Header */}
             <div className="flex items-center justify-between p-5 border-b border-slate-100">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[#f6f2fd] text-[#7743db]">
+                <div className="p-2 rounded-xl bg-[#f0fdfa] text-[#0f766e]">
                   <Calendar className="w-4 h-4" />
                 </div>
                 <div>
@@ -549,7 +549,7 @@ export default function TimeOffAllocationsPage() {
                     value={form.empId}
                     onChange={(e) => setForm({ ...form, empId: e.target.value })}
                     disabled={Boolean(editingAlloc)}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <option value="">â€” Select employee â€”</option>
                     {employees.map((emp) => (
@@ -572,7 +572,7 @@ export default function TimeOffAllocationsPage() {
                     value={form.typeId}
                     onChange={(e) => setForm({ ...form, typeId: e.target.value })}
                     disabled={Boolean(editingAlloc)}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <option value="">â€” Select leave type â€”</option>
                     {types.map((t) => (
@@ -595,7 +595,7 @@ export default function TimeOffAllocationsPage() {
                     min="0.5"
                     value={form.days}
                     onChange={(e) => setForm({ ...form, days: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm font-mono rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 text-sm font-mono rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                   <p className="mt-1 text-[11px] text-slate-400">
                     Enter the number of leave days/hours to allocate. Half-day increments (0.5) are supported.
@@ -634,7 +634,7 @@ export default function TimeOffAllocationsPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition disabled:opacity-50"
                 >
                   {submitting ? (
                     <>

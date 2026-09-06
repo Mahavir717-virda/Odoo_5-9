@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 
 export default function EmptyState({
   icon: Icon,
@@ -23,7 +23,7 @@ export default function EmptyState({
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="px-4 py-2 text-sm font-medium text-white bg-[#7743db] rounded-lg hover:bg-[#6334b8] active:bg-[#4f2795] focus:outline-none focus:ring-2 focus:ring-[#7743db] focus:ring-offset-1 transition-colors shadow-sm"
+          className="px-4 py-2 text-sm font-medium text-white bg-teal-700 rounded-lg hover:bg-teal-800 active:bg-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-1 transition-colors shadow-sm cursor-pointer"
         >
           {actionLabel}
         </button>

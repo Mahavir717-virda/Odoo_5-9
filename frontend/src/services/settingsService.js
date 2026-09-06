@@ -59,18 +59,20 @@ const DB_ROLE_MAP = {
   employee: "EMPLOYEE",
 };
 
-export const listUsers = async ({ role, status, search } = {}) => {
+export const listUsers = async ({ role, status, search, page = 1, limit = 25 } = {}) => {
   try {
     const params = new URLSearchParams();
     if (search) params.append("search", search.trim());
-    // Pass lowercase role for DB matching
     if (role && role !== "all") params.append("role", role.toLowerCase());
     if (status && status !== "all") params.append("status", status.toLowerCase());
+    if (page) params.append("page", page);
+    if (limit) params.append("limit", limit);
 
     const response = await api.get(`/auth/users?${params.toString()}`);
-    const rows = response.data?.data?.users || [];
+    const resData = response.data?.data || {};
+    const rows = resData.users || [];
 
-    return rows.map((u) => ({
+    const mappedUsers = rows.map((u) => ({
       id: u.employee_id || u.user_id,
       userId: u.user_id,
       name: u.name || u.email.split("@")[0],
@@ -84,6 +86,14 @@ export const listUsers = async ({ role, status, search } = {}) => {
       createdAt: u.joining_date || u.user_created_at || "2024-01-15",
       lastActive: "Recent",
     }));
+
+    return {
+      users: mappedUsers,
+      total: resData.total || mappedUsers.length,
+      page: resData.page || page,
+      totalPages: resData.totalPages || 1,
+      limit: resData.limit || limit,
+    };
   } catch (err) {
     console.error("Failed to fetch users from backend:", err);
     throw err;

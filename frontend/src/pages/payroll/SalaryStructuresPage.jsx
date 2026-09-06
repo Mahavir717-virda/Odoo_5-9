@@ -175,7 +175,7 @@ export default function SalaryStructuresPage() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Salary Structures
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
               {structures.length} Configured
             </span>
           </div>
@@ -190,12 +190,12 @@ export default function SalaryStructuresPage() {
             disabled={loading}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#7743db]" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#0f766e]" : ""}`} />
             Refresh
           </button>
           <button
             onClick={openCreateModal}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Plus className="w-4 h-4" />
             New Structure
@@ -220,7 +220,7 @@ export default function SalaryStructuresPage() {
             placeholder="Search structure by name or code..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           />
         </div>
       </div>
@@ -228,7 +228,7 @@ export default function SalaryStructuresPage() {
       {/* Structures Grid */}
       {loading ? (
         <div className="p-12 text-center bg-white rounded-2xl border border-slate-200">
-          <RefreshCw className="w-8 h-8 animate-spin text-[#7743db] mx-auto mb-3" />
+          <RefreshCw className="w-8 h-8 animate-spin text-[#0f766e] mx-auto mb-3" />
           <p className="text-sm text-slate-500">Loading salary structures...</p>
         </div>
       ) : filteredStructures.length === 0 ? (
@@ -241,7 +241,7 @@ export default function SalaryStructuresPage() {
           {!search && (
             <button
               onClick={openCreateModal}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white transition shadow-sm"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#0f766e] hover:bg-[#115e59] text-white transition shadow-sm"
             >
               <Plus className="w-4 h-4" />
               Create Structure
@@ -265,14 +265,14 @@ export default function SalaryStructuresPage() {
                 <div>
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2.5 rounded-xl bg-[#f6f2fd] text-[#7743db]">
+                      <div className="p-2.5 rounded-xl bg-[#f0fdfa] text-[#0f766e]">
                         <Building2 className="w-5 h-5" />
                       </div>
                       <div>
                         <h3 className="font-bold text-slate-900 text-base">
                           {struct.name}
                         </h3>
-                        <span className="font-mono text-xs font-semibold text-[#7743db] bg-[#f6f2fd] px-2 py-0.5 rounded border border-indigo-100">
+                        <span className="font-mono text-xs font-semibold text-[#0f766e] bg-[#f0fdfa] px-2 py-0.5 rounded border border-indigo-100">
                           {struct.code}
                         </span>
                       </div>
@@ -312,7 +312,7 @@ export default function SalaryStructuresPage() {
                 <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-4 mt-6">
                   <button
                     onClick={() => openEditModal(struct)}
-                    className="p-2 rounded-lg text-slate-600 hover:text-[#7743db] hover:bg-slate-100 transition"
+                    className="p-2 rounded-lg text-slate-600 hover:text-[#0f766e] hover:bg-slate-100 transition"
                     title="Edit Structure"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -370,7 +370,7 @@ export default function SalaryStructuresPage() {
                   placeholder="e.g. Standard Full-Time Staff"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -384,7 +384,7 @@ export default function SalaryStructuresPage() {
                   placeholder="e.g. STRUCT_FT"
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                  className="w-full font-mono uppercase px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full font-mono uppercase px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -397,7 +397,7 @@ export default function SalaryStructuresPage() {
                   placeholder="Optional brief description of this compensation framework..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -416,7 +416,7 @@ export default function SalaryStructuresPage() {
                           prev.rule_ids.length === allRules.length ? [] : allRules.map((r) => r.id),
                       }))
                     }
-                    className="text-xs text-[#7743db] hover:underline"
+                    className="text-xs text-[#0f766e] hover:underline"
                   >
                     {formData.rule_ids.length === allRules.length ? "Deselect All" : "Select All"}
                   </button>
@@ -436,7 +436,7 @@ export default function SalaryStructuresPage() {
                           onClick={() => toggleRuleSelection(rule.id)}
                           className={`flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition ${
                             isSelected
-                              ? "bg-[#f6f2fd]/80"
+                              ? "bg-[#f0fdfa]/80"
                               : "hover:bg-slate-100/60"
                           }`}
                         >
@@ -444,7 +444,7 @@ export default function SalaryStructuresPage() {
                             <div
                               className={`w-4 h-4 rounded border flex items-center justify-center ${
                                 isSelected
-                                  ? "bg-[#7743db] border-indigo-600 text-white"
+                                  ? "bg-[#0f766e] border-indigo-600 text-white"
                                   : "border-slate-300"
                               }`}
                             >
@@ -481,7 +481,7 @@ export default function SalaryStructuresPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition disabled:opacity-50"
                 >
                   {submitting ? (
                     <>
