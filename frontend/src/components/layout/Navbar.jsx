@@ -9,6 +9,7 @@ import {
   Menu,
   Search,
   Bell,
+  Calendar,
   User,
   LogOut,
   Settings,
@@ -228,6 +229,15 @@ export default function Navbar({ onMobileMenuClick }) {
             </div>
           )}
         </div>
+
+        {/* Calendar Icon Button */}
+        <Link
+          to="/calendar"
+          className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+          title="Attendance & Leave Calendar"
+        >
+          <Calendar className="w-5 h-5" />
+        </Link>
 
         {/* User Profile Dropdown */}
         <div className="relative">

@@ -25,6 +25,7 @@ import ContractFormPage from "./pages/contracts/ContractFormPage";
 import SchedulesPage from "./pages/schedules/SchedulesPage";
 import ScheduleFormPage from "./pages/schedules/ScheduleFormPage";
 import AttendancePage from "./pages/attendance/AttendancePage";
+import CalendarPage from "./pages/CalendarPage";
 
 import TimeOffRequestsPage from "./pages/timeoff/TimeOffRequestsPage";
 import TimeOffAllocationsPage from "./pages/timeoff/TimeOffAllocationsPage";
@@ -177,6 +178,14 @@ function App() {
               element={
                 <ProtectedRoute requiredPermission={PERMISSIONS.ATTENDANCE.VIEW}>
                   <AttendancePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <CalendarPage />
                 </ProtectedRoute>
               }
             />
