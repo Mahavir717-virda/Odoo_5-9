@@ -66,8 +66,8 @@ export const listContracts = async ({ employee_id, status, department, search })
       c.created_at,
       c.updated_at
     FROM contracts c
-    JOIN employees e ON c.employee_id = e.id
-    JOIN salary_structures ss ON c.structure_id = ss.id
+    LEFT JOIN employees e ON c.employee_id = e.id
+    LEFT JOIN salary_structures ss ON c.structure_id = ss.id
     WHERE 1=1
   `;
   const params = [];
@@ -148,8 +148,8 @@ export const getContractById = async (id) => {
       c.created_at,
       c.updated_at
     FROM contracts c
-    JOIN employees e ON c.employee_id = e.id
-    JOIN salary_structures ss ON c.structure_id = ss.id
+    LEFT JOIN employees e ON c.employee_id = e.id
+    LEFT JOIN salary_structures ss ON c.structure_id = ss.id
     WHERE c.id = $1
     LIMIT 1
   `;
@@ -213,8 +213,8 @@ export const getEmployeeContracts = async (employeeId) => {
       c.created_at,
       c.updated_at
     FROM contracts c
-    JOIN employees e ON c.employee_id = e.id
-    JOIN salary_structures ss ON c.structure_id = ss.id
+    LEFT JOIN employees e ON c.employee_id = e.id
+    LEFT JOIN salary_structures ss ON c.structure_id = ss.id
     WHERE c.employee_id = $1
     ORDER BY c.start_date DESC
   `;

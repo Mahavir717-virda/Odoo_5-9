@@ -22,13 +22,13 @@ export const isSameId = (a, b) => {
 };
 
 function resolveEmployeeName(c) {
+  if (c.employee?.name && c.employee.name !== "Employee") return c.employee.name;
   if (c.employee_name && c.employee_name !== "Employee") return c.employee_name;
-  if (c.employee?.name && c.employee?.name !== "Employee") return c.employee.name;
   if (c.employeeName && c.employeeName !== "Employee") return c.employeeName;
   const empId = String(c.employee_id || c.employeeId || "");
-  const found = empMap.get(empId) || empMap.get(`emp-${empId}`);
+  const found = empMap.get(empId) || empMap.get(`emp-${empId}`) || empMap.get(normalizeId(empId));
   if (found) return found;
-  return "Employee";
+  return c.employee_name || c.employee?.name || c.employeeName || "Employee";
 }
 
 function enforceSingleActiveContract(contractsList) {
@@ -216,7 +216,7 @@ export const getContractById = async (id) => {
 export const getContractsByEmployeeId = async (employeeId) => {
   const cleanId = normalizeId(employeeId);
   try {
-    const response = await api.get(`/employees/${cleanId}/contracts`);
+    const response = await api.get(`/contracts/employee/${cleanId}`);
     const rows = response.data?.data?.contracts || (Array.isArray(response.data?.data) ? response.data.data : []);
     if (Array.isArray(rows)) {
       const mapped = rows.map((c) => ({
@@ -235,7 +235,7 @@ export const getContractsByEmployeeId = async (employeeId) => {
       return enforceSingleActiveContract(mapped);
     }
   } catch (err) {
-    console.warn(`Backend /employees/${cleanId}/contracts failed:`, err.message);
+    console.warn(`Backend /contracts/employee/${cleanId} failed:`, err.message);
   }
 
   const matched = localContracts.filter((c) => isSameId(c.employeeId, employeeId));
@@ -259,9 +259,16 @@ export const createContract = async (data) => {
       structure_id: data.structureId || 1,
       department: data.department,
       job_position: data.jobPosition,
+      status: data.status ? data.status.toLowerCase() : "active",
     });
     return response.data?.data;
   } catch (err) {
+    // If backend returned a specific status (e.g. 409 Conflict, 400 Bad Request, 403 Forbidden), surface the message to the form
+    const serverMessage = err.response?.data?.message || err.response?.data?.error;
+    if (serverMessage) {
+      throw new Error(serverMessage);
+    }
+
     console.warn("Backend createContract failed, storing locally:", err.message);
     const newNum = localContracts.length + 1;
     const year = new Date().getFullYear();
@@ -299,6 +306,11 @@ export const updateContract = async (id, data) => {
     });
     return response.data?.data;
   } catch (err) {
+    const serverMessage = err.response?.data?.message || err.response?.data?.error;
+    if (serverMessage) {
+      throw new Error(serverMessage);
+    }
+
     console.warn("Backend updateContract failed, updating locally:", err.message);
     const idx = localContracts.findIndex((c) => isSameId(c.id, id));
     if (idx !== -1) {
