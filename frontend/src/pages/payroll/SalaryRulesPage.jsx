@@ -479,7 +479,7 @@ export default function SalaryRulesPage() {
         data={filteredRules}
         loading={loading}
         error={error}
-        onRetry={fetchRules}
+        onRetry={fetchData}
         emptyState={{
           icon: FileText,
           title: "No salary rules found",
