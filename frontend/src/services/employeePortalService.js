@@ -29,17 +29,46 @@ const formatDate = (isoString) => {
 };
 
 /**
+ * Helper to calculate valid start and end dates for any YYYY-MM string
+ */
+const getMonthDateRange = (monthStr) => {
+  if (!monthStr || monthStr === "all") return null;
+  const parts = String(monthStr).split("-");
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  if (isNaN(year) || isNaN(month)) return null;
+
+  const lastDay = new Date(year, month, 0).getDate();
+  const mm = String(month).padStart(2, "0");
+  const dd = String(lastDay).padStart(2, "0");
+  return {
+    from_date: `${year}-${mm}-01`,
+    to_date: `${year}-${mm}-${dd}`,
+  };
+};
+
+/**
  * Get dashboard statistics for the logged in employee
  */
 export const getEmployeeDashboardData = async () => {
   try {
-    const [attRes, allocRes, reqRes, payRes] = await Promise.all([
-      api.get("/attendance/me?limit=10").catch(() => ({ data: { data: [] } })),
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const lastDayCurrentMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const from_date = `${currentYear}-${String(currentMonth).padStart(2, "0")}-01`;
+    const to_date = `${currentYear}-${String(currentMonth).padStart(2, "0")}-${String(lastDayCurrentMonth).padStart(2, "0")}`;
+
+    const [profileRes, attRes, allocRes, reqRes, payRes] = await Promise.all([
+      api.get("/employees/me").catch(() => ({ data: { data: null } })),
+      api.get(`/attendance/me?from_date=${from_date}&to_date=${to_date}&limit=50`).catch(() => ({ data: { data: [] } })),
       api.get("/time-off/allocations/me").catch(() => ({ data: { data: [] } })),
       api.get("/time-off/requests/me?limit=5").catch(() => ({ data: { data: [] } })),
       api.get("/payslips/me?limit=1").catch(() => ({ data: { data: [] } })),
     ]);
 
+    const profile = profileRes.data?.data;
+    const isInactive = profile?.status && profile.status.toLowerCase() !== "active";
     const attendanceRecords = Array.isArray(attRes.data?.data) ? attRes.data.data : [];
     const allocations = Array.isArray(allocRes.data?.data) ? allocRes.data.data : [];
     const rawRequests = Array.isArray(reqRes.data?.data) ? reqRes.data.data : [];
@@ -113,7 +142,6 @@ export const getEmployeeDashboardData = async () => {
     }));
 
     // Dynamic upcoming holidays based on company calendar
-    const currentYear = new Date().getFullYear();
     const holidays = [
       { id: "h1", name: "Labor Day / May Day", date: `${currentYear}-05-01`, type: "Public Holiday" },
       { id: "h2", name: "Independence Day", date: `${currentYear}-08-15`, type: "Public Holiday" },
@@ -126,6 +154,8 @@ export const getEmployeeDashboardData = async () => {
       : "100%";
 
     return {
+      profile,
+      isInactive,
       punchState: {
         isClockedIn,
         clockInTime,
@@ -157,10 +187,14 @@ export const getEmployeeDashboardData = async () => {
 export const getMyAttendance = async ({ status, month } = {}) => {
   try {
     const params = new URLSearchParams();
+    params.append("limit", "100");
     if (status && status !== "all") params.append("status", status.toLowerCase());
     if (month && month !== "all") {
-      params.append("from_date", `${month}-01`);
-      params.append("to_date", `${month}-31`);
+      const range = getMonthDateRange(month);
+      if (range) {
+        params.append("from_date", range.from_date);
+        params.append("to_date", range.to_date);
+      }
     }
 
     const response = await api.get(`/attendance/me?${params.toString()}`);

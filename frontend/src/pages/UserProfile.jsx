@@ -19,6 +19,8 @@ import {
   Pencil,
   X,
   Loader2,
+  Trophy,
+  TrendingUp,
 } from "lucide-react";
 
 import PageHeader from "../components/common/PageHeader";
@@ -29,6 +31,7 @@ import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { getMyEmployeeProfile } from "../services/employeeService";
+import { getLeaderboard } from "../services/managerAttendanceService";
 
 export default function UserProfile() {
   const { user } = useAuth();
@@ -40,6 +43,42 @@ export default function UserProfile() {
   const [address, setAddress] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // Leaderboard rank state
+  const [rankInfo, setRankInfo] = useState(null);
+
+  /**
+   * Fetch this month's rank for the logged-in user.
+   * The backend already resolves the match server-side via req.user → myRank.
+   * We just read data.myRank directly — no client-side ID matching needed.
+   */
+  const fetchMyRank = async (profileData = profile) => {
+    try {
+      const now = new Date();
+      const data = await getLeaderboard({
+        month: now.getMonth() + 1,
+        year: now.getFullYear(),
+        limit: 500,
+      });
+      const totalEmployees = data?.rankings?.length || 0;
+      const myRank = data?.myRank || data?.rankings?.find(
+        (r) => r.employee_id === profileData?.id || (profileData?.email && r.employee_email?.toLowerCase() === profileData.email.toLowerCase())
+      );
+
+      if (myRank) {
+        setRankInfo({
+          rank: myRank.rank,
+          total: totalEmployees,
+          totalHours: myRank.total_worked_hours,
+          tier: myRank.perks?.tier || null,
+        });
+      } else {
+        setRankInfo({ rank: null, total: totalEmployees, totalHours: 0, tier: null });
+      }
+    } catch {
+      // Silently ignore — rank is non-critical UI info
+    }
+  };
+
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -48,14 +87,43 @@ export default function UserProfile() {
         setProfile(data);
         setPhone(data.phone || "+1 (555) 019-2834");
         setAddress(data.address || "742 Evergreen Terrace, Springfield");
+        fetchMyRank(data);
       } catch (err) {
         console.error("Failed to load profile:", err);
       } finally {
         setLoading(false);
       }
     };
-
     loadProfile();
+    fetchMyRank();
+  }, []);
+
+  // Keep rank live via WebSocket — reconnects automatically on disconnect
+  useEffect(() => {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.hostname}:5000/ws`;
+    let ws = null;
+    let reconnectTimer = null;
+
+    const connect = () => {
+      try {
+        ws = new WebSocket(wsUrl);
+        ws.onmessage = (e) => {
+          try {
+            const msg = JSON.parse(e.data);
+            if (msg.type === "LEADERBOARD_UPDATED") fetchMyRank();
+          } catch {}
+        };
+        ws.onclose = () => { reconnectTimer = setTimeout(connect, 4000); };
+        ws.onerror = () => { if (ws) ws.close(); };
+      } catch {}
+    };
+    connect();
+
+    return () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (ws) { ws.onclose = null; ws.close(); }
+    };
   }, []);
 
   const getInitials = (name) => {
@@ -111,11 +179,31 @@ export default function UserProfile() {
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <Avatar className="h-18 w-18 border-2 border-primary/20 shadow-sm shrink-0">
-                <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
-                  {getInitials(profile?.name || user?.name)}
-                </AvatarFallback>
-              </Avatar>
+              {/* Avatar with rank badge overlay */}
+              <div className="relative shrink-0">
+                <Avatar className="h-18 w-18 border-2 border-primary/20 shadow-xs">
+                  <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
+                    {getInitials(profile?.name || user?.name)}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Rank badge — bottom-right of avatar */}
+                {rankInfo?.rank != null && (
+                  <div
+                    className={`absolute -bottom-1.5 -right-1.5 flex items-center justify-center w-7 h-7 rounded-full text-[10px] font-black shadow-md ring-2 ring-white dark:ring-gray-900 ${
+                      rankInfo.tier === "gold"
+                        ? "bg-amber-400 text-amber-900"
+                        : rankInfo.tier === "silver"
+                        ? "bg-slate-300 text-slate-800"
+                        : rankInfo.tier === "bronze"
+                        ? "bg-orange-400 text-orange-900"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                    title={`Leaderboard rank #${rankInfo.rank}`}
+                  >
+                    #{rankInfo.rank}
+                  </div>
+                )}
+              </div>
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2.5">
@@ -125,12 +213,60 @@ export default function UserProfile() {
                   <StatusBadge status={profile?.status || "Active"} />
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5 font-medium">
-                  {profile?.jobPosition || "Employee"} â€¢{" "}
+                  {profile?.jobPosition || "Employee"} •{" "}
                   <span className="text-foreground/80">{profile?.department || "Engineering"}</span>
                 </p>
                 <p className="text-xs text-muted-foreground/80 font-mono mt-0.5">
                   {profile?.employeeId || "EMP-2024-001"}
                 </p>
+
+                {/* Inline rank summary line */}
+                {rankInfo && (
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <Trophy
+                      className={`w-3.5 h-3.5 ${
+                        rankInfo.tier === "gold"
+                          ? "text-amber-500"
+                          : rankInfo.tier === "silver"
+                          ? "text-slate-400"
+                          : rankInfo.tier === "bronze"
+                          ? "text-orange-500"
+                          : "text-blue-400"
+                      }`}
+                    />
+                    <span className="text-xs text-muted-foreground">
+                      {rankInfo.rank != null ? (
+                        <>
+                          Rank{" "}
+                          <span className="font-semibold text-foreground">
+                            #{rankInfo.rank}
+                          </span>{" "}
+                          of {rankInfo.total} this month
+                          {rankInfo.totalHours > 0 && (
+                            <> · <span className="font-medium text-foreground">{rankInfo.totalHours}h</span> logged</>
+                          )}
+                        </>
+                      ) : (
+                        "No attendance logged this month"
+                      )}
+                    </span>
+                    {rankInfo.tier && (
+                      <span
+                        className={`ml-1 px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-full ${
+                          rankInfo.tier === "gold"
+                            ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                            : rankInfo.tier === "silver"
+                            ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                            : rankInfo.tier === "bronze"
+                            ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                            : "bg-blue-50 text-blue-600"
+                        }`}
+                      >
+                        {rankInfo.tier}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -338,7 +474,7 @@ export default function UserProfile() {
                 </span>
                 <div className="flex items-center gap-2 mt-1 text-sm font-mono font-medium text-foreground bg-muted/40 p-2 rounded-md border border-border/40">
                   <Building className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>{profile?.bankAccount || "â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 4892 (Chase Bank)"}</span>
+                  <span>{profile?.bankAccount || "•••• •••• •••• 4892 (Chase Bank)"}</span>
                 </div>
               </div>
 

@@ -232,6 +232,37 @@ router.post("/:id/finalize", authenticate, requireRole(...CALC_ROLES), handleFin
 router.patch("/:id/validate", authenticate, requireRole(...CALC_ROLES), handleFinalizePayrun);
 
 /**
+ * POST /api/v1/payruns/:id/reset-to-draft
+ * PATCH /api/v1/payruns/:id/draft
+ * Allowed: admin, hr_payroll_manager, hr_payroll_user
+ */
+const handleResetToDraft = async (req, res, next) => {
+  try {
+    const payrunId = parseId(req.params.id);
+    if (!payrunId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid payrun ID",
+      });
+    }
+
+    const updated = await payrollService.resetPayrunToDraft(payrunId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Payrun reset to draft successfully",
+      data: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+router.post("/:id/reset-to-draft", authenticate, requireRole(...CALC_ROLES), handleResetToDraft);
+router.patch("/:id/draft", authenticate, requireRole(...CALC_ROLES), handleResetToDraft);
+router.post("/:id/draft", authenticate, requireRole(...CALC_ROLES), handleResetToDraft);
+
+/**
  * PATCH /api/v1/payruns/:id/pay
  * Allowed: admin, hr_payroll_manager
  */

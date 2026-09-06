@@ -1,3 +1,4 @@
+import http from "http";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -5,6 +6,7 @@ import express from "express";
 import cors from "cors";
 import v1Routes from "./routes/index.routes.js";
 import errorHandler from "./middleware/error.middleware.js";
+import { initWebSocket } from "./services/socketService.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,8 +22,12 @@ app.use("/api/v1", v1Routes);
 // Centralized Error Handling Middleware
 app.use(errorHandler);
 
+// Create HTTP Server & Attach WebSockets
+const server = http.createServer(app);
+initWebSocket(server);
+
 // Start Server & Check Database Connection
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
   console.log(`🚀 PeoplePay360 Server running on port ${PORT}`);
   try {
     const { pool } = await import("./db.js");
@@ -34,4 +40,4 @@ app.listen(PORT, async () => {
 });
 
 export default app;
-export { app };
+export { app, server };

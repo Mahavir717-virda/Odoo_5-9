@@ -30,7 +30,7 @@ import {
 
 import * as portalService from "../../services/employeePortalService";
 
-// LEAVE_TYPE_OPTIONS removed â€” now loaded dynamically from backend
+// LEAVE_TYPE_OPTIONS removed — now loaded dynamically from backend
 
 export default function MyTimeOffPage() {
   const [data, setData] = useState(null);
@@ -43,7 +43,7 @@ export default function MyTimeOffPage() {
   const [requestSuccess, setRequestSuccess] = useState(false);
   const [formError, setFormError] = useState(null);
 
-  // Form State â€” leaveType stores the type id as string
+  // Form State — leaveType stores the type id as string
   const [leaveType, setLeaveType] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -235,7 +235,7 @@ export default function MyTimeOffPage() {
               Cancel
             </Button>
           ) : (
-            <span className="text-xs text-muted-foreground">â€”</span>
+            <span className="text-xs text-muted-foreground">—</span>
           ),
       },
     ],

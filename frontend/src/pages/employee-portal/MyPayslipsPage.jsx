@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   FileText,
   Download,
@@ -22,15 +22,8 @@ import { Separator } from "../../components/ui/separator";
 
 import { useAuth } from "../../context/AuthContext";
 import * as portalService from "../../services/employeePortalService";
-
-function formatCurrency(amount) {
-  if (amount == null) return "â€”";
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { downloadPayslipPDF } from "../../utils/payslipPdfGenerator";
+import { formatCurrency } from "../../utils/formatters";
 
 export default function MyPayslipsPage() {
   const { user } = useAuth();
@@ -60,9 +53,10 @@ export default function MyPayslipsPage() {
     fetchPayslips();
   }, []);
 
-  const handleDownloadSimulation = (slip) => {
+  const handleDownloadPDF = (slip) => {
     setDownloadToast(true);
-    setTimeout(() => setDownloadToast(false), 3500);
+    downloadPayslipPDF(slip, user);
+    setTimeout(() => setDownloadToast(false), 3000);
   };
 
   const { summary, payslips = [] } = data || {};
@@ -170,7 +164,7 @@ export default function MyPayslipsPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDownloadSimulation(row)}
+              onClick={() => handleDownloadPDF(row)}
               className="h-7 px-2 text-xs gap-1 text-muted-foreground hover:text-foreground"
             >
               <Download className="w-3 h-3" />
@@ -299,7 +293,7 @@ export default function MyPayslipsPage() {
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-primary" />
                 <CardTitle className="text-base font-bold text-foreground">
-                  Salary Payslip â€” {selectedSlip.period}
+                  Salary Payslip — {selectedSlip.period}
                 </CardTitle>
               </div>
               <button
@@ -318,7 +312,7 @@ export default function MyPayslipsPage() {
                     PeoplePay360 Technologies Pvt Ltd
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    Payroll Reference: {selectedSlip.payrunId} â€¢ Paid on: {selectedSlip.paymentDate}
+                    Payroll Reference: {selectedSlip.payrunId} • Paid on: {selectedSlip.paymentDate}
                   </p>
                 </div>
                 <StatusBadge status={selectedSlip.status} />
@@ -347,7 +341,7 @@ export default function MyPayslipsPage() {
                 <div>
                   <span className="text-muted-foreground block">Bank Account:</span>
                   <span className="font-semibold text-foreground font-mono">
-                    â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 4892
+                    •••• •••• •••• 4892
                   </span>
                 </div>
                 <div>
@@ -455,11 +449,11 @@ export default function MyPayslipsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleDownloadSimulation(selectedSlip)}
+                onClick={() => handleDownloadPDF(selectedSlip)}
                 className="text-xs gap-1.5"
               >
                 <Printer className="w-3.5 h-3.5" />
-                Print / PDF
+                Print / Save PDF
               </Button>
 
               <Button

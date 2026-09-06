@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Clock,
   Plus,
@@ -11,6 +11,7 @@ import {
   Pencil,
   Trash2,
   TrendingUp,
+  Trophy,
 } from "lucide-react";
 
 import PageHeader from "../../components/common/PageHeader";
@@ -18,6 +19,7 @@ import FilterBar from "../../components/common/FilterBar";
 import DataTable from "../../components/common/DataTable";
 import StatusBadge from "../../components/common/StatusBadge";
 import FormField from "../../components/common/FormField";
+import AttendanceLeaderboard from "../../components/attendance/AttendanceLeaderboard";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -49,6 +51,7 @@ const DEPARTMENT_OPTIONS = [
 ];
 
 export default function AttendancePage() {
+  const [activeTab, setActiveTab] = useState("logs"); // "logs" | "leaderboard"
   const [records, setRecords] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,7 +88,7 @@ export default function AttendancePage() {
           date: dateFilter || undefined,
           limit: 100,
         }),
-        employeeService.getEmployees().catch(() => []),
+        employeeService.getEmployees({ limit: 100, status: "Active" }).catch(() => []),
       ]);
 
       setRecords(attRes.data || []);
@@ -251,7 +254,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono">
             {row.check_in
               ? new Date(row.check_in).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-              : "â€”"}
+              : "—"}
           </span>
         ),
       },
@@ -263,7 +266,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono text-muted-foreground">
             {row.check_out
               ? new Date(row.check_out).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-              : "â€”"}
+              : "—"}
           </span>
         ),
       },
@@ -275,7 +278,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono font-medium">
             {row.worked_hours !== null && row.worked_hours !== undefined
               ? `${Number(row.worked_hours).toFixed(1)}h`
-              : "â€”"}
+              : "—"}
           </span>
         ),
       },
@@ -320,118 +323,153 @@ export default function AttendancePage() {
     <div className="space-y-6 pb-16 max-w-7xl mx-auto">
       <PageHeader
         title="Attendance Management"
-        subtitle="Review real-time employee check-ins, worked hours, and manage attendance logs."
+        subtitle="Review real-time employee check-ins, worked hours, and celebrate monthly top performers."
         actions={
-          <Button onClick={handleOpenCreateModal} size="sm" className="gap-1.5 shadow-sm">
-            <Plus className="w-4 h-4" />
-            Record Attendance
-          </Button>
+          activeTab === "logs" ? (
+            <Button onClick={handleOpenCreateModal} size="sm" className="gap-1.5 shadow-xs">
+              <Plus className="w-4 h-4" />
+              Record Attendance
+            </Button>
+          ) : null
         }
       />
 
-      {toastMessage && (
-        <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+      {/* Tab Switcher */}
+      <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 w-fit">
+        <button
+          onClick={() => setActiveTab("logs")}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === "logs"
+              ? "bg-white text-teal-800 shadow-xs border border-slate-200"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Clock className="w-4 h-4 text-teal-700" />
+          Daily Attendance Logs
+        </button>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card className="border-border bg-card shadow-sm">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">Total Logs</p>
-              <p className="text-2xl font-bold text-foreground mt-0.5">{stats.total}</p>
-            </div>
-            <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600">
-              <Clock className="w-5 h-5" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border bg-card shadow-sm">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">Present Today</p>
-              <p className="text-2xl font-bold text-emerald-600 mt-0.5">{stats.present}</p>
-            </div>
-            <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border bg-card shadow-sm">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">Late Arrivals</p>
-              <p className="text-2xl font-bold text-amber-600 mt-0.5">{stats.late}</p>
-            </div>
-            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border bg-card shadow-sm">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">Absences</p>
-              <p className="text-2xl font-bold text-rose-600 mt-0.5">{stats.absent}</p>
-            </div>
-            <div className="p-2.5 rounded-lg bg-rose-50 text-rose-600">
-              <AlertCircle className="w-5 h-5" />
-            </div>
-          </CardContent>
-        </Card>
+        <button
+          onClick={() => setActiveTab("leaderboard")}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === "leaderboard"
+              ? "bg-white text-teal-800 shadow-xs border border-slate-200"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Trophy className="w-4 h-4 text-amber-500" />
+          Monthly Leaderboard & Perks
+        </button>
       </div>
 
-      {/* Filter Bar */}
-      <FilterBar
-        searchValue={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Search by employee name or department..."
-        filters={[
-          {
-            key: "status",
-            label: "Status",
-            value: statusFilter,
-            options: STATUS_OPTIONS,
-            onChange: setStatusFilter,
-          },
-          {
-            key: "department",
-            label: "Department",
-            value: departmentFilter,
-            options: DEPARTMENT_OPTIONS,
-            onChange: setDepartmentFilter,
-          },
-        ]}
-        onClearAll={() => {
-          setSearch("");
-          setStatusFilter("all");
-          setDepartmentFilter("all");
-          setDateFilter("");
-        }}
-      />
+      {activeTab === "leaderboard" ? (
+        <AttendanceLeaderboard />
+      ) : (
+        <>
+          {toastMessage && (
+            <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>{toastMessage}</span>
+            </div>
+          )}
 
-      {/* Attendance Table */}
-      <DataTable
-        columns={columns}
-        data={filteredRecords}
-        loading={loading}
-        error={error}
-        onRetry={loadData}
-        emptyState={{
-          icon: Clock,
-          title: "No Attendance Logs Found",
-          description: "No employee attendance records match your active search filters.",
-          actionLabel: "Record Attendance",
-          onAction: handleOpenCreateModal,
-        }}
-        pageSize={15}
-      />
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <Card className="border-border bg-card shadow-2xs">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Total Logs</p>
+                  <p className="text-2xl font-bold text-foreground mt-0.5">{stats.total}</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600">
+                  <Clock className="w-5 h-5" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border bg-card shadow-2xs">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Present Today</p>
+                  <p className="text-2xl font-bold text-emerald-600 mt-0.5">{stats.present}</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border bg-card shadow-2xs">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Late Arrivals</p>
+                  <p className="text-2xl font-bold text-amber-600 mt-0.5">{stats.late}</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border bg-card shadow-2xs">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Absences</p>
+                  <p className="text-2xl font-bold text-rose-600 mt-0.5">{stats.absent}</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600">
+                  <AlertCircle className="w-5 h-5" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Filter Bar */}
+          <FilterBar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search by employee name or department..."
+            filters={[
+              {
+                key: "status",
+                label: "Status",
+                value: statusFilter,
+                options: STATUS_OPTIONS,
+                onChange: setStatusFilter,
+              },
+              {
+                key: "department",
+                label: "Department",
+                value: departmentFilter,
+                options: DEPARTMENT_OPTIONS,
+                onChange: setDepartmentFilter,
+              },
+            ]}
+            onClearAll={() => {
+              setSearch("");
+              setStatusFilter("all");
+              setDepartmentFilter("all");
+              setDateFilter("");
+            }}
+          />
+
+          {/* Attendance Table */}
+          <DataTable
+            columns={columns}
+            data={filteredRecords}
+            loading={loading}
+            error={error}
+            onRetry={loadData}
+            emptyState={{
+              icon: Clock,
+              title: "No Attendance Logs Found",
+              description: "No employee attendance records match your active search filters.",
+              actionLabel: "Record Attendance",
+              onAction: handleOpenCreateModal,
+            }}
+            pageSize={15}
+          />
+        </>
+      )}
 
       {/* Create / Edit Modal Dialog */}
       {isModalOpen && (
@@ -471,7 +509,7 @@ export default function AttendancePage() {
                     <SelectContent>
                       {employees.map((emp) => (
                         <SelectItem key={emp.id} value={String(emp.id)} className="text-xs">
-                          {emp.name || `${emp.firstName} ${emp.lastName}`} â€¢ {emp.department}
+                          {emp.name || `${emp.firstName} ${emp.lastName}`} • {emp.department}
                         </SelectItem>
                       ))}
                     </SelectContent>

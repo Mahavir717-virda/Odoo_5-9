@@ -51,7 +51,7 @@ export default function SystemSettingsPage() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               System Settings
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
               Enterprise Configuration
             </span>
           </div>
@@ -63,7 +63,7 @@ export default function SystemSettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
           {saving ? "Saving Changes..." : "Save Settings"}
@@ -84,7 +84,7 @@ export default function SystemSettingsPage() {
           onClick={() => setActiveTab("company")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === "company"
-              ? "bg-[#7743db] text-white shadow-sm shadow-indigo-200"
+              ? "bg-[#0f766e] text-white shadow-sm shadow-teal-100"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
@@ -96,7 +96,7 @@ export default function SystemSettingsPage() {
           onClick={() => setActiveTab("payroll")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === "payroll"
-              ? "bg-[#7743db] text-white shadow-sm shadow-indigo-200"
+              ? "bg-[#0f766e] text-white shadow-sm shadow-teal-100"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
@@ -108,7 +108,7 @@ export default function SystemSettingsPage() {
           onClick={() => setActiveTab("security")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === "security"
-              ? "bg-[#7743db] text-white shadow-sm shadow-indigo-200"
+              ? "bg-[#0f766e] text-white shadow-sm shadow-teal-100"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
@@ -120,7 +120,7 @@ export default function SystemSettingsPage() {
           onClick={() => setActiveTab("notifications")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === "notifications"
-              ? "bg-[#7743db] text-white shadow-sm shadow-indigo-200"
+              ? "bg-[#0f766e] text-white shadow-sm shadow-teal-100"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
@@ -156,7 +156,7 @@ export default function SystemSettingsPage() {
                       company: { ...settings.company, name: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -173,7 +173,7 @@ export default function SystemSettingsPage() {
                       company: { ...settings.company, legalName: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -190,7 +190,7 @@ export default function SystemSettingsPage() {
                       company: { ...settings.company, taxId: e.target.value },
                     })
                   }
-                  className="w-full font-mono px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full font-mono px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -207,7 +207,7 @@ export default function SystemSettingsPage() {
                       company: { ...settings.company, email: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -224,7 +224,7 @@ export default function SystemSettingsPage() {
                       company: { ...settings.company, address: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
             </div>
@@ -247,12 +247,12 @@ export default function SystemSettingsPage() {
                         company: { ...settings.company, currency: e.target.value },
                       })
                     }
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   >
                     <option value="USD">USD ($ - US Dollar)</option>
-                    <option value="EUR">EUR (â‚¬ - Euro)</option>
-                    <option value="GBP">GBP (Â£ - British Pound)</option>
-                    <option value="INR">INR (â‚¹ - Indian Rupee)</option>
+                    <option value="EUR">EUR (€ - Euro)</option>
+                    <option value="GBP">GBP (£ - British Pound)</option>
+                    <option value="INR">INR (₹ - Indian Rupee)</option>
                   </select>
                 </div>
 
@@ -269,7 +269,7 @@ export default function SystemSettingsPage() {
                         company: { ...settings.company, timezone: e.target.value },
                       })
                     }
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
 
@@ -285,7 +285,7 @@ export default function SystemSettingsPage() {
                         company: { ...settings.company, fiscalYearStart: e.target.value },
                       })
                     }
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   >
                     <option value="January">January</option>
                     <option value="April">April</option>
@@ -326,7 +326,7 @@ export default function SystemSettingsPage() {
                       payroll: { ...settings.payroll, workHoursPerDay: parseInt(e.target.value, 10) },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -345,7 +345,7 @@ export default function SystemSettingsPage() {
                       payroll: { ...settings.payroll, workDaysPerWeek: parseInt(e.target.value, 10) },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -364,7 +364,7 @@ export default function SystemSettingsPage() {
                       payroll: { ...settings.payroll, cutoffDayOfMonth: parseInt(e.target.value, 10) },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -387,7 +387,7 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
             </div>
@@ -403,7 +403,7 @@ export default function SystemSettingsPage() {
                       payroll: { ...settings.payroll, autoCalculateTax: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
+                  className="w-4 h-4 rounded text-[#0f766e] focus:ring-[#0f766e] border-slate-300"
                 />
                 <span className="text-xs font-semibold text-slate-900">
                   Automatically calculate tax withholdings and deductions during payrun computation
@@ -444,7 +444,7 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -466,7 +466,7 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
             </div>
@@ -482,7 +482,7 @@ export default function SystemSettingsPage() {
                       security: { ...settings.security, requireSpecialChars: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
+                  className="w-4 h-4 rounded text-[#0f766e] focus:ring-[#0f766e] border-slate-300"
                 />
                 <span className="text-xs font-semibold text-slate-900">
                   Require special characters & numbers in user passwords
@@ -499,7 +499,7 @@ export default function SystemSettingsPage() {
                       security: { ...settings.security, mfaEnabled: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
+                  className="w-4 h-4 rounded text-[#0f766e] focus:ring-[#0f766e] border-slate-300"
                 />
                 <span className="text-xs font-semibold text-slate-900">
                   Enable Multi-Factor Authentication (MFA / 2FA) requirement for administrative roles
@@ -543,7 +543,7 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
+                  className="w-4 h-4 rounded text-[#0f766e] focus:ring-[#0f766e] border-slate-300"
                 />
               </div>
 
@@ -568,7 +568,7 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
+                  className="w-4 h-4 rounded text-[#0f766e] focus:ring-[#0f766e] border-slate-300"
                 />
               </div>
 
@@ -593,7 +593,7 @@ export default function SystemSettingsPage() {
                       },
                     })
                   }
-                  className="w-4 h-4 rounded text-[#7743db] focus:ring-[#7743db] border-slate-300"
+                  className="w-4 h-4 rounded text-[#0f766e] focus:ring-[#0f766e] border-slate-300"
                 />
               </div>
             </div>

@@ -19,7 +19,6 @@ import {
   User,
   FileText,
   Building2,
-  Briefcase,
 } from "lucide-react";
 
 import Logo from "../common/Logo";
@@ -53,24 +52,19 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
       <NavLink
         to={to}
         title={!showLabel ? label : undefined}
-        className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-150 relative group ${
+        className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 relative group ${
           isActive
-            ? "bg-[#09351b] text-[#00e676] border-l-4 border-[#00e676] shadow-sm font-bold"
-            : "text-[#334155] hover:bg-[#f1f5f9] hover:text-[#0f172a]"
+            ? "bg-teal-50 text-teal-900 border-l-4 border-teal-700 shadow-xs font-semibold"
+            : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
         }`}
       >
-        <Icon className={`w-5 h-5 shrink-0 ${isActive ? "text-[#00e676]" : "text-[#475569] group-hover:text-slate-900"}`} />
+        <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-teal-700" : "text-slate-400 group-hover:text-slate-700"}`} />
         {showLabel && (
-          <span className="flex items-center gap-2 truncate">
-            <span className={isActive ? "text-[#00e676]/80 font-normal" : "text-slate-400 font-normal"}>
-              -
-            </span>
-            <span className="truncate">{label}</span>
-          </span>
+          <span className="truncate">{label}</span>
         )}
         {!showLabel && (
           <span className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium bg-slate-800 text-white rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 shadow-md transition-opacity duration-150">
-            - {label}
+            {label}
           </span>
         )}
       </NavLink>
@@ -91,27 +85,22 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
     <button
       onClick={() => toggleSection(sectionKey)}
       title={!showLabel ? label : undefined}
-      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-150 ${
+      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
         isActiveSection
-          ? "text-[#00e676] bg-[#09351b] border-l-4 border-[#00e676]"
-          : "text-[#334155] hover:bg-[#f1f5f9] hover:text-[#0f172a]"
+          ? "text-teal-900 bg-teal-50/60 font-semibold"
+          : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
       }`}
     >
       <div className="flex items-center gap-2.5">
-        <Icon className={`w-5 h-5 shrink-0 ${isActiveSection ? "text-[#00e676]" : "text-[#475569]"}`} />
+        <Icon className={`w-4 h-4 shrink-0 ${isActiveSection ? "text-teal-700" : "text-slate-400"}`} />
         {showLabel && (
-          <span className="flex items-center gap-2 truncate">
-            <span className={isActiveSection ? "text-[#00e676]/80 font-normal" : "text-slate-400 font-normal"}>
-              -
-            </span>
-            <span className="truncate">{label}</span>
-          </span>
+          <span className="truncate">{label}</span>
         )}
       </div>
       {showLabel && (
         <ChevronDown
-          className={`w-4 h-4 transition-transform duration-150 ${
-            isActiveSection ? "text-[#00e676]" : "text-slate-400"
+          className={`w-3.5 h-3.5 transition-transform duration-150 ${
+            isActiveSection ? "text-teal-700" : "text-slate-400"
           } ${openSections[sectionKey] ? "rotate-180" : ""}`}
         />
       )}
@@ -134,19 +123,19 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
 
   return (
     <aside
-      className={`h-full flex flex-col transition-all duration-200 bg-white/90 backdrop-blur-md border-r border-slate-200/60 ${
+      className={`h-full flex flex-col transition-all duration-200 bg-white border-r border-slate-200/80 ${
         isMobileSheet ? "w-64" : collapsed ? "w-16" : "w-64"
       }`}
     >
       {/* ── Brand Header ── */}
-      <div className="h-16 flex items-center px-3.5 shrink-0 border-b border-slate-200/60">
-        <Link to="/dashboard" className="flex items-center justify-center overflow-hidden py-1">
-          <Logo size={showLabel ? 42 : 32} lightText={false} />
+      <div className="h-16 flex items-center px-4 shrink-0 border-b border-slate-200/80">
+        <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden py-1">
+          <Logo size={showLabel ? 36 : 28} showText={showLabel} lightText={false} />
         </Link>
       </div>
 
       {/* ── Navigation ── */}
-      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
+      <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-1">
         {isEmployeeRole ? (
           /* Employee-only reduced menu */
           <>
@@ -172,7 +161,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
                 }
               />
               {(openSections.workspace || (!showLabel)) && (
-                <div className={`mt-1 space-y-1 ${showLabel ? "pl-5" : ""}`}>
+                <div className={`mt-1 space-y-1 ${showLabel ? "pl-4" : ""}`}>
                   <NavItem to="/profile"       icon={User}     label="My Profile" />
                   <NavItem to="/my-attendance"  icon={Clock}    label="My Attendance" />
                   <NavItem to="/my-time-off"   icon={Calendar} label="My Time Off" />
@@ -222,7 +211,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
                 isActiveSection={location.pathname.startsWith("/time-off")}
               />
               {(openSections.timeoff || (!showLabel)) && (
-                <div className={`mt-1 space-y-1 ${showLabel ? "pl-5" : ""}`}>
+                <div className={`mt-1 space-y-1 ${showLabel ? "pl-4" : ""}`}>
                   <NavItem
                     to="/time-off/requests"
                     icon={FileText}
@@ -254,7 +243,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
                 isActiveSection={location.pathname.startsWith("/payroll")}
               />
               {(openSections.payroll || (!showLabel)) && (
-                <div className={`mt-1 space-y-1 ${showLabel ? "pl-5" : ""}`}>
+                <div className={`mt-1 space-y-1 ${showLabel ? "pl-4" : ""}`}>
                   <NavItem
                     to="/payroll/payruns"
                     icon={DollarSign}
@@ -300,7 +289,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
                 isActiveSection={location.pathname.startsWith("/settings")}
               />
               {(openSections.settings || (!showLabel)) && (
-                <div className={`mt-1 space-y-1 ${showLabel ? "pl-5" : ""}`}>
+                <div className={`mt-1 space-y-1 ${showLabel ? "pl-4" : ""}`}>
                   <NavItem
                     to="/settings/users"
                     icon={Users}
@@ -328,13 +317,13 @@ export default function Sidebar({ collapsed, onToggleCollapse, isMobileSheet = f
 
       {/* Collapse Toggle */}
       {!isMobileSheet && (
-        <div className="p-3 shrink-0 border-t border-slate-200/60">
+        <div className="p-3 shrink-0 border-t border-slate-200/80">
           <button
             onClick={onToggleCollapse}
-            className="w-full flex items-center justify-center p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100/80 rounded-2xl transition-colors"
+            className="w-full flex items-center justify-center p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100/80 rounded-xl transition-colors cursor-pointer"
           >
             {collapsed ? (
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             ) : (
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
                 <ChevronLeft className="w-4 h-4" />

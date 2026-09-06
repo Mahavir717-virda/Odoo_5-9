@@ -33,12 +33,13 @@ router.get("/dashboard", async (req, res, next) => {
  */
 router.get("/payroll-summary", async (req, res, next) => {
   try {
-    const { payrun_id, from_date, to_date } = req.query;
+    const { payrun_id, from_date, to_date, period_start, period_end, department } = req.query;
 
     const data = await reportService.getPayrollSummary({
       payrun_id,
-      from_date,
-      to_date,
+      from_date: from_date || period_start,
+      to_date: to_date || period_end,
+      department,
     });
 
     return res.status(200).json({
@@ -125,11 +126,11 @@ router.get("/time-off-summary", async (req, res, next) => {
  */
 router.get("/department-cost", async (req, res, next) => {
   try {
-    const { period_start, period_end } = req.query;
+    const { period_start, period_end, from_date, to_date } = req.query;
 
     const data = await reportService.getDepartmentCost({
-      period_start,
-      period_end,
+      period_start: period_start || from_date,
+      period_end: period_end || to_date,
     });
 
     return res.status(200).json({

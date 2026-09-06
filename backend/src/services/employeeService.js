@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import pool from "../db.js";
 import { isValidEmail, isValidPhone } from "../utils/validators.js";
 
@@ -9,30 +9,30 @@ const VALID_STATUSES = ["active", "inactive", "terminated"];
 /**
  * List employees with optional filters: department, status, employee_type, search
  */
-const listEmployees = async ({ department, status, employee_type, search }) => {
+const listEmployees = async ({ department, status, employee_type, manager_id, search, limit = 100, offset = 0 }) => {
   let query = `
-    SELECT 
-      e.id,
-      e.user_id,
-      e.name,
-      e.email,
-      e.phone,
-      e.department,
-      e.manager_id,
-      m.name AS manager_name,
-      m.email AS manager_email,
-      e.job_position,
-      e.employee_type,
-      e.schedule_id,
-      ws.name AS schedule_name,
-      e.joining_date,
-      e.status,
-      e.created_at,
-      e.updated_at
-    FROM employees e
-    LEFT JOIN employees m ON e.manager_id = m.id
-    LEFT JOIN working_schedules ws ON e.schedule_id = ws.id
-    WHERE 1=1
+      SELECT 
+        e.id,
+        e.user_id,
+        e.name,
+        e.email,
+        e.phone,
+        e.department,
+        e.manager_id,
+        m.name AS manager_name,
+        m.email AS manager_email,
+        e.job_position,
+        e.employee_type,
+        e.schedule_id,
+        ws.name AS schedule_name,
+        e.joining_date,
+        e.status,
+        e.created_at,
+        e.updated_at
+      FROM employees e
+      LEFT JOIN employees m ON e.manager_id = m.id
+      LEFT JOIN working_schedules ws ON e.schedule_id = ws.id
+      WHERE 1=1
   `;
   const params = [];
 
@@ -51,6 +51,11 @@ const listEmployees = async ({ department, status, employee_type, search }) => {
     query += ` AND e.employee_type = $${params.length}`;
   }
 
+  if (manager_id) {
+    params.push(manager_id);
+    query += ` AND e.manager_id = $${params.length}`;
+  }
+
   if (search) {
     params.push(`%${search}%`);
     const pIdx = params.length;
@@ -63,6 +68,16 @@ const listEmployees = async ({ department, status, employee_type, search }) => {
   }
 
   query += ` ORDER BY e.id ASC`;
+
+  if (limit && Number(limit) > 0) {
+    params.push(Number(limit));
+    query += ` LIMIT $${params.length}`;
+  }
+
+  if (offset && Number(offset) > 0) {
+    params.push(Number(offset));
+    query += ` OFFSET $${params.length}`;
+  }
 
   const result = await pool.query(query, params);
 
@@ -622,6 +637,16 @@ const deactivateEmployee = async (id) => {
     err.statusCode = 404;
     throw err;
   }
+
+  // Stop any active open attendance check-ins immediately
+  await pool.query(
+    `UPDATE attendance
+     SET check_out = COALESCE(check_out, NOW()),
+         worked_hours = COALESCE(worked_hours, EXTRACT(EPOCH FROM (NOW() - check_in))/3600),
+         updated_at = NOW()
+     WHERE employee_id = $1 AND check_out IS NULL`,
+    [id]
+  );
 
   return true;
 };

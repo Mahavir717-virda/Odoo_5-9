@@ -196,7 +196,7 @@ export default function SalaryRulesPage() {
     const cat = (category || "").toLowerCase();
     if (cat === "basic") {
       return (
-        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#f6f2fd] text-[#6334b8] border border-[#ddcef7]">
+        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#f0fdfa] text-[#115e59] border border-[#99f6e4]">
           Basic Wage
         </span>
       );
@@ -240,7 +240,7 @@ export default function SalaryRulesPage() {
     }
     if (t === "formula") {
       return (
-        <span className="inline-flex items-center gap-1 text-xs text-[#7743db] font-medium">
+        <span className="inline-flex items-center gap-1 text-xs text-[#0f766e] font-medium">
           <Calculator className="w-3.5 h-3.5" /> Formula
         </span>
       );
@@ -261,7 +261,7 @@ export default function SalaryRulesPage() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Salary Rules
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
               {totalCount} Active Rules
             </span>
           </div>
@@ -276,12 +276,12 @@ export default function SalaryRulesPage() {
             disabled={loading}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#7743db]" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#0f766e]" : ""}`} />
             Refresh
           </button>
           <button
             onClick={openCreateModal}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Plus className="w-4 h-4" />
             New Salary Rule
@@ -302,7 +302,7 @@ export default function SalaryRulesPage() {
             <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalCount}</h3>
             <p className="text-xs text-slate-400 mt-0.5">Computational modules</p>
           </div>
-          <div className="p-3 bg-[#f6f2fd] rounded-xl text-[#7743db]">
+          <div className="p-3 bg-[#f0fdfa] rounded-xl text-[#0f766e]">
             <Layers className="w-6 h-6" />
           </div>
         </motion.div>
@@ -358,7 +358,7 @@ export default function SalaryRulesPage() {
             placeholder="Search rules by name, code..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           />
         </div>
 
@@ -366,7 +366,7 @@ export default function SalaryRulesPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           >
             <option value="all">All Categories</option>
             <option value="basic">Basic</option>
@@ -379,7 +379,7 @@ export default function SalaryRulesPage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           >
             <option value="all">All Types</option>
             <option value="fixed">Fixed Amount</option>
@@ -412,7 +412,7 @@ export default function SalaryRulesPage() {
                 <span className="font-semibold text-slate-900">
                   {rule.name}
                 </span>
-                <span className="font-mono text-xs font-semibold text-[#7743db] bg-[#f6f2fd] px-1.5 py-0.5 rounded border border-indigo-100">
+                <span className="font-mono text-xs font-semibold text-[#0f766e] bg-[#f0fdfa] px-1.5 py-0.5 rounded border border-indigo-100">
                   {rule.code}
                 </span>
               </div>
@@ -460,7 +460,7 @@ export default function SalaryRulesPage() {
               <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => openEditModal(rule)}
-                  className="p-1.5 rounded-lg text-slate-600 hover:text-[#7743db] hover:bg-slate-100 transition"
+                  className="p-1.5 rounded-lg text-slate-600 hover:text-[#0f766e] hover:bg-slate-100 transition"
                   title="Edit Rule"
                 >
                   <Edit2 className="w-4 h-4" />
@@ -479,7 +479,7 @@ export default function SalaryRulesPage() {
         data={filteredRules}
         loading={loading}
         error={error}
-        onRetry={fetchRules}
+        onRetry={fetchData}
         emptyState={{
           icon: FileText,
           title: "No salary rules found",
@@ -532,7 +532,7 @@ export default function SalaryRulesPage() {
                     placeholder="e.g. Housing Allowance"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
 
@@ -546,7 +546,7 @@ export default function SalaryRulesPage() {
                     placeholder="e.g. HRA"
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                    className="w-full font-mono uppercase px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full font-mono uppercase px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
               </div>
@@ -559,7 +559,7 @@ export default function SalaryRulesPage() {
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   >
                     <option value="basic">Basic</option>
                     <option value="allowance">Allowance (+)</option>
@@ -578,7 +578,7 @@ export default function SalaryRulesPage() {
                     min="1"
                     value={formData.sequence}
                     onChange={(e) => setFormData({ ...formData, sequence: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
               </div>
@@ -591,7 +591,7 @@ export default function SalaryRulesPage() {
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   >
                     <option value="fixed">Fixed Amount ($)</option>
                     <option value="percent">Percentage (%)</option>
@@ -619,7 +619,7 @@ export default function SalaryRulesPage() {
                     }
                     value={formData.value}
                     onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
               </div>
@@ -633,7 +633,7 @@ export default function SalaryRulesPage() {
                   placeholder="Optional notes or statutory rule explanation..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -649,7 +649,7 @@ export default function SalaryRulesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition disabled:opacity-50"
                 >
                   {submitting ? (
                     <>

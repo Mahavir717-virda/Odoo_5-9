@@ -20,6 +20,7 @@ import {
   UserCheck,
   ShieldCheck,
   UserX,
+  Trophy,
 } from "lucide-react";
 
 import { usePermissions } from "../../hooks/usePermissions";
@@ -47,13 +48,14 @@ import {
 
 import * as employeeService from "../../services/employeeService";
 import * as contractService from "../../services/contractService";
+import { getLeaderboard } from "../../services/managerAttendanceService";
 import api from "../../services/api";
 
 /**
  * Format ISO date string into readable format (e.g. "Jan 15, 2024")
  */
 function formatDate(dateString) {
-  if (!dateString) return "â€”";
+  if (!dateString) return "—";
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
@@ -92,7 +94,7 @@ function InfoItem({ label, value, icon: Icon }) {
           {label}
         </span>
         <div className="text-sm font-medium text-foreground mt-0.5 truncate">
-          {value || "â€”"}
+          {value || "—"}
         </div>
       </div>
     </div>
@@ -138,6 +140,30 @@ export default function EmployeeDetailsPage() {
   const [payslips, setPayslips] = useState([]);
   const [payslipsLoading, setPayslipsLoading] = useState(false);
   const [payslipsLoaded, setPayslipsLoaded] = useState(false);
+
+  // Monthly leaderboard rank
+  const [rankInfo, setRankInfo] = useState(null);
+
+  useEffect(() => {
+    if (!id) return;
+    const now = new Date();
+    getLeaderboard({ month: now.getMonth() + 1, year: now.getFullYear(), limit: 500 })
+      .then((data) => {
+        const total = data?.rankings?.length || 0;
+        const match = data?.rankings?.find((r) => r.employee_id === Number(id));
+        if (match) {
+          setRankInfo({
+            rank: match.rank,
+            total,
+            totalHours: match.total_worked_hours,
+            tier: match.perks?.tier || null,
+          });
+        } else {
+          setRankInfo({ rank: null, total, totalHours: 0, tier: null });
+        }
+      })
+      .catch(() => {});
+  }, [id]);
 
   // Lazy-load employee contracts when Contracts tab becomes active for the first time
   useEffect(() => {
@@ -269,6 +295,17 @@ export default function EmployeeDetailsPage() {
     }
   };
 
+  const handleExportProfile = () => {
+    if (!employee) return;
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(employee, null, 2));
+    const link = document.createElement("a");
+    link.setAttribute("href", dataStr);
+    link.setAttribute("download", `${(employee.name || "employee").toLowerCase().replace(/\s+/g, "_")}_profile.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Loading skeleton state
   if (loading) {
     return (
@@ -354,7 +391,7 @@ export default function EmployeeDetailsPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             {/* Left: Avatar & Identity */}
             <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-sm shrink-0">
+              <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-xs shrink-0">
                 <AvatarImage src={employee.avatarUrl} alt={fullName} />
                 <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
                   {initials}
@@ -370,15 +407,39 @@ export default function EmployeeDetailsPage() {
                 </div>
 
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  {employee.jobPosition} â€¢{" "}
+                  {employee.jobPosition} •{" "}
                   <span className="font-medium text-foreground/80">
                     {employee.department}
                   </span>
                 </p>
 
-                <p className="text-xs text-muted-foreground/80 font-mono mt-0.5">
-                  {employee.employeeId}
-                </p>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <span className="text-xs text-muted-foreground/80 font-mono">
+                    {employee.employeeId}
+                  </span>
+                  {rankInfo && (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md border border-border/50">
+                      <Trophy
+                        className={`w-3 h-3 ${
+                          rankInfo.tier === "gold"
+                            ? "text-amber-500"
+                            : rankInfo.tier === "silver"
+                            ? "text-slate-400"
+                            : rankInfo.tier === "bronze"
+                            ? "text-orange-500"
+                            : "text-primary"
+                        }`}
+                      />
+                      {rankInfo.rank != null ? (
+                        <span>
+                          Rank <strong className="text-foreground font-semibold">#{rankInfo.rank}</strong> of {rankInfo.total} ({rankInfo.totalHours}h logged)
+                        </span>
+                      ) : (
+                        <span>No hours logged this month</span>
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -421,7 +482,7 @@ export default function EmployeeDetailsPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
-                    onClick={() => alert("Profile export coming soon")}
+                    onClick={handleExportProfile}
                     className="text-xs cursor-pointer"
                   >
                     Export Profile
@@ -684,7 +745,7 @@ export default function EmployeeDetailsPage() {
                                 )}
                               </div>
                               <p className="text-xs text-muted-foreground">
-                                {c.jobPosition} â€¢ {c.department}
+                                {c.jobPosition} • {c.department}
                               </p>
                             </div>
 
@@ -717,7 +778,7 @@ export default function EmployeeDetailsPage() {
             {activeTab === "attendance" && (
               <Card className="border-border bg-card">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold">Attendance Records â€” {fullName}</CardTitle>
+                  <CardTitle className="text-sm font-semibold">Attendance Records — {fullName}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {attendanceLoading ? (
@@ -739,16 +800,16 @@ export default function EmployeeDetailsPage() {
                         <tbody className="divide-y divide-border/40">
                           {attendance.map((a) => (
                             <tr key={a.id} className="hover:bg-muted/30">
-                              <td className="py-2 px-3 font-mono">{a.date ? new Date(a.date).toLocaleDateString() : "â€”"}</td>
-                              <td className="py-2 px-3">{a.check_in ? new Date(a.check_in).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "â€”"}</td>
-                              <td className="py-2 px-3">{a.check_out ? new Date(a.check_out).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "â€”"}</td>
-                              <td className="py-2 px-3 font-mono">{a.worked_hours ? `${Number(a.worked_hours).toFixed(1)}h` : "â€”"}</td>
+                              <td className="py-2 px-3 font-mono">{a.date ? new Date(a.date).toLocaleDateString() : "—"}</td>
+                              <td className="py-2 px-3">{a.check_in ? new Date(a.check_in).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</td>
+                              <td className="py-2 px-3">{a.check_out ? new Date(a.check_out).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</td>
+                              <td className="py-2 px-3 font-mono">{a.worked_hours ? `${Number(a.worked_hours).toFixed(1)}h` : "—"}</td>
                               <td className="py-2 px-3">
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                   a.status === "present" ? "bg-emerald-100 text-emerald-700" :
                                   a.status === "absent" ? "bg-rose-100 text-rose-700" :
                                   "bg-amber-100 text-amber-700"
-                                }`}>{a.status || "â€”"}</span>
+                                }`}>{a.status || "—"}</span>
                               </td>
                             </tr>
                           ))}
@@ -764,7 +825,7 @@ export default function EmployeeDetailsPage() {
             {activeTab === "timeoff" && (
               <Card className="border-border bg-card">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold">Time Off Requests â€” {fullName}</CardTitle>
+                  <CardTitle className="text-sm font-semibold">Time Off Requests — {fullName}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {timeOffLoading ? (
@@ -787,9 +848,9 @@ export default function EmployeeDetailsPage() {
                           {timeOffRequests.map((r) => (
                             <tr key={r.id} className="hover:bg-muted/30">
                               <td className="py-2 px-3 font-medium">{r.time_off_type_name || r.type_name || "Leave"}</td>
-                              <td className="py-2 px-3 font-mono">{r.start_date ? formatDate(r.start_date) : "â€”"}</td>
-                              <td className="py-2 px-3 font-mono">{r.end_date ? formatDate(r.end_date) : "â€”"}</td>
-                              <td className="py-2 px-3">{r.days_requested ?? r.duration ?? "â€”"}</td>
+                              <td className="py-2 px-3 font-mono">{r.start_date ? formatDate(r.start_date) : "—"}</td>
+                              <td className="py-2 px-3 font-mono">{r.end_date ? formatDate(r.end_date) : "—"}</td>
+                              <td className="py-2 px-3">{r.days_requested ?? r.duration ?? "—"}</td>
                               <td className="py-2 px-3">
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                   r.status === "approved" ? "bg-emerald-100 text-emerald-700" :
@@ -812,7 +873,7 @@ export default function EmployeeDetailsPage() {
             {activeTab === "payroll" && (
               <Card className="border-border bg-card">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold">Payslips â€” {fullName}</CardTitle>
+                  <CardTitle className="text-sm font-semibold">Payslips — {fullName}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {payslipsLoading ? (
@@ -835,9 +896,9 @@ export default function EmployeeDetailsPage() {
                           {payslips.map((p) => (
                             <tr key={p.id} className="hover:bg-muted/30">
                               <td className="py-2 px-3 font-mono font-bold">{p.payslip_number || p.reference || `#${p.id}`}</td>
-                              <td className="py-2 px-3">{p.pay_period_start ? `${formatDate(p.pay_period_start)} â€“ ${formatDate(p.pay_period_end)}` : "â€”"}</td>
-                              <td className="py-2 px-3 text-right font-mono">{p.gross_salary != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.gross_salary) : "â€”"}</td>
-                              <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">{p.net_salary != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.net_salary) : "â€”"}</td>
+                              <td className="py-2 px-3">{p.pay_period_start ? `${formatDate(p.pay_period_start)} â€“ ${formatDate(p.pay_period_end)}` : "—"}</td>
+                              <td className="py-2 px-3 text-right font-mono">{p.gross_salary != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.gross_salary) : "—"}</td>
+                              <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">{p.net_salary != null ? new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p.net_salary) : "—"}</td>
                               <td className="py-2 px-3">
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                   p.status === "paid" ? "bg-emerald-100 text-emerald-700" :

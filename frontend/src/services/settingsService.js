@@ -59,18 +59,20 @@ const DB_ROLE_MAP = {
   employee: "EMPLOYEE",
 };
 
-export const listUsers = async ({ role, status, search } = {}) => {
+export const listUsers = async ({ role, status, search, page = 1, limit = 25 } = {}) => {
   try {
     const params = new URLSearchParams();
     if (search) params.append("search", search.trim());
-    // Pass lowercase role for DB matching
     if (role && role !== "all") params.append("role", role.toLowerCase());
     if (status && status !== "all") params.append("status", status.toLowerCase());
+    if (page) params.append("page", page);
+    if (limit) params.append("limit", limit);
 
     const response = await api.get(`/auth/users?${params.toString()}`);
-    const rows = response.data?.data?.users || [];
+    const resData = response.data?.data || {};
+    const rows = resData.users || [];
 
-    return rows.map((u) => ({
+    const mappedUsers = rows.map((u) => ({
       id: u.employee_id || u.user_id,
       userId: u.user_id,
       name: u.name || u.email.split("@")[0],
@@ -84,6 +86,14 @@ export const listUsers = async ({ role, status, search } = {}) => {
       createdAt: u.joining_date || u.user_created_at || "2024-01-15",
       lastActive: "Recent",
     }));
+
+    return {
+      users: mappedUsers,
+      total: resData.total || mappedUsers.length,
+      page: resData.page || page,
+      totalPages: resData.totalPages || 1,
+      limit: resData.limit || limit,
+    };
   } catch (err) {
     console.error("Failed to fetch users from backend:", err);
     throw err;
@@ -92,36 +102,16 @@ export const listUsers = async ({ role, status, search } = {}) => {
 
 export const createUser = async ({ name, email, password, role, department, jobPosition, phone }) => {
   try {
-    // 1. Register user through auth endpoint
-    const regRes = await api.post("/auth/register", {
+    const res = await api.post("/auth/users", {
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password,
+      role: (role || "employee").toLowerCase(),
+      department: department || "General",
+      jobPosition: jobPosition || "Staff",
+      phone: phone || null,
     });
-
-    const registeredUser = regRes.data?.data?.user;
-
-    // 2. Adjust role & department on the newly created employee record
-    if (registeredUser && registeredUser.id) {
-      // Find employee record by email
-      const empsRes = await api.get(`/employees?search=${encodeURIComponent(email)}`);
-      const emps = empsRes.data?.data?.employees || empsRes.data?.data || [];
-      const newEmp = emps.find((e) => e.email.toLowerCase() === email.toLowerCase());
-
-      if (newEmp) {
-        await api.put(`/employees/${newEmp.id}`, {
-          name: name.trim(),
-          department: department || "Engineering",
-          job_position: jobPosition || (role === "ADMIN" ? "Administrator" : role === "HR_PAYROLL_MANAGER" ? "Payroll Manager" : "Staff"),
-          phone: phone || null,
-        });
-      }
-    }
-
-    return {
-      success: true,
-      message: "User and employee account created successfully.",
-    };
+    return res.data;
   } catch (err) {
     console.error("Failed to create user:", err);
     throw err;
@@ -130,17 +120,40 @@ export const createUser = async ({ name, email, password, role, department, jobP
 
 export const updateUser = async (id, payload) => {
   try {
-    const res = await api.put(`/employees/${id}`, {
+    // If id is employee id or user id, we update via user id or employee id
+    const res = await api.put(`/auth/users/${payload.userId || id}`, {
       name: payload.name,
       department: payload.department,
-      job_position: payload.jobPosition,
+      jobPosition: payload.jobPosition,
       phone: payload.phone,
       status: payload.status?.toLowerCase(),
+      role: payload.role ? payload.role.toLowerCase() : undefined,
     });
-
     return res.data?.data;
   } catch (err) {
-    console.error(`Failed to update user #${id}:`, err);
+    // Fallback to updating employee if user endpoint returns error
+    try {
+      const fallback = await api.put(`/employees/${id}`, {
+        name: payload.name,
+        department: payload.department,
+        job_position: payload.jobPosition,
+        phone: payload.phone,
+        status: payload.status?.toLowerCase(),
+      });
+      return fallback.data?.data;
+    } catch {
+      console.error(`Failed to update user #${id}:`, err);
+      throw err;
+    }
+  }
+};
+
+export const deleteUser = async (userId) => {
+  try {
+    const res = await api.delete(`/auth/users/${userId}`);
+    return res.data;
+  } catch (err) {
+    console.error(`Failed to delete user #${userId}:`, err);
     throw err;
   }
 };

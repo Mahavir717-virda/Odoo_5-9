@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Clock,
   Play,
@@ -9,12 +9,14 @@ import {
   TrendingUp,
   AlertTriangle,
   History,
+  Trophy,
 } from "lucide-react";
 
 import PageHeader from "../../components/common/PageHeader";
 import FilterBar from "../../components/common/FilterBar";
 import DataTable from "../../components/common/DataTable";
 import StatusBadge from "../../components/common/StatusBadge";
+import AttendanceLeaderboard from "../../components/attendance/AttendanceLeaderboard";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 
@@ -31,17 +33,19 @@ const MONTH_OPTIONS = [
   { value: "2026-09", label: "September 2026 (Current)" },
   { value: "2026-08", label: "August 2026" },
   { value: "2026-07", label: "July 2026" },
+  { value: "all", label: "All Months (Overall)" },
 ];
 
 export default function MyAttendancePage() {
+  const [activeTab, setActiveTab] = useState("my-logs"); // "my-logs" | "leaderboard"
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [punchLoading, setPunchLoading] = useState(false);
 
-  // Filters
+  // Filters - Default to current active month so summary matches monthly leaderboard
   const [statusFilter, setStatusFilter] = useState("all");
-  const [monthFilter, setMonthFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState("2026-09");
 
   const fetchAttendance = () => {
     setLoading(true);
@@ -90,7 +94,7 @@ export default function MyAttendancePage() {
         header: "Date",
         sortable: true,
         render: (row) => {
-          if (!row.date) return "â€”";
+          if (!row.date) return "—";
           const dateStr = String(row.date).includes("T") ? row.date : `${row.date}T00:00:00`;
           const d = new Date(dateStr);
           return (
@@ -174,14 +178,45 @@ export default function MyAttendancePage() {
     <div className="space-y-6 pb-16 max-w-6xl mx-auto">
       <PageHeader
         title="My Attendance"
-        subtitle="Track your daily punch logs, working hours, and monthly attendance statistics."
+        subtitle="Track your daily punch logs, working hours, and see where you rank on the company perks ladder."
       />
 
-      {/* Clock In / Out Interactive Hub */}
-      <Card className="border-border bg-gradient-to-r from-slate-900 to-indigo-950 text-white shadow-sm overflow-hidden">
+      {/* Tab Switcher */}
+      <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 w-fit">
+        <button
+          onClick={() => setActiveTab("my-logs")}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === "my-logs"
+              ? "bg-white text-teal-800 shadow-xs border border-slate-200"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Clock className="w-4 h-4 text-teal-700" />
+          My Punch Logs & Shifts
+        </button>
+
+        <button
+          onClick={() => setActiveTab("leaderboard")}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === "leaderboard"
+              ? "bg-white text-teal-800 shadow-xs border border-slate-200"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Trophy className="w-4 h-4 text-amber-500" />
+          Company Leaderboard & Perks
+        </button>
+      </div>
+
+      {activeTab === "leaderboard" ? (
+        <AttendanceLeaderboard />
+      ) : (
+        <>
+          {/* Clock In / Out Interactive Hub */}
+          <Card className="border-slate-800 bg-slate-900 text-white shadow-sm overflow-hidden">
         <CardContent className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-blue-400 shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-teal-400 shrink-0">
               <Clock className="w-6 h-6" />
             </div>
             <div>
@@ -210,7 +245,7 @@ export default function MyAttendancePage() {
               </h2>
               {punchState?.lastShiftText && (
                 <p className="text-xs text-slate-300 mt-1 flex items-center gap-1.5 font-mono">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400" />
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-teal-400" />
                   {punchState.lastShiftText}
                 </p>
               )}
@@ -258,7 +293,7 @@ export default function MyAttendancePage() {
                 size="sm"
                 disabled={punchLoading}
                 onClick={() => handlePunch("clock-in")}
-                className="bg-[#7743db] hover:bg-[#6334b8] text-white text-xs gap-1.5 font-semibold shadow-sm px-5"
+                className="bg-teal-700 hover:bg-teal-800 text-white text-xs gap-1.5 font-semibold shadow-sm px-5 cursor-pointer"
               >
                 <Play className="w-3.5 h-3.5 fill-white" />
                 Clock In Now
@@ -281,7 +316,7 @@ export default function MyAttendancePage() {
                 Avg: {monthlySummary?.averageDailyHours || "0h"}/day
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600">
+            <div className="p-2.5 rounded-lg bg-teal-50 text-teal-700">
               <Clock className="w-5 h-5" />
             </div>
           </CardContent>
@@ -330,11 +365,11 @@ export default function MyAttendancePage() {
               <p className="text-xl font-bold text-foreground mt-1">
                 {monthlySummary?.overtimeHours || "0h 00m"}
               </p>
-              <p className="text-[11px] text-purple-600 mt-0.5">
+              <p className="text-[11px] text-teal-700 mt-0.5 font-medium">
                 Compensable
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-purple-50 text-purple-600">
+            <div className="p-2.5 rounded-lg bg-teal-50 text-teal-700">
               <TrendingUp className="w-5 h-5" />
             </div>
           </CardContent>
@@ -379,6 +414,8 @@ export default function MyAttendancePage() {
         }}
         pageSize={10}
       />
+        </>
+      )}
     </div>
   );
 }

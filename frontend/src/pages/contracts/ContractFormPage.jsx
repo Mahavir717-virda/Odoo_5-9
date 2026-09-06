@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -72,6 +72,7 @@ export default function ContractFormPage() {
 
   // Dynamic Employee List
   const [employees, setEmployees] = useState([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(true);
 
   // UI States
   const [fetching, setFetching] = useState(true);
@@ -80,16 +81,26 @@ export default function ContractFormPage() {
   const [submitError, setSubmitError] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // Load available employees on mount
+  // Load available employees on mount (limit 100 active employees)
   useEffect(() => {
+    let isMounted = true;
+    setLoadingEmployees(true);
     employeeService
-      .getEmployees()
+      .getEmployees({ limit: 100, status: "Active" })
       .then((data) => {
-        setEmployees(data);
+        if (isMounted) {
+          setEmployees(data || []);
+          setLoadingEmployees(false);
+        }
       })
       .catch((err) => {
         console.error("Failed to load employees for contract form:", err);
+        if (isMounted) setLoadingEmployees(false);
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Fetch contract details if editing
@@ -198,7 +209,15 @@ export default function ContractFormPage() {
       }
       navigate("/contracts");
     } catch (err) {
-      setSubmitError(err.message || "Failed to save contract.");
+      const msg = err.message || "Failed to save contract.";
+      setSubmitError(msg);
+      if (msg.toLowerCase().includes("overlap")) {
+        setErrors((prev) => ({
+          ...prev,
+          startDate: "Contract dates overlap with an existing contract for this employee",
+          endDate: "Contract dates overlap with an existing contract for this employee",
+        }));
+      }
       setSubmitting(false);
     }
   };
@@ -306,12 +325,12 @@ export default function ContractFormPage() {
               <Select
                 value={employeeId}
                 onValueChange={handleEmployeeSelect}
-                disabled={isEditMode}
+                disabled={isEditMode || loadingEmployees}
               >
                 <SelectTrigger className={errors.employeeId ? "border-destructive" : ""}>
-                  <SelectValue placeholder="Choose employee..." />
+                  <SelectValue placeholder={loadingEmployees ? "Loading workforce..." : "Choose employee..."} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60">
                   {employees.map((emp) => (
                     <SelectItem key={emp.id} value={String(emp.id)}>
                       {emp.firstName} {emp.lastName} ({emp.department || "No Dept"})
@@ -381,7 +400,7 @@ export default function ContractFormPage() {
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
             {/* Monthly Wage */}
             <FormField
-              label="Monthly Wage (â‚¹ INR)"
+              label="Monthly Wage (₹ INR)"
               required
               error={errors.wage}
               hint="Gross monthly base compensation"

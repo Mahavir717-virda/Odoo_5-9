@@ -97,6 +97,11 @@ export const createPayrun = async ({ name, period_start, period_end, structure_i
   return response.data?.data;
 };
 
+export const updatePayrun = async (id, payload) => {
+  const response = await api.put(`/payruns/${id}`, payload);
+  return response.data?.data;
+};
+
 export const computePayrun = async (id, employeeIds = null) => {
   const payload = Array.isArray(employeeIds) && employeeIds.length > 0 ? { employee_ids: employeeIds } : {};
   const response = await api.post(`/payruns/${id}/compute`, payload);
@@ -106,6 +111,11 @@ export const computePayrun = async (id, employeeIds = null) => {
 export const validatePayrun = async (id) => {
   const response = await api.patch(`/payruns/${id}/validate`);
   return response.data?.data;
+};
+
+export const resetPayrunToDraft = async (id) => {
+  const response = await api.post(`/payruns/${id}/reset-to-draft`);
+  return response.data?.data || response.data;
 };
 
 export const markPayrunPaid = async (id) => {
@@ -148,10 +158,11 @@ export const recalculatePayslip = async (id) => {
 // 5. REPORTS
 // ==========================================
 
-export const getPayrollSummaryReport = async ({ period_start, period_end } = {}) => {
+export const getPayrollSummaryReport = async ({ period_start, period_end, department } = {}) => {
   const params = new URLSearchParams();
   if (period_start) params.append("period_start", period_start);
   if (period_end) params.append("period_end", period_end);
+  if (department && department !== "all") params.append("department", department);
 
   const response = await api.get(`/reports/payroll-summary?${params.toString()}`);
   return response.data?.data;
@@ -185,6 +196,7 @@ export default {
   listPayruns,
   getPayrunById,
   createPayrun,
+  updatePayrun,
   computePayrun,
   validatePayrun,
   markPayrunPaid,

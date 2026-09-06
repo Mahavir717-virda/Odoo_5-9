@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 import Logo from "../components/common/Logo";
-import { Eye, EyeOff, Briefcase, ArrowRight, Lock, Mail, User } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Lock, Mail, User } from "lucide-react";
 
 function SignUp() {
   const navigate = useNavigate();
@@ -50,16 +50,16 @@ function SignUp() {
     message.toLowerCase().includes("invalid");
 
   return (
-    <div className="min-h-screen bg-[#fffbf5] flex flex-col justify-center items-center p-6">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-6">
       <div className="w-full max-w-md">
         {/* Brand */}
         <div className="flex items-center justify-center mb-8">
           <Logo size={48} />
         </div>
 
-        <div className="bg-white rounded-xl border border-[#eae0d5] shadow-sm p-8 space-y-5">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-8 space-y-5">
           <div className="text-center">
-            <h1 className="text-xl font-bold text-[#1e1b24]">Create your account</h1>
+            <h1 className="text-xl font-bold text-slate-900">Create your account</h1>
             <p className="text-sm text-slate-500 mt-1">Join PeoplePay360 today</p>
           </div>
 
@@ -74,7 +74,7 @@ function SignUp() {
                   value={formData.name}
                   type="text"
                   placeholder="Your full name"
-                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-[#eae0d5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-[#1e1b24] placeholder:text-slate-400 transition-all shadow-xs"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600/20 focus:border-teal-600 text-slate-900 placeholder:text-slate-400 transition-all shadow-xs"
                 />
               </div>
             </div>
@@ -91,7 +91,7 @@ function SignUp() {
                   required
                   autoComplete="email"
                   placeholder="you@company.com"
-                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-[#eae0d5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-[#1e1b24] placeholder:text-slate-400 transition-all shadow-xs"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600/20 focus:border-teal-600 text-slate-900 placeholder:text-slate-400 transition-all shadow-xs"
                 />
               </div>
             </div>
@@ -108,12 +108,12 @@ function SignUp() {
                   required
                   autoComplete="new-password"
                   placeholder="Create a strong password"
-                  className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-[#eae0d5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-[#1e1b24] placeholder:text-slate-400 transition-all shadow-xs"
+                  className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600/20 focus:border-teal-600 text-slate-900 placeholder:text-slate-400 transition-all shadow-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -129,7 +129,7 @@ function SignUp() {
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-[#ede5fb] file:text-[#7743db] hover:file:bg-[#ddcef7] file:transition-colors cursor-pointer"
+                className="w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-teal-50 file:text-teal-800 hover:file:bg-teal-100 file:transition-colors cursor-pointer"
               />
             </div>
 
@@ -148,7 +148,7 @@ function SignUp() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#7743db] hover:bg-[#6334b8] active:bg-[#4f2795] text-white text-sm font-semibold rounded-lg shadow-sm shadow-[#7743db]/25 transition-all focus:outline-none focus:ring-2 focus:ring-[#7743db] focus:ring-offset-1 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white text-sm font-semibold rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-1 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
               {loading ? (
                 <>
@@ -165,9 +165,9 @@ function SignUp() {
           </form>
 
           <div className="flex items-center gap-3">
-            <div className="flex-1 border-t border-[#eae0d5]" />
+            <div className="flex-1 border-t border-slate-200" />
             <span className="text-xs text-slate-400 font-medium">or</span>
-            <div className="flex-1 border-t border-[#eae0d5]" />
+            <div className="flex-1 border-t border-slate-200" />
           </div>
 
           <div className="flex justify-center">
@@ -177,7 +177,7 @@ function SignUp() {
 
         <p className="text-center text-xs text-slate-500 mt-5">
           Already have an account?{" "}
-          <Link to="/login" className="text-[#7743db] font-semibold hover:text-[#6334b8] hover:underline">
+          <Link to="/login" className="text-teal-700 font-semibold hover:text-teal-800 hover:underline">
             Sign in
           </Link>
         </p>

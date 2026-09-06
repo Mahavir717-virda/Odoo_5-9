@@ -41,7 +41,7 @@ export const listPayruns = async ({
   let whereClause = "WHERE 1=1";
   const params = [];
 
-  if (status) {
+  if (status && status !== "all") {
     params.push(status.toLowerCase().trim());
     whereClause += ` AND pr.status = $${params.length}`;
   }
@@ -426,6 +426,19 @@ const calculateEmployeePayrollInternal = ({
     }
   }
 
+  // Detect pre-flight warnings
+  const warnings = [];
+  if (!employee.bank_account_number && !employee.bank_name) {
+    warnings.push({ code: "MISSING_BANK_DETAILS", message: "Employee does not have bank account information configured on profile" });
+  }
+  if (!contract || contract.status !== "active") {
+    warnings.push({ code: "INACTIVE_CONTRACT", message: "Contract is not in active status for the current pay period" });
+  }
+  const unclosedAttendance = attendanceRecords.filter((a) => !a.check_out && a.status !== "absent");
+  if (unclosedAttendance.length > 0) {
+    warnings.push({ code: "UNCLOSED_ATTENDANCE", message: `${unclosedAttendance.length} attendance record(s) with missing check-out detected` });
+  }
+
   return {
     contract_id: contract.id,
     worked_days: workedDays,
@@ -434,9 +447,11 @@ const calculateEmployeePayrollInternal = ({
     total_deductions: totalDeductions,
     net_salary: netSalary,
     lines,
+    warnings,
     attendance_summary: {
       total_records: attendanceRecords.length,
       worked_days: workedDays,
+      unclosed_punches: unclosedAttendance.length,
     },
     leave_summary: {
       total_requests: timeOffRequests.length,
@@ -673,10 +688,8 @@ export const finalizePayrun = async (id) => {
     throw err;
   }
 
-  if (payrun.payslip_count === 0) {
-    const err = new Error("Cannot finalize payrun with zero calculated payslips. Run calculate first.");
-    err.statusCode = 400;
-    throw err;
+  if (!payrun.payslip_count || parseInt(payrun.payslip_count, 10) === 0) {
+    await calculatePayrun(parsedId);
   }
 
   const client = await pool.connect();
@@ -792,6 +805,50 @@ export const markPayrunPaid = async (id) => {
 };
 
 /**
+ * Reset Payrun to Draft (transitions payrun and payslips to draft state)
+ */
+export const resetPayrunToDraft = async (id) => {
+  const parsedId = parseId(id);
+  if (!parsedId) {
+    const err = new Error("Invalid payrun ID");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const payrun = await getPayrunById(parsedId);
+  if (!payrun) {
+    const err = new Error("Payrun not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // Reset payslips to draft
+    await client.query(
+      "UPDATE payslips SET status = 'draft', updated_at = NOW() WHERE payrun_id = $1",
+      [parsedId]
+    );
+
+    // Reset payrun to draft
+    const payrunUpdateRes = await client.query(
+      "UPDATE payruns SET status = 'draft', paid_at = NULL, updated_at = NOW() WHERE id = $1 RETURNING id, name, status, period_start, period_end, paid_at, updated_at",
+      [parsedId]
+    );
+
+    await client.query("COMMIT");
+    return payrunUpdateRes.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+/**
  * Delete a Payrun (and its associated payslips)
  */
 export const deletePayrun = async (id) => {
@@ -861,7 +918,7 @@ export const listPayslips = async ({
     whereClause += ` AND ps.employee_id = $${params.length}`;
   }
 
-  if (status) {
+  if (status && status !== "all") {
     params.push(status.toLowerCase().trim());
     whereClause += ` AND ps.status = $${params.length}`;
   }
@@ -1196,6 +1253,7 @@ export default {
   updatePayrun,
   calculatePayrun,
   finalizePayrun,
+  resetPayrunToDraft,
   markPayrunPaid,
   deletePayrun,
   listPayslips,

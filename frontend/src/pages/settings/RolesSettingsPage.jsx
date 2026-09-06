@@ -39,7 +39,7 @@ const ROLES = [
     key: "HR_PAYROLL_USER",
     name: "HR Payroll User",
     description: "Compute payruns, manage employee attendance, validate payslips, and review time off requests.",
-    badgeClass: "bg-[#f6f2fd] text-[#6334b8] border-[#ddcef7]",
+    badgeClass: "bg-[#f0fdfa] text-[#115e59] border-[#99f6e4]",
   },
   {
     key: "HR_MANAGER",
@@ -122,7 +122,7 @@ const MODULE_DEFINITIONS = [
     id: "reports",
     title: "Reports & Analytics",
     icon: BarChart3,
-    color: "text-[#7743db] bg-[#f6f2fd]",
+    color: "text-[#0f766e] bg-[#f0fdfa]",
     permissions: [
       { key: PERMISSIONS.REPORTS.VIEW, label: "View BI Analytics", desc: "Access payroll summaries and cost reports" },
     ],
@@ -213,7 +213,7 @@ export default function RolesSettingsPage() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Roles & Permissions
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
               Role-Based Access Control (RBAC)
             </span>
           </div>
@@ -232,7 +232,7 @@ export default function RolesSettingsPage() {
           </button>
           <button
             onClick={handleSave}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition"
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Save className="w-4 h-4" />
             Save Changes
@@ -260,7 +260,7 @@ export default function RolesSettingsPage() {
               onClick={() => setActiveRoleKey(role.key)}
               className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between ${
                 isSelected
-                  ? "bg-[#f6f2fd]/70 border-indigo-600 shadow-sm ring-1 ring-indigo-600"
+                  ? "bg-[#f0fdfa]/70 border-indigo-600 shadow-sm ring-1 ring-indigo-600"
                   : "bg-white border-slate-200/80 hover:border-slate-300"
               }`}
             >
@@ -282,7 +282,7 @@ export default function RolesSettingsPage() {
 
       {/* Active Role Description Banner */}
       <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-start gap-4">
-        <div className="p-3 bg-[#f6f2fd] text-[#7743db] rounded-xl shrink-0">
+        <div className="p-3 bg-[#f0fdfa] text-[#0f766e] rounded-xl shrink-0">
           <Shield className="w-6 h-6" />
         </div>
         <div className="flex-1">
@@ -328,7 +328,7 @@ export default function RolesSettingsPage() {
                 {activeRoleKey !== "ADMIN" && (
                   <button
                     onClick={() => handleToggleModule(mod.permissions)}
-                    className="text-xs font-semibold text-[#7743db] hover:underline"
+                    className="text-xs font-semibold text-[#0f766e] hover:underline"
                   >
                     {allSelected ? "Deselect All" : "Select All"}
                   </button>
@@ -347,14 +347,14 @@ export default function RolesSettingsPage() {
                       onClick={() => handleTogglePermission(perm.key)}
                       className={`p-3 rounded-xl flex items-start gap-3 transition cursor-pointer ${
                         isChecked
-                          ? "bg-[#f6f2fd]/60"
+                          ? "bg-[#f0fdfa]/60"
                           : "hover:bg-slate-50"
                       }`}
                     >
                       <div
                         className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition ${
                           isChecked
-                            ? "bg-[#7743db] border-indigo-600 text-white"
+                            ? "bg-[#0f766e] border-indigo-600 text-white"
                             : "border-slate-300 bg-white"
                         }`}
                       >

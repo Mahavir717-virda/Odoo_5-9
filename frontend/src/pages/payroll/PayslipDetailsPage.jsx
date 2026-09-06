@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   FileText,
@@ -18,6 +18,7 @@ import {
   Layers,
 } from "lucide-react";
 import { getPayslipById, recalculatePayslip } from "../../services/payrollManagerService";
+import { formatCurrency } from "../../utils/formatters";
 
 export default function PayslipDetailsPage() {
   const { id } = useParams();
@@ -71,7 +72,7 @@ export default function PayslipDetailsPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <RefreshCw className="w-8 h-8 animate-spin text-[#7743db] mb-3" />
+        <RefreshCw className="w-8 h-8 animate-spin text-[#0f766e] mb-3" />
         <p className="text-sm text-slate-500">Loading payslip statement...</p>
       </div>
     );
@@ -92,7 +93,7 @@ export default function PayslipDetailsPage() {
           </Link>
           <button
             onClick={fetchPayslip}
-            className="px-4 py-2 bg-[#7743db] hover:bg-[#6334b8] text-white rounded-xl text-sm font-medium transition"
+            className="px-4 py-2 bg-[#0f766e] hover:bg-[#115e59] text-white rounded-xl text-sm font-medium transition"
           >
             Retry
           </button>
@@ -186,14 +187,14 @@ export default function PayslipDetailsPage() {
               disabled={recalculating}
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
             >
-              <RefreshCw className={`w-4 h-4 ${recalculating ? "animate-spin text-[#7743db]" : ""}`} />
+              <RefreshCw className={`w-4 h-4 ${recalculating ? "animate-spin text-[#0f766e]" : ""}`} />
               Recalculate Rules
             </button>
           )}
 
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Printer className="w-4 h-4" />
             Print / Export PDF
@@ -220,7 +221,7 @@ export default function PayslipDetailsPage() {
         {/* Company Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-6 gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#7743db] text-white flex items-center justify-center font-bold text-xl shadow-md shadow-indigo-200">
+            <div className="w-12 h-12 rounded-2xl bg-[#0f766e] text-white flex items-center justify-center font-bold text-xl shadow-md shadow-teal-100">
               P
             </div>
             <div>
@@ -231,7 +232,7 @@ export default function PayslipDetailsPage() {
 
           <div className="sm:text-right">
             <span className="text-xs font-mono uppercase tracking-widest text-slate-400">Official Payslip</span>
-            <h3 className="text-lg font-bold font-mono text-[#7743db]">{slipNumber}</h3>
+            <h3 className="text-lg font-bold font-mono text-[#0f766e]">{slipNumber}</h3>
             <p className="text-xs text-slate-500">
               Period: {payslip?.period_start || "N/A"} to {payslip?.period_end || "N/A"}
             </p>
@@ -242,7 +243,7 @@ export default function PayslipDetailsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 p-5 rounded-xl bg-slate-50 border border-slate-100">
           <div className="space-y-2.5">
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              <User className="w-3.5 h-3.5 text-[#7743db]" />
+              <User className="w-3.5 h-3.5 text-[#0f766e]" />
               Employee Details
             </div>
             <div className="grid grid-cols-3 text-xs gap-y-1.5">
@@ -259,7 +260,7 @@ export default function PayslipDetailsPage() {
 
           <div className="space-y-2.5">
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              <CreditCard className="w-3.5 h-3.5 text-[#7743db]" />
+              <CreditCard className="w-3.5 h-3.5 text-[#0f766e]" />
               Payment & Account Info
             </div>
             <div className="grid grid-cols-3 text-xs gap-y-1.5">
@@ -273,7 +274,7 @@ export default function PayslipDetailsPage() {
               </span>
               <span className="text-slate-400">Bank Account:</span>
               <span className="col-span-2 font-mono text-slate-700">
-                {payslip?.bank_account_number || "â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 4821"}
+                {payslip?.bank_account_number || "•••• •••• •••• 4821"}
               </span>
               <span className="text-slate-400">Status:</span>
               <span className="col-span-2 capitalize text-slate-700 font-medium">
@@ -323,15 +324,14 @@ export default function PayslipDetailsPage() {
                           {line.rate ? `${line.rate}%` : "-"}
                         </td>
                         <td className="py-2.5 px-4 text-right text-slate-700">
-                          ${Math.abs(parseFloat(line.amount || amt)).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                          {formatCurrency(Math.abs(parseFloat(line.amount || amt)))}
                         </td>
                         <td
                           className={`py-2.5 px-4 text-right font-bold ${
                             isDeduction ? "text-rose-600" : "text-slate-900"
                           }`}
                         >
-                          {isDeduction ? "-" : ""}$
-                          {Math.abs(amt).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                          {isDeduction ? "-" : ""}{formatCurrency(Math.abs(amt))}
                         </td>
                       </tr>
                     );
@@ -343,16 +343,16 @@ export default function PayslipDetailsPage() {
                       <td className="py-2.5 px-4 font-semibold text-slate-900">Basic Monthly Wage</td>
                       <td className="py-2.5 px-4"><span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600">Basic</span></td>
                       <td className="py-2.5 px-4 text-right text-slate-500">100%</td>
-                      <td className="py-2.5 px-4 text-right text-slate-700">${basicWage.toFixed(2)}</td>
-                      <td className="py-2.5 px-4 text-right font-bold text-slate-900">${basicWage.toFixed(2)}</td>
+                      <td className="py-2.5 px-4 text-right text-slate-700">{formatCurrency(basicWage)}</td>
+                      <td className="py-2.5 px-4 text-right font-bold text-slate-900">{formatCurrency(basicWage)}</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50">
                       <td className="py-2.5 px-4 font-mono text-slate-500">GROSS</td>
                       <td className="py-2.5 px-4 font-semibold text-slate-900">Gross Disbursable Salary</td>
                       <td className="py-2.5 px-4"><span className="px-2 py-0.5 rounded bg-blue-50 text-blue-600">Gross</span></td>
                       <td className="py-2.5 px-4 text-right text-slate-500">-</td>
-                      <td className="py-2.5 px-4 text-right text-slate-700">${grossWage.toFixed(2)}</td>
-                      <td className="py-2.5 px-4 text-right font-bold text-slate-900">${grossWage.toFixed(2)}</td>
+                      <td className="py-2.5 px-4 text-right text-slate-700">{formatCurrency(grossWage)}</td>
+                      <td className="py-2.5 px-4 text-right font-bold text-slate-900">{formatCurrency(grossWage)}</td>
                     </tr>
                   </>
                 )}
@@ -367,25 +367,25 @@ export default function PayslipDetailsPage() {
             <div className="flex justify-between text-xs text-slate-600">
               <span>Basic Salary:</span>
               <span className="font-semibold text-slate-900">
-                ${basicWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                {formatCurrency(basicWage)}
               </span>
             </div>
             <div className="flex justify-between text-xs text-slate-600">
               <span>Gross Earnings:</span>
               <span className="font-semibold text-slate-900">
-                ${grossWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                {formatCurrency(grossWage)}
               </span>
             </div>
             <div className="flex justify-between text-xs text-rose-600">
               <span>Total Deductions:</span>
               <span className="font-semibold">
-                -${(grossWage > netWage ? grossWage - netWage : 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                -{formatCurrency(grossWage > netWage ? grossWage - netWage : 0)}
               </span>
             </div>
             <div className="border-t border-slate-200 pt-3 flex justify-between items-baseline">
               <span className="text-sm font-bold text-slate-900">Net Take-Home Pay:</span>
               <span className="text-xl font-bold text-emerald-600">
-                ${netWage.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                {formatCurrency(netWage)}
               </span>
             </div>
           </div>

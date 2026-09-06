@@ -1,4 +1,5 @@
 import pool from "../db.js";
+import { broadcastLeaderboardUpdate } from "./socketService.js";
 
 const VALID_STATUSES = ["present", "absent", "late", "half_day", "leave", "on_leave"];
 
@@ -207,10 +208,15 @@ export const createAttendance = async (data) => {
     throw err;
   }
 
-  // Validate employee exists
+  // Validate employee exists and is active
   const empRes = await pool.query("SELECT id, status FROM employees WHERE id = $1", [employee_id]);
   if (empRes.rows.length === 0) {
     const err = new Error("Employee not found");
+    err.statusCode = 400;
+    throw err;
+  }
+  if (empRes.rows[0].status && empRes.rows[0].status.toLowerCase() !== "active") {
+    const err = new Error("Cannot record attendance for a deactivated employee.");
     err.statusCode = 400;
     throw err;
   }
@@ -266,6 +272,7 @@ export const createAttendance = async (data) => {
     normalizedStatus,
   ]);
 
+  invalidateLeaderboardCache();
   return result.rows[0];
 };
 
@@ -347,6 +354,7 @@ export const updateAttendance = async (id, data) => {
     id,
   ]);
 
+  invalidateLeaderboardCache();
   return result.rows[0];
 };
 
@@ -354,11 +362,17 @@ export const updateAttendance = async (id, data) => {
  * Check In an employee
  */
 export const checkIn = async (employeeId, date = null) => {
-  // Validate employee exists
-  const empRes = await pool.query("SELECT id FROM employees WHERE id = $1", [employeeId]);
+  // Validate employee exists and is active
+  const empRes = await pool.query("SELECT id, status FROM employees WHERE id = $1", [employeeId]);
   if (empRes.rows.length === 0) {
     const err = new Error("Employee not found");
     err.statusCode = 404;
+    throw err;
+  }
+
+  if (empRes.rows[0].status && empRes.rows[0].status.toLowerCase() !== "active") {
+    const err = new Error("Employee account is deactivated. Attendance check-in is stopped.");
+    err.statusCode = 403;
     throw err;
   }
 
@@ -398,6 +412,7 @@ export const checkIn = async (employeeId, date = null) => {
        RETURNING *`,
       [record.id]
     );
+    invalidateLeaderboardCache();
     return updateRes.rows[0];
   }
 
@@ -413,6 +428,7 @@ export const checkIn = async (employeeId, date = null) => {
     [employeeId, targetDate]
   );
 
+  invalidateLeaderboardCache();
   return insertRes.rows[0];
 };
 
@@ -420,11 +436,17 @@ export const checkIn = async (employeeId, date = null) => {
  * Check Out an employee and calculate worked_hours
  */
 export const checkOut = async (employeeId, date = null) => {
-  // Validate employee exists
-  const empRes = await pool.query("SELECT id FROM employees WHERE id = $1", [employeeId]);
+  // Validate employee exists and is active
+  const empRes = await pool.query("SELECT id, status FROM employees WHERE id = $1", [employeeId]);
   if (empRes.rows.length === 0) {
     const err = new Error("Employee not found");
     err.statusCode = 404;
+    throw err;
+  }
+
+  if (empRes.rows[0].status && empRes.rows[0].status.toLowerCase() !== "active") {
+    const err = new Error("Employee account is deactivated. Attendance is stopped.");
+    err.statusCode = 403;
     throw err;
   }
 
@@ -487,7 +509,218 @@ export const checkOut = async (employeeId, date = null) => {
     [now, workedHours, record.id]
   );
 
+  invalidateLeaderboardCache();
   return updateRes.rows[0];
+};
+
+/**
+ * In-memory high-speed cache for leaderboard queries
+ */
+const leaderboardCache = new Map();
+const CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes
+
+export const invalidateLeaderboardCache = () => {
+  leaderboardCache.clear();
+  try {
+    broadcastLeaderboardUpdate({ reason: "ATTENDANCE_CHANGED" });
+  } catch (err) {
+    // Ignore if sockets not ready
+  }
+};
+
+/**
+ * Assign perks based on ranking
+ */
+const assignPerks = (rank, punctualityRate) => {
+  if (rank === 1) {
+    return {
+      tier: "gold",
+      badge: "🥇 Champion",
+      title: "Workhorse of the Month",
+      perkBonus: 150,
+      perkText: "$150 Bonus + 1 Extra Floating Leave Day + Executive Spotlight",
+      color: "#F59E0B",
+    };
+  }
+  if (rank === 2) {
+    return {
+      tier: "silver",
+      badge: "🥈 Elite Performer",
+      title: "Silver Pillar",
+      perkBonus: 100,
+      perkText: "$100 Bonus + Team Lunch Voucher",
+      color: "#94A3B8",
+    };
+  }
+  if (rank === 3) {
+    return {
+      tier: "bronze",
+      badge: "🥉 Rising Star",
+      title: "Bronze Vanguard",
+      perkBonus: 50,
+      perkText: "$50 Wellness & Coffee Card",
+      color: "#D97706",
+    };
+  }
+  if (rank <= 10) {
+    return {
+      tier: "top10",
+      badge: "⭐ Star Contributor",
+      title: "Top 10 High Achiever",
+      perkBonus: 25,
+      perkText: "250 Perk Points + Certificate of Commendation",
+      color: "#7743DB",
+    };
+  }
+  return {
+    tier: "contributor",
+    badge: "👤 Team Contributor",
+    title: "Valued Team Player",
+    perkBonus: 0,
+    perkText: "Standard Attendance & Growth Program",
+    color: "#6B7280",
+  };
+};
+
+/**
+ * Retrieve monthly attendance leaderboard with perks
+ */
+export const getMonthlyLeaderboard = async ({
+  month,
+  year,
+  department,
+  limit = 50,
+  currentEmployeeId = null,
+}) => {
+  const now = new Date();
+  const targetYear = parseInt(year, 10) || now.getFullYear();
+  const targetMonth = parseInt(month, 10) || now.getMonth() + 1;
+  const parsedLimit = Math.min(1000, Math.max(5, parseInt(limit, 10) || 500));
+
+  const cacheKey = `${targetYear}-${targetMonth}-${department || "all"}-${parsedLimit}`;
+  const cached = leaderboardCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  // Calculate start and end date for month in YYYY-MM-DD
+  const startDate = `${targetYear}-${String(targetMonth).padStart(2, "0")}-01`;
+  const lastDay = new Date(targetYear, targetMonth, 0).getDate();
+  const endDate = `${targetYear}-${String(targetMonth).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+
+  const queryParams = [startDate, endDate];
+  let deptFilter = "";
+  if (department && department !== "all") {
+    queryParams.push(department);
+    deptFilter = `AND e.department = $${queryParams.length}`;
+  }
+  queryParams.push(parsedLimit);
+
+  const query = `
+    SELECT 
+      e.id AS employee_id,
+      e.name AS employee_name,
+      e.email AS employee_email,
+      e.department,
+      e.job_position,
+      COALESCE(SUM(a.worked_hours), 0)::numeric(10, 2) AS total_worked_hours,
+      COUNT(CASE WHEN a.status IN ('present', 'late', 'half_day') THEN 1 END)::int AS days_present,
+      COUNT(CASE WHEN a.status = 'late' THEN 1 END)::int AS days_late,
+      COALESCE(AVG(a.worked_hours), 0)::numeric(5, 2) AS avg_daily_hours
+    FROM employees e
+    LEFT JOIN attendance a ON e.id = a.employee_id 
+      AND a.attendance_date >= $1 
+      AND a.attendance_date <= $2
+    WHERE e.status = 'active'
+    ${deptFilter}
+    GROUP BY e.id, e.name, e.email, e.department, e.job_position
+    ORDER BY total_worked_hours DESC, days_present DESC, e.name ASC
+    LIMIT $${queryParams.length};
+  `;
+
+  const res = await pool.query(query, queryParams);
+
+  let currentRank = 1;
+  const rankings = res.rows.map((row, index) => {
+    const totalHours = parseFloat(row.total_worked_hours) || 0;
+    const daysPresent = parseInt(row.days_present, 10) || 0;
+    const daysLate = parseInt(row.days_late, 10) || 0;
+    const onTimeDays = Math.max(0, daysPresent - daysLate);
+    const punctualityRate = daysPresent > 0 ? Math.round((onTimeDays / daysPresent) * 100) : 100;
+    const avgDailyHours = parseFloat(row.avg_daily_hours) || 0;
+
+    const rank = index + 1;
+    const perks = assignPerks(rank, punctualityRate);
+
+    return {
+      rank,
+      employee_id: row.employee_id,
+      employee_name: row.employee_name,
+      employee_email: row.employee_email,
+      department: row.department,
+      job_position: row.job_position,
+      total_worked_hours: totalHours,
+      days_present: daysPresent,
+      days_late: daysLate,
+      punctuality_rate: punctualityRate,
+      avg_daily_hours: avgDailyHours,
+      perks,
+    };
+  });
+
+  // Inter-Department Competition Standings
+  const deptQuery = `
+    SELECT 
+      COALESCE(e.department, 'General') AS department,
+      COUNT(DISTINCT e.id)::int AS total_members,
+      COALESCE(SUM(a.worked_hours), 0)::numeric(10, 2) AS total_department_hours,
+      CASE 
+        WHEN COUNT(DISTINCT e.id) > 0 THEN (COALESCE(SUM(a.worked_hours), 0) / COUNT(DISTINCT e.id))::numeric(6, 2)
+        ELSE 0
+      END AS avg_hours_per_member
+    FROM employees e
+    LEFT JOIN attendance a ON e.id = a.employee_id 
+      AND a.attendance_date >= $1 
+      AND a.attendance_date <= $2
+    WHERE e.status = 'active'
+    GROUP BY e.department
+    ORDER BY avg_hours_per_member DESC, total_department_hours DESC;
+  `;
+  const deptRes = await pool.query(deptQuery, [startDate, endDate]);
+
+  const departmentStandings = deptRes.rows.map((d, i) => ({
+    rank: i + 1,
+    department: d.department,
+    total_members: parseInt(d.total_members, 10) || 0,
+    total_department_hours: parseFloat(d.total_department_hours) || 0,
+    avg_hours_per_member: parseFloat(d.avg_hours_per_member) || 0,
+  }));
+
+  const top3 = rankings.slice(0, 3);
+  const totalEmployeesCount = rankings.length;
+  const totalCompanyHours = rankings.reduce((acc, r) => acc + r.total_worked_hours, 0);
+  const avgCompanyHours = totalEmployeesCount > 0 ? Math.round((totalCompanyHours / totalEmployeesCount) * 10) / 10 : 0;
+
+  const result = {
+    month: targetMonth,
+    year: targetYear,
+    periodName: new Date(targetYear, targetMonth - 1).toLocaleString("default", { month: "long", year: "numeric" }),
+    department: department || "All Departments",
+    rankings,
+    top3,
+    departmentStandings,
+    availableDepartments: departmentStandings.map((d) => d.department).filter(Boolean),
+    stats: {
+      totalEmployees: totalEmployeesCount,
+      totalHoursLogged: Math.round(totalCompanyHours),
+      avgHoursPerEmployee: avgCompanyHours,
+    },
+  };
+
+  // Cache in memory
+  leaderboardCache.set(cacheKey, { timestamp: Date.now(), data: result });
+
+  return result;
 };
 
 export default {
@@ -498,4 +731,7 @@ export default {
   updateAttendance,
   checkIn,
   checkOut,
+  getMonthlyLeaderboard,
+  invalidateLeaderboardCache,
 };
+

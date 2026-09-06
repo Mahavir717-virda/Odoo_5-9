@@ -246,8 +246,8 @@ export default function DataTable({
                       key={col.key}
                       style={{ width: col.width }}
                       className={cn(
-                        "font-bold text-[11px] uppercase tracking-wider text-slate-500 select-none py-3.5 px-4 bg-[#f8fafc]",
-                        isSortable && "cursor-pointer hover:text-[#7743db] transition-colors"
+                        "font-bold text-[11px] uppercase tracking-wider text-slate-500 select-none py-3.5 px-4 bg-slate-50/80",
+                        isSortable && "cursor-pointer hover:text-teal-700 transition-colors"
                       )}
                       onClick={() => isSortable && handleSort(col.key)}
                     >
@@ -256,9 +256,9 @@ export default function DataTable({
                         {isSortable && (
                           <span className="inline-flex shrink-0">
                             {isSorted && sortConfig.direction === "asc" ? (
-                              <ArrowUp className="w-3.5 h-3.5 text-[#7743db]" />
+                              <ArrowUp className="w-3.5 h-3.5 text-teal-700" />
                             ) : isSorted && sortConfig.direction === "desc" ? (
-                              <ArrowDown className="w-3.5 h-3.5 text-[#7743db]" />
+                              <ArrowDown className="w-3.5 h-3.5 text-teal-700" />
                             ) : (
                               <ArrowUpDown className="w-3.5 h-3.5 opacity-40 hover:opacity-100 transition-opacity" />
                             )}

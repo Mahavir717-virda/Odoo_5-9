@@ -1,6 +1,5 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { FileText, Plus, Eye, Pencil, MoreVertical } from "lucide-react";
 
 import PageHeader from "../../components/common/PageHeader";
@@ -34,35 +33,7 @@ const STATUS_OPTIONS = [
   { value: "Cancelled", label: "Cancelled" },
 ];
 
-/**
- * Format currency to Indian Rupee (INR)
- */
-function formatCurrency(amount) {
-  if (amount == null) return "â€”";
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-/**
- * Format ISO date string into readable format (e.g. "Jan 15, 2024")
- */
-function formatDate(dateString) {
-  if (!dateString) return "â€”";
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return dateString;
-  }
-}
+import { formatCurrency, formatDate } from "../../utils/formatters";
 
 export default function ContractsPage() {
   const navigate = useNavigate();
@@ -92,35 +63,7 @@ export default function ContractsPage() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // Initial load to derive unique employees who have contracts
-  useEffect(() => {
-    let isMounted = true;
-    contractService
-      .getContracts()
-      .then((allContracts) => {
-        if (isMounted) {
-          const empMap = new Map();
-          allContracts.forEach((con) => {
-            if (con.employeeId && con.employeeName && !empMap.has(con.employeeId)) {
-              empMap.set(con.employeeId, {
-                value: con.employeeId,
-                label: con.employeeName,
-              });
-            }
-          });
-          setEmployeeOptions(Array.from(empMap.values()));
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load employee contract options:", err);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // Fetch filtered contracts
+  // Fetch filtered contracts & populate employee options dynamically
   useEffect(() => {
     let isCancelled = false;
     setLoading(true);
@@ -135,8 +78,23 @@ export default function ContractsPage() {
       })
       .then((data) => {
         if (!isCancelled) {
-          setContracts(data);
+          const list = Array.isArray(data) ? data : [];
+          setContracts(list);
           setLoading(false);
+
+          // Populate employee filter options dynamically once
+          if (employeeFilter === "all") {
+            const empMap = new Map();
+            list.forEach((con) => {
+              if (con.employeeId && con.employeeName && !empMap.has(con.employeeId)) {
+                empMap.set(con.employeeId, {
+                  value: con.employeeId,
+                  label: con.employeeName,
+                });
+              }
+            });
+            setEmployeeOptions(Array.from(empMap.values()));
+          }
         }
       })
       .catch((err) => {
@@ -250,14 +208,8 @@ export default function ContractsPage() {
             <div className="flex items-center gap-2">
               <StatusBadge status={row.status} />
               {isActive && (
-                <motion.span
+                <span
                   className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
                   title="Active running contract"
                 />
               )}
@@ -348,30 +300,21 @@ export default function ContractsPage() {
             label: "Employee",
             options: employeeOptions,
             value: employeeFilter,
-            onChange: (val) => {
-              setLoading(true);
-              setEmployeeFilter(val);
-            },
+            onChange: (val) => setEmployeeFilter(val),
           },
           {
             key: "department",
             label: "Department",
             options: DEPARTMENT_OPTIONS,
             value: departmentFilter,
-            onChange: (val) => {
-              setLoading(true);
-              setDepartmentFilter(val);
-            },
+            onChange: (val) => setDepartmentFilter(val),
           },
           {
             key: "status",
             label: "Status",
             options: STATUS_OPTIONS,
             value: statusFilter,
-            onChange: (val) => {
-              setLoading(true);
-              setStatusFilter(val);
-            },
+            onChange: (val) => setStatusFilter(val),
           },
         ]}
         onClearAll={handleClearAllFilters}

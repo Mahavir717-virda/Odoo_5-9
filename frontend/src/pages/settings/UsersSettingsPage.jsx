@@ -18,11 +18,15 @@ import {
   X,
   Phone,
   UserCheck,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
 } from "lucide-react";
 import {
   listUsers,
   createUser,
   updateUser,
+  deleteUser,
   toggleUserStatus,
   updateUserRole,
 } from "../../services/settingsService";
@@ -52,10 +56,23 @@ export default function UsersSettingsPage() {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Filters
+  // Pagination & Filters
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Debounce search input (300ms)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [search]);
 
   // Create Modal State
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -88,12 +105,16 @@ export default function UsersSettingsPage() {
     try {
       setLoading(true);
       setError("");
-      const data = await listUsers({
+      const res = await listUsers({
         role: roleFilter !== "all" ? roleFilter : undefined,
         status: statusFilter !== "all" ? statusFilter : undefined,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
+        page,
+        limit: 25,
       });
-      setUsers(data);
+      setUsers(res.users || []);
+      setTotalCount(res.total || 0);
+      setTotalPages(res.totalPages || 1);
     } catch (err) {
       console.error("Failed to load users:", err);
       setError(err.response?.data?.message || "Failed to load system users.");
@@ -104,7 +125,7 @@ export default function UsersSettingsPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, [roleFilter, statusFilter]);
+  }, [roleFilter, statusFilter, debouncedSearch, page]);
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
@@ -143,7 +164,7 @@ export default function UsersSettingsPage() {
       name: user.name,
       department: user.department,
       jobPosition: user.jobPosition,
-      phone: user.phone !== "â€”" ? user.phone : "",
+      phone: user.phone !== "—" ? user.phone : "",
       status: user.status,
       role: user.role,
     });
@@ -187,19 +208,20 @@ export default function UsersSettingsPage() {
     }
   };
 
-  // Filter users by search term
-  const filteredUsers = users.filter((u) => {
-    const term = search.toLowerCase();
-    return (
-      u.name.toLowerCase().includes(term) ||
-      u.email.toLowerCase().includes(term) ||
-      u.employeeCode.toLowerCase().includes(term) ||
-      u.department.toLowerCase().includes(term)
-    );
-  });
+  const handleDeleteUser = async (user) => {
+    if (!window.confirm(`Are you sure you want to permanently delete user account ${user.email}? This action cannot be undone.`)) return;
+
+    try {
+      await deleteUser(user.userId || user.id);
+      setSuccessMsg(`User ${user.email} deleted successfully.`);
+      setTimeout(() => setSuccessMsg(""), 4000);
+      fetchUsers();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete user account.");
+    }
+  };
 
   // KPI Calculations
-  const totalCount = users.length;
   const activeCount = users.filter((u) => u.status === "Active").length;
   const adminCount = users.filter((u) => u.role === "ADMIN" || u.role.includes("MANAGER")).length;
   const employeeCount = users.filter((u) => u.role === "EMPLOYEE" || u.role === "HR_PAYROLL_USER").length;
@@ -222,7 +244,7 @@ export default function UsersSettingsPage() {
     }
     if (r === "HR_PAYROLL_USER") {
       return (
-        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#f6f2fd] text-[#6334b8] border border-[#ddcef7]">
+        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#f0fdfa] text-[#115e59] border border-[#99f6e4]">
           Payroll User
         </span>
       );
@@ -250,7 +272,7 @@ export default function UsersSettingsPage() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               User Management
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
               {totalCount} Accounts
             </span>
           </div>
@@ -265,12 +287,12 @@ export default function UsersSettingsPage() {
             disabled={loading}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#7743db]" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#0f766e]" : ""}`} />
             Refresh
           </button>
           <button
             onClick={() => setIsCreateOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Plus className="w-4 h-4" />
             New User
@@ -290,7 +312,7 @@ export default function UsersSettingsPage() {
             <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalCount}</h3>
             <p className="text-xs text-slate-400 mt-0.5">Database credentials</p>
           </div>
-          <div className="p-3 bg-[#f6f2fd] rounded-xl text-[#7743db]">
+          <div className="p-3 bg-[#f0fdfa] rounded-xl text-[#0f766e]">
             <Users className="w-6 h-6" />
           </div>
         </motion.div>
@@ -352,7 +374,7 @@ export default function UsersSettingsPage() {
             placeholder="Search by name, email, or ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           />
         </div>
 
@@ -360,7 +382,7 @@ export default function UsersSettingsPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           >
             <option value="all">All Roles</option>
             <option value="ADMIN">Admin</option>
@@ -373,7 +395,7 @@ export default function UsersSettingsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-slate-900"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           >
             <option value="all">All Statuses</option>
             <option value="Active">Active</option>
@@ -383,109 +405,108 @@ export default function UsersSettingsPage() {
       </div>
 
       {/* Users Table */}
-      <DataTable
-        columns={[
-          {
-            key: "name",
-            header: "User / Identity",
-            sortable: true,
-            render: (u) => (
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#ede5fb] text-[#7743db] font-semibold text-xs flex items-center justify-center shrink-0">
-                  {u.name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-900">{u.name}</p>
-                  <p className="text-xs text-slate-400 font-mono">{u.email}</p>
-                </div>
-              </div>
-            ),
-          },
-          {
-            key: "employeeCode",
-            header: "Employee ID",
-            sortable: true,
-            render: (u) => (
-              <span className="font-mono text-xs font-medium text-slate-600">
-                {u.employeeCode}
-              </span>
-            ),
-          },
-          {
-            key: "department",
-            header: "Department & Position",
-            sortable: true,
-            render: (u) => (
-              <div>
-                <p className="font-medium text-slate-900 text-xs">{u.jobPosition}</p>
-                <p className="text-[11px] text-slate-400">{u.department}</p>
-              </div>
-            ),
-          },
-          {
-            key: "role",
-            header: "Security Role",
-            sortable: true,
-            render: (u) => getRoleBadge(u.role),
-          },
-          {
-            key: "status",
-            header: "Status",
-            sortable: true,
-            align: "center",
-            render: (u) => (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleStatusToggle(u);
-                }}
-                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold cursor-pointer transition ${
-                  u.status === "Active"
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : "bg-slate-100 text-slate-500 border border-slate-200"
-                }`}
-                title="Click to toggle status"
-              >
-                {u.status === "Active" ? (
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                ) : (
-                  <XCircle className="w-3.5 h-3.5" />
-                )}
-                {u.status}
-              </button>
-            ),
-          },
-          {
-            key: "actions",
-            header: "Actions",
-            align: "right",
-            render: (u) => (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openEditModal(u);
-                }}
-                className="p-1.5 rounded-lg text-slate-600 hover:text-[#7743db] hover:bg-slate-100 transition"
-                title="Edit User"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
-            ),
-          },
-        ]}
-        data={filteredUsers}
-        loading={loading}
-        error={error}
-        onRetry={fetchUsers}
-        emptyState={{
-          icon: Users,
-          title: "No users found",
-          description:
-            search || roleFilter !== "all" || statusFilter !== "all"
-              ? "Try adjusting your search filters."
-              : "Create user credentials to allow staff members to log in.",
-        }}
-      />
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm overflow-hidden">
+        {loading ? (
+          <div className="p-12 text-center">
+            <RefreshCw className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-3" />
+            <p className="text-sm text-slate-500">Loading system users...</p>
+          </div>
+        ) : users.length === 0 ? (
+          <div className="p-12 text-center">
+            <Users className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">No users found</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+              {search || roleFilter !== "all" || statusFilter !== "all"
+                ? "Try adjusting your search filters."
+                : "Create user credentials to allow staff members to log in."}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/75 dark:bg-slate-900/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <th className="py-3.5 px-4 pl-6">User / Identity</th>
+                  <th className="py-3.5 px-4">Employee ID</th>
+                  <th className="py-3.5 px-4">Department & Position</th>
+                  <th className="py-3.5 px-4">Security Role</th>
+                  <th className="py-3.5 px-4 text-center">Status</th>
+                  <th className="py-3.5 px-4 pr-6 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
+                {users.map((u) => (
+                  <tr
+                    key={u.id}
+                    className="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition group"
+                  >
+                    <td className="py-3.5 px-4 pl-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-indigo-100 dark:bg-slate-900/50 text-indigo-600 dark:text-indigo-400 font-semibold text-xs flex items-center justify-center shrink-0">
+                          {u.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900 dark:text-white">{u.name}</p>
+                          <p className="text-xs text-slate-400 font-mono">{u.email}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="py-3.5 px-4 font-mono text-xs font-medium text-slate-600 dark:text-slate-300">
+                      {u.employeeCode}
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      <p className="font-medium text-slate-900 dark:text-white text-xs">{u.jobPosition}</p>
+                      <p className="text-[11px] text-slate-400">{u.department}</p>
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      {getRoleBadge(u.role)}
+                    </td>
+
+                    <td className="py-3.5 px-4 text-center">
+                      <button
+                        onClick={() => handleStatusToggle(u)}
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold cursor-pointer transition ${
+                          u.status === "Active"
+                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                            : "bg-slate-100 text-slate-500 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                        }`}
+                        title="Click to toggle status"
+                      >
+                        {u.status === "Active" ? (
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        ) : (
+                          <XCircle className="w-3.5 h-3.5" />
+                        )}
+                        {u.status}
+                      </button>
+                    </td>
+
+                    <td className="py-3.5 px-4 pr-6 text-right flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => openEditModal(u)}
+                        className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
+                        title="Edit User"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteUser(u)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition"
+                        title="Delete User"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Create User Modal */}
       {isCreateOpen && (
@@ -522,7 +543,7 @@ export default function UsersSettingsPage() {
                   placeholder="e.g. Eleanor Vance"
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -536,7 +557,7 @@ export default function UsersSettingsPage() {
                   placeholder="e.g. eleanor.vance@company.com"
                   value={createForm.email}
                   onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -547,10 +568,10 @@ export default function UsersSettingsPage() {
                 <input
                   type="password"
                   required
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                  placeholder="••••••••••••"
                   value={createForm.password}
                   onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -562,7 +583,7 @@ export default function UsersSettingsPage() {
                   <select
                     value={createForm.role}
                     onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   >
                     <option value="EMPLOYEE">Employee (Self-Service)</option>
                     <option value="HR_PAYROLL_USER">HR Payroll User</option>
@@ -581,7 +602,7 @@ export default function UsersSettingsPage() {
                     placeholder="e.g. Engineering"
                     value={createForm.department}
                     onChange={(e) => setCreateForm({ ...createForm, department: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
               </div>
@@ -596,7 +617,7 @@ export default function UsersSettingsPage() {
                     placeholder="e.g. Payroll Analyst"
                     value={createForm.jobPosition}
                     onChange={(e) => setCreateForm({ ...createForm, jobPosition: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
 
@@ -609,7 +630,7 @@ export default function UsersSettingsPage() {
                     placeholder="+1 (555) 000-0000"
                     value={createForm.phone}
                     onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
               </div>
@@ -625,7 +646,7 @@ export default function UsersSettingsPage() {
                 <button
                   type="submit"
                   disabled={createSubmitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition disabled:opacity-50"
                 >
                   {createSubmitting ? (
                     <>
@@ -676,7 +697,7 @@ export default function UsersSettingsPage() {
                   required
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                 />
               </div>
 
@@ -689,7 +710,7 @@ export default function UsersSettingsPage() {
                     type="text"
                     value={editForm.department}
                     onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
 
@@ -701,7 +722,7 @@ export default function UsersSettingsPage() {
                     type="text"
                     value={editForm.jobPosition}
                     onChange={(e) => setEditForm({ ...editForm, jobPosition: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
               </div>
@@ -715,7 +736,7 @@ export default function UsersSettingsPage() {
                     type="text"
                     value={editForm.phone}
                     onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                 </div>
 
@@ -726,7 +747,7 @@ export default function UsersSettingsPage() {
                   <select
                     value={editForm.status}
                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db]"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   >
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
@@ -734,7 +755,7 @@ export default function UsersSettingsPage() {
                 </div>
               </div>
 
-              {/* Security Role â€” Admin-Only Change */}
+              {/* Security Role — Admin-Only Change */}
               <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                 <div className="flex items-center gap-2 mb-2">
                   <Shield className="w-4 h-4 text-amber-600" />
@@ -750,16 +771,16 @@ export default function UsersSettingsPage() {
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
                   className="w-full px-3.5 py-2 rounded-xl bg-white border border-amber-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-medium"
                 >
-                  <option value="EMPLOYEE">ðŸ‘¤ Employee (Self-Service Portal)</option>
-                  <option value="HR_PAYROLL_USER">ðŸ“‹ HR Payroll User</option>
-                  <option value="HR_PAYROLL_MANAGER">ðŸ’¼ HR Payroll Manager</option>
+                  <option value="EMPLOYEE">👤 Employee (Self-Service Portal)</option>
+                  <option value="HR_PAYROLL_USER">📋 HR Payroll User</option>
+                  <option value="HR_PAYROLL_MANAGER">💼 HR Payroll Manager</option>
                   <option value="HR_MANAGER">ðŸ¢ HR Manager</option>
                   <option value="ADMIN">ðŸ›¡ï¸ Administrator (Full Access)</option>
                 </select>
                 {editForm.role !== editingUser?.role && (
                   <p className="mt-2 text-[11px] text-amber-700 flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5" />
-                    Role will change from <strong>{editingUser?.role}</strong> â†’ <strong>{editForm.role}</strong>
+                    Role will change from <strong>{editingUser?.role}</strong> → <strong>{editForm.role}</strong>
                   </p>
                 )}
               </div>
@@ -775,7 +796,7 @@ export default function UsersSettingsPage() {
                 <button
                   type="submit"
                   disabled={editSubmitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition disabled:opacity-50"
                 >
                   {editSubmitting ? (
                     <>

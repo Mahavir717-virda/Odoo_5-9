@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BarChart3,
   DollarSign,
@@ -19,6 +19,7 @@ import {
   getPayrollSummaryReport,
   getDepartmentCostReport,
 } from "../../services/payrollManagerService";
+import { formatCurrency } from "../../utils/formatters";
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState("summary"); // 'summary' | 'department'
@@ -33,23 +34,25 @@ export default function ReportsPage() {
   // Data states
   const [summaryData, setSummaryData] = useState(null);
   const [deptCostData, setDeptCostData] = useState([]);
+  const [allDepartments, setAllDepartments] = useState([]);
 
-  const fetchReports = async () => {
+  const fetchReports = async (optDept = deptFilter, optStart = periodStart, optEnd = periodEnd) => {
     try {
       setLoading(true);
       setError("");
 
       const [summaryRes, deptRes] = await Promise.all([
         getPayrollSummaryReport({
-          period_start: periodStart || undefined,
-          period_end: periodEnd || undefined,
+          period_start: optStart || undefined,
+          period_end: optEnd || undefined,
+          department: optDept !== "all" ? optDept : undefined,
         }).catch((err) => {
           console.warn("Summary report err:", err);
           return null;
         }),
         getDepartmentCostReport({
-          period_start: periodStart || undefined,
-          period_end: periodEnd || undefined,
+          period_start: optStart || undefined,
+          period_end: optEnd || undefined,
         }).catch((err) => {
           console.warn("Dept report err:", err);
           return [];
@@ -57,7 +60,14 @@ export default function ReportsPage() {
       ]);
 
       setSummaryData(summaryRes);
-      setDeptCostData(Array.isArray(deptRes) ? deptRes : []);
+      const depts = Array.isArray(deptRes) ? deptRes : [];
+      setDeptCostData(depts);
+      if (depts.length > 0) {
+        setAllDepartments((prev) => {
+          const names = new Set([...prev, ...depts.map((d) => d.department_name || d.name).filter(Boolean)]);
+          return Array.from(names);
+        });
+      }
     } catch (err) {
       console.error("Failed to load reports:", err);
       setError(err.response?.data?.message || "Failed to load payroll analytics & reports.");
@@ -72,23 +82,19 @@ export default function ReportsPage() {
 
   const handleApplyFilter = (e) => {
     e.preventDefault();
-    fetchReports();
+    fetchReports(deptFilter, periodStart, periodEnd);
+  };
+
+  const handleDeptChange = (newDept) => {
+    setDeptFilter(newDept);
+    fetchReports(newDept, periodStart, periodEnd);
   };
 
   const handleResetFilter = () => {
     setPeriodStart("");
     setPeriodEnd("");
     setDeptFilter("all");
-    // Fetch with cleared values immediately
-    setLoading(true);
-    setError("");
-    Promise.all([
-      getPayrollSummaryReport({}).catch(() => null),
-      getDepartmentCostReport({}).catch(() => []),
-    ]).then(([summaryRes, deptRes]) => {
-      setSummaryData(summaryRes);
-      setDeptCostData(Array.isArray(deptRes) ? deptRes : []);
-    }).catch(() => {}).finally(() => setLoading(false));
+    fetchReports("all", "", "");
   };
 
   const handlePrint = () => {
@@ -101,6 +107,14 @@ export default function ReportsPage() {
     : deptCostData.filter((d) =>
         (d.department_name || d.name || "").toLowerCase() === deptFilter.toLowerCase()
       );
+
+  // Available unique department options
+  const departmentOptions = Array.from(
+    new Set([
+      ...allDepartments,
+      ...deptCostData.map((d) => d.department_name || d.name).filter(Boolean)
+    ])
+  );
 
   // Safe KPI calculations from summaryData or calculated fallbacks
   const totalGross = parseFloat(
@@ -127,7 +141,7 @@ export default function ReportsPage() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Payroll Reports & Analytics
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f6f2fd] text-[#6334b8] border border-indigo-100">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
               Live BI Metrics
             </span>
           </div>
@@ -142,12 +156,12 @@ export default function ReportsPage() {
             disabled={loading}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#7743db]" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#0f766e]" : ""}`} />
             Refresh
           </button>
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#7743db] hover:bg-[#6334b8] text-white shadow-sm shadow-indigo-200 transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Printer className="w-4 h-4" />
             Print / Export Report
@@ -179,18 +193,18 @@ export default function ReportsPage() {
             />
           </div>
 
-          {deptCostData.length > 0 && (
+          {departmentOptions.length > 0 && (
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-slate-700">Department:</span>
               <select
                 value={deptFilter}
-                onChange={(e) => setDeptFilter(e.target.value)}
+                onChange={(e) => handleDeptChange(e.target.value)}
                 className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900"
               >
                 <option value="all">All Departments</option>
-                {deptCostData.map((d, i) => (
-                  <option key={i} value={d.department_name || d.name}>
-                    {d.department_name || d.name || "General"}
+                {departmentOptions.map((deptName, i) => (
+                  <option key={i} value={deptName}>
+                    {deptName}
                   </option>
                 ))}
               </select>
@@ -199,7 +213,7 @@ export default function ReportsPage() {
 
           <button
             type="submit"
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#7743db] hover:bg-[#6334b8] text-white transition shadow-sm"
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white transition shadow-sm"
           >
             Filter Analytics
           </button>
@@ -232,7 +246,7 @@ export default function ReportsPage() {
               Total Disbursed Net
             </p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">
-              ${totalNet.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(totalNet)}
             </h3>
             <p className="text-xs text-emerald-600 mt-0.5 font-medium">Net Take-Home Sum</p>
           </div>
@@ -247,7 +261,7 @@ export default function ReportsPage() {
               Total Gross Payroll
             </p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">
-              ${totalGross.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(totalGross)}
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Pre-deduction wage cost</p>
           </div>
@@ -262,7 +276,7 @@ export default function ReportsPage() {
               Total Deductions & Tax
             </p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">
-              ${totalDeductions.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(totalDeductions)}
             </h3>
             <p className="text-xs text-rose-600 mt-0.5 font-medium">Withheld amounts</p>
           </div>
@@ -277,13 +291,13 @@ export default function ReportsPage() {
               Average Net / Slip
             </p>
             <h3 className="text-2xl font-bold text-slate-900 mt-1">
-              ${avgSalary.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(avgSalary)}
             </h3>
-            <p className="text-xs text-[#7743db] mt-0.5 font-medium">
+            <p className="text-xs text-[#0f766e] mt-0.5 font-medium">
               Across {totalPayslips} generated payslips
             </p>
           </div>
-          <div className="p-3 bg-[#f6f2fd] rounded-xl text-[#7743db]">
+          <div className="p-3 bg-[#f0fdfa] rounded-xl text-[#0f766e]">
             <Users className="w-6 h-6" />
           </div>
         </div>
@@ -295,7 +309,7 @@ export default function ReportsPage() {
           onClick={() => setActiveTab("summary")}
           className={`pb-3 px-4 text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
             activeTab === "summary"
-              ? "border-indigo-600 text-[#7743db]"
+              ? "border-indigo-600 text-[#0f766e]"
               : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -307,7 +321,7 @@ export default function ReportsPage() {
           onClick={() => setActiveTab("department")}
           className={`pb-3 px-4 text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
             activeTab === "department"
-              ? "border-indigo-600 text-[#7743db]"
+              ? "border-indigo-600 text-[#0f766e]"
               : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -333,7 +347,7 @@ export default function ReportsPage() {
                 <div className="flex justify-between text-xs font-semibold mb-1">
                   <span className="text-emerald-700">Net Take-Home Payout</span>
                   <span className="text-slate-900">
-                    ${totalNet.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    {formatCurrency(totalNet)}
                   </span>
                 </div>
                 <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
@@ -350,7 +364,7 @@ export default function ReportsPage() {
                 <div className="flex justify-between text-xs font-semibold mb-1">
                   <span className="text-rose-700">Taxes, Insurance & Deductions</span>
                   <span className="text-slate-900">
-                    ${totalDeductions.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    {formatCurrency(totalDeductions)}
                   </span>
                 </div>
                 <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
@@ -374,7 +388,7 @@ export default function ReportsPage() {
               <div className="flex justify-between text-slate-500">
                 <span>Period Range:</span>
                 <span className="font-semibold text-slate-900">
-                  {periodStart || "All Recorded"} â†’ {periodEnd || "Present"}
+                  {periodStart || "All Recorded"} → {periodEnd || "Present"}
                 </span>
               </div>
             </div>
@@ -411,10 +425,8 @@ export default function ReportsPage() {
 
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-xs text-slate-500">Avg Cost / Worker</span>
-                <p className="text-xl font-bold text-[#7743db] mt-1">
-                  ${(totalGross > 0 && totalPayslips > 0 ? totalGross / totalPayslips : 0).toLocaleString("en-US", {
-                    maximumFractionDigits: 0,
-                  })}
+                <p className="text-xl font-bold text-[#0f766e] mt-1">
+                  {formatCurrency(totalGross > 0 && totalPayslips > 0 ? totalGross / totalPayslips : 0)}
                 </p>
               </div>
             </div>
@@ -441,7 +453,7 @@ export default function ReportsPage() {
 
           {loading ? (
             <div className="p-12 text-center">
-              <RefreshCw className="w-8 h-8 animate-spin text-[#7743db] mx-auto mb-3" />
+              <RefreshCw className="w-8 h-8 animate-spin text-[#0f766e] mx-auto mb-3" />
               <p className="text-sm text-slate-500">Loading department cost breakdown...</p>
             </div>
           ) : filteredDeptCostData.length === 0 ? (
@@ -461,9 +473,9 @@ export default function ReportsPage() {
                   <tr className="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-500">
                     <th className="py-3.5 px-4 pl-6">Department Name</th>
                     <th className="py-3.5 px-4 text-center">Headcount</th>
-                    <th className="py-3.5 px-4 text-right">Total Gross Cost ($)</th>
-                    <th className="py-3.5 px-4 text-right">Total Net Paid ($)</th>
-                    <th className="py-3.5 px-4 text-right">Avg Cost / Member ($)</th>
+                    <th className="py-3.5 px-4 text-right">Total Gross Cost</th>
+                    <th className="py-3.5 px-4 text-right">Total Net Paid</th>
+                    <th className="py-3.5 px-4 text-right">Avg Cost / Member</th>
                     <th className="py-3.5 px-4 pr-6 text-right">% of Total Payroll</th>
                   </tr>
                 </thead>
@@ -478,7 +490,7 @@ export default function ReportsPage() {
                     return (
                       <tr key={dept.department_id || idx} className="hover:bg-slate-50/80">
                         <td className="py-3.5 px-4 pl-6 font-semibold text-slate-900 flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-[#7743db] flex-shrink-0" />
+                          <Building2 className="w-4 h-4 text-[#0f766e] flex-shrink-0" />
                           {dept.department_name || dept.name || "General"}
                         </td>
 
@@ -487,18 +499,18 @@ export default function ReportsPage() {
                         </td>
 
                         <td className="py-3.5 px-4 text-right font-medium text-slate-900">
-                          ${deptGross.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                          {formatCurrency(deptGross)}
                         </td>
 
                         <td className="py-3.5 px-4 text-right font-bold text-emerald-600">
-                          ${deptNet.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                          {formatCurrency(deptNet)}
                         </td>
 
                         <td className="py-3.5 px-4 text-right font-medium text-slate-600">
-                          ${avgCost.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                          {formatCurrency(avgCost)}
                         </td>
 
-                        <td className="py-3.5 px-4 pr-6 text-right font-bold text-[#7743db]">
+                        <td className="py-3.5 px-4 pr-6 text-right font-bold text-[#0f766e]">
                           {percent}%
                         </td>
                       </tr>

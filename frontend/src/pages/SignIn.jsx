@@ -41,22 +41,21 @@ function SignIn() {
     message.toLowerCase().includes("wrong");
 
   return (
-    <div className="min-h-screen bg-[#fffbf5] flex">
+    <div className="min-h-screen bg-slate-50 flex">
       {/* Left Brand Panel */}
       <div
-        className="hidden lg:flex lg:w-[420px] xl:w-[480px] shrink-0 flex-col justify-between p-10"
-        style={{ background: "linear-gradient(160deg, #120e1c 0%, #26104c 50%, #120e1c 100%)" }}
+        className="hidden lg:flex lg:w-[420px] xl:w-[480px] shrink-0 flex-col justify-between p-10 bg-slate-900 text-white"
       >
         <div>
           <div className="mb-14">
-            <Logo size={54} lightText={true} />
+            <Logo size={46} lightText={true} />
           </div>
 
           <div className="space-y-6">
             <h2 className="text-3xl font-bold text-white leading-tight">
               Your complete HR &<br />Payroll platform
             </h2>
-            <p className="text-[#c3acd0]/80 text-sm leading-relaxed max-w-xs">
+            <p className="text-slate-300 text-sm leading-relaxed max-w-xs">
               Streamline your workforce management, automate payroll processing, and keep your team informed — all in one place.
             </p>
           </div>
@@ -68,34 +67,34 @@ function SignIn() {
               { label: "Leave & Attendance", desc: "Track time accurately" },
             ].map((f) => (
               <div key={f.label} className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-[#7743db]/20 border border-[#7743db]/30 flex items-center justify-center mt-0.5 shrink-0">
-                  <div className="w-2 h-2 rounded-full bg-[#c3acd0]" />
+                <div className="w-5 h-5 rounded-full bg-teal-500/20 border border-teal-500/30 flex items-center justify-center mt-0.5 shrink-0">
+                  <div className="w-2 h-2 rounded-full bg-teal-400" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">{f.label}</p>
-                  <p className="text-xs text-[#c3acd0]/70">{f.desc}</p>
+                  <p className="text-xs text-slate-400">{f.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-xs text-[#6b5880]">
+        <p className="text-xs text-slate-500">
           © {new Date().getFullYear()} PeoplePay360. Enterprise HR & Payroll.
         </p>
       </div>
 
       {/* Right Login Panel */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-10 bg-[#fffbf5]">
+      <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-10 bg-slate-50">
         {/* Mobile brand */}
         <div className="lg:hidden flex items-center justify-center mb-8">
           <Logo size={44} />
         </div>
 
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md bg-white p-8 rounded-2xl border border-slate-200/80 shadow-xs">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-[#1e1b24]">Sign in to your account</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Sign in to your account</h1>
             <p className="text-sm text-slate-500 mt-1">
               Enter your credentials to access the platform
             </p>
@@ -117,7 +116,7 @@ function SignIn() {
                   required
                   autoComplete="email"
                   placeholder="you@company.com"
-                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-[#eae0d5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-[#1e1b24] placeholder:text-slate-400 transition-all shadow-xs"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600/20 focus:border-teal-600 text-slate-900 placeholder:text-slate-400 transition-all shadow-xs"
                 />
               </div>
             </div>
@@ -129,7 +128,7 @@ function SignIn() {
                 </label>
                 <Link
                   to="/change-password"
-                  className="text-xs font-semibold text-[#7743db] hover:text-[#6334b8] hover:underline"
+                  className="text-xs font-semibold text-teal-700 hover:text-teal-800 hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -144,12 +143,12 @@ function SignIn() {
                   required
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-[#eae0d5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7743db]/20 focus:border-[#7743db] text-[#1e1b24] placeholder:text-slate-400 transition-all shadow-xs"
+                  className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600/20 focus:border-teal-600 text-slate-900 placeholder:text-slate-400 transition-all shadow-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -178,7 +177,7 @@ function SignIn() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2.5 px-4 bg-[#7743db] hover:bg-[#6334b8] active:bg-[#4f2795] text-white text-sm font-semibold rounded-lg shadow-sm shadow-[#7743db]/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full py-2.5 px-4 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white text-sm font-semibold rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading ? (
                 <span>Signing in...</span>
@@ -193,9 +192,9 @@ function SignIn() {
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-5">
-            <div className="flex-1 border-t border-[#eae0d5]" />
+            <div className="flex-1 border-t border-slate-200" />
             <span className="text-xs text-slate-400 font-medium">or continue with</span>
-            <div className="flex-1 border-t border-[#eae0d5]" />
+            <div className="flex-1 border-t border-slate-200" />
           </div>
 
           <div className="flex justify-center">
@@ -203,8 +202,8 @@ function SignIn() {
           </div>
 
           {/* Demo Credentials */}
-          <div className="mt-6 bg-[#f7efe5]/70 border border-[#eae0d5] rounded-lg p-4">
-            <p className="text-xs font-semibold text-[#1e1b24] uppercase tracking-wide mb-2">
+          <div className="mt-6 bg-slate-50 border border-slate-200 rounded-lg p-4">
+            <p className="text-xs font-semibold text-slate-900 uppercase tracking-wide mb-2">
               Demo Credentials
             </p>
             <div className="space-y-1">
@@ -225,7 +224,7 @@ function SignIn() {
 
           <p className="text-center text-xs text-slate-500 mt-5">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-[#7743db] font-semibold hover:text-[#6334b8] hover:underline">
+            <Link to="/signup" className="text-teal-700 font-semibold hover:text-teal-800 hover:underline">
               Create account
             </Link>
           </p>
