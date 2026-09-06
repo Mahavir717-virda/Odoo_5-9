@@ -70,38 +70,53 @@ const getAuthenticatedEmployeeId = async (user) => {
 /**
  * GET /api/v1/attendance/leaderboard
  * Allowed: Any authenticated user
+ * Role Policy:
+ * - Admin / HR Manager / Payroll Manager can view any department or all company.
+ * - Department employee / manager can only view their own department and overall ("all").
  */
 router.get("/leaderboard", authenticate, async (req, res, next) => {
   try {
     const { month, year, department, limit } = req.query;
     const currentEmpId = await getAuthenticatedEmployeeId(req.user).catch(() => null);
 
+    let myDepartment = null;
+    if (currentEmpId) {
+      const empRes = await pool.query("SELECT department FROM employees WHERE id = $1", [currentEmpId]);
+      if (empRes.rows.length > 0) {
+        myDepartment = empRes.rows[0].department;
+      }
+    }
+
+    const isPrivilegedAdmin = ["admin", "hr_manager", "hr_payroll_manager"].includes(req.user.role);
+
+    // If regular employee or manager asks for a department other than 'all' or their own, restrict to their department
+    let effectiveDepartment = department && department !== "all" ? department : undefined;
+    if (!isPrivilegedAdmin && effectiveDepartment && myDepartment) {
+      if (effectiveDepartment.toLowerCase().trim() !== myDepartment.toLowerCase().trim()) {
+        effectiveDepartment = myDepartment;
+      }
+    }
+
     const leaderboard = await attendanceService.getMonthlyLeaderboard({
       month,
       year,
-      department: department && department !== "all" ? department : undefined,
+      department: effectiveDepartment,
       limit: limit || 500,
       currentEmployeeId: currentEmpId,
     });
 
     // Determine current user's profile and department
     let myRank = null;
-    let myDepartment = null;
     let myDepartmentRank = null;
 
     if (currentEmpId) {
-      const empRes = await pool.query("SELECT department FROM employees WHERE id = $1", [currentEmpId]);
-      if (empRes.rows.length > 0) {
-        myDepartment = empRes.rows[0].department;
-      }
-
       const match = leaderboard.rankings.find((r) => r.employee_id === currentEmpId);
       if (match) {
         myRank = match;
       }
 
       // If user is currently viewing "All Company", also compute their rank within their own department
-      if (myDepartment && (!department || department === "all")) {
+      if (myDepartment && (!effectiveDepartment || effectiveDepartment === "all")) {
         const deptBoard = await attendanceService.getMonthlyLeaderboard({
           month,
           year,
