@@ -4,8 +4,6 @@ import {
   DollarSign,
   ArrowLeft,
   ArrowRight,
-  Calendar,
-  Layers,
   Sparkles,
   AlertCircle,
   Users,
@@ -15,6 +13,7 @@ import {
   Square,
   Building2,
   Briefcase,
+  Loader2,
 } from "lucide-react";
 
 import PageHeader from "../../components/common/PageHeader";
@@ -47,7 +46,6 @@ export default function PayrunWizardPage() {
   const [visibleLimit, setVisibleLimit] = useState(50);
 
   const [loading, setLoading] = useState(true);
-  const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
 
@@ -67,7 +65,7 @@ export default function PayrunWizardPage() {
       try {
         const [structuresData, empRes] = await Promise.all([
           payrollManagerService.listSalaryStructures().catch(() => []),
-          employeeService.getEmployees({ status: "active", limit: 50 }).catch(() => []),
+          employeeService.getEmployees({ status: "active", limit: 200 }).catch(() => []),
         ]);
 
         setStructures(structuresData || []);
@@ -150,7 +148,7 @@ export default function PayrunWizardPage() {
   // Select/Deselect all filtered
   const handleToggleSelectAll = () => {
     const filteredIds = filteredEmployees.map((e) => String(e.id));
-    const allSelected = filteredIds.every((id) => selectedEmpIds.has(id));
+    const allSelected = filteredIds.length > 0 && filteredIds.every((id) => selectedEmpIds.has(id));
 
     setSelectedEmpIds((prev) => {
       const next = new Set(prev);
@@ -194,6 +192,15 @@ export default function PayrunWizardPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[360px] space-y-3">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-xs text-muted-foreground">Loading payroll configuration...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 pb-16 max-w-4xl mx-auto">
       <div className="flex items-center gap-2">
@@ -214,7 +221,7 @@ export default function PayrunWizardPage() {
       />
 
       {/* Progress Steps Header */}
-      <div className="flex items-center justify-between p-4 bg-card border border-border rounded-xl shadow-xs">
+      <div className="flex items-center justify-between p-4 bg-card border border-border rounded-xl shadow-sm">
         <div className="flex items-center gap-3">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
@@ -261,7 +268,7 @@ export default function PayrunWizardPage() {
 
       {/* STEP 1: CONFIGURATION */}
       {step === 1 && (
-        <Card className="border-border bg-card shadow-xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
               <DollarSign className="w-4 h-4 text-primary" />
@@ -315,7 +322,7 @@ export default function PayrunWizardPage() {
                 </Select>
               </FormField>
 
-              <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-800/40 text-xs text-blue-900 dark:text-blue-200 space-y-1">
+              <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-200/60 text-xs text-blue-900 space-y-1">
                 <p className="font-semibold flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-blue-600" />
                   Two-Step Workflow Note
@@ -336,7 +343,7 @@ export default function PayrunWizardPage() {
               >
                 Cancel
               </Button>
-              <Button type="submit" size="sm" className="text-xs gap-1.5 shadow-xs">
+              <Button type="submit" size="sm" className="text-xs gap-1.5 shadow-sm">
                 Continue to Select Employees
                 <ArrowRight className="w-3.5 h-3.5" />
               </Button>
@@ -347,7 +354,7 @@ export default function PayrunWizardPage() {
 
       {/* STEP 2: EMPLOYEE SELECTION */}
       {step === 2 && (
-        <Card className="border-border bg-card shadow-xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/40 pb-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
@@ -362,7 +369,7 @@ export default function PayrunWizardPage() {
                   onClick={handleToggleSelectAll}
                   className="text-xs gap-1.5"
                 >
-                  {filteredEmployees.every((e) => selectedEmpIds.has(String(e.id))) ? (
+                  {filteredEmployees.length > 0 && filteredEmployees.every((e) => selectedEmpIds.has(String(e.id))) ? (
                     <>
                       <Square className="w-3.5 h-3.5 text-muted-foreground" />
                       Deselect All
@@ -443,9 +450,6 @@ export default function PayrunWizardPage() {
                               <span className="text-[10px] font-normal text-muted-foreground px-1.5 py-0.5 rounded-full bg-muted">
                                 {emp.employeeId || `EMP-${emp.id}`}
                               </span>
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">
-                                <CheckCircle2 className="w-2.5 h-2.5" /> Validated
-                              </span>
                             </p>
                             <p className="text-[11px] text-muted-foreground mt-0.5">
                               {emp.email}
@@ -517,7 +521,7 @@ export default function PayrunWizardPage() {
               size="sm"
               disabled={submitting || selectedEmpIds.size === 0}
               onClick={handleFinalSubmit}
-              className="text-xs gap-1.5 shadow-xs"
+              className="text-xs gap-1.5 shadow-sm"
             >
               {submitting ? "Processing & Computing..." : `Initialize & Compute (${selectedEmpIds.size})`}
             </Button>
@@ -527,3 +531,4 @@ export default function PayrunWizardPage() {
     </div>
   );
 }
+

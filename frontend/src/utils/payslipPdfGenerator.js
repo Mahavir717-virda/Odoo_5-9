@@ -66,8 +66,8 @@ export function downloadPayslipPDF(slip, user = {}) {
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #f8fafc; padding: 30px; color: #1e293b; font-size: 13px; }
     .payslip-container { max-width: 800px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 36px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; border-bottom: 2px solid #7743DB; margin-bottom: 24px; }
-    .company-title { font-size: 22px; font-weight: 800; color: #7743DB; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; border-bottom: 2px solid #0f766e; margin-bottom: 24px; }
+    .company-title { font-size: 22px; font-weight: 800; color: #0f766e; }
     .company-subtitle { font-size: 11px; color: #64748b; margin-top: 3px; }
     .payslip-badge { background: #e0e7ff; color: #4338ca; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     

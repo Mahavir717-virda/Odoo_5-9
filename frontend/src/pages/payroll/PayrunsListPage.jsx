@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   DollarSign,
@@ -133,9 +133,9 @@ export default function PayrunsListPage() {
         sortable: true,
         render: (row) => (
           <div className="text-xs text-foreground font-mono">
-            <span>{row.period_start ? row.period_start.split("T")[0] : "—"}</span>
-            <span className="text-muted-foreground mx-1">→</span>
-            <span>{row.period_end ? row.period_end.split("T")[0] : "—"}</span>
+            <span>{row.period_start ? row.period_start.split("T")[0] : "â€”"}</span>
+            <span className="text-muted-foreground mx-1">â†’</span>
+            <span>{row.period_end ? row.period_end.split("T")[0] : "â€”"}</span>
           </div>
         ),
       },
@@ -153,14 +153,11 @@ export default function PayrunsListPage() {
         key: "payslips_count",
         header: "Generated Slips",
         sortable: true,
-        render: (row) => {
-          const count = row.payslip_count ?? row.payslips_count;
-          return (
-            <span className="text-xs font-mono font-bold text-foreground">
-              {count !== undefined && count !== null ? count : (row.status === "draft" ? "0" : "—")}
-            </span>
-          );
-        },
+        render: (row) => (
+          <span className="text-xs font-mono font-bold text-foreground">
+            {row.payslips_count !== undefined ? row.payslips_count : (row.status === "draft" ? "0" : "—")}
+          </span>
+        ),
       },
       {
         key: "status",
@@ -209,7 +206,7 @@ export default function PayrunsListPage() {
           <Button
             onClick={() => navigate("/payroll/payruns/new")}
             size="sm"
-            className="gap-1.5 shadow-xs"
+            className="gap-1.5 shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Create Payrun Batch
@@ -218,7 +215,7 @@ export default function PayrunsListPage() {
       />
 
       {toastMessage && (
-        <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
+        <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>{toastMessage}</span>
         </div>
@@ -226,49 +223,49 @@ export default function PayrunsListPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Draft Batches</p>
               <p className="text-2xl font-bold text-foreground mt-0.5">{stats.draft}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600">
+            <div className="p-2.5 rounded-lg bg-slate-100 text-slate-600">
               <Clock className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-slate-200 bg-white shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-muted-foreground">Computed / Ready</p>
-              <p className="text-2xl font-bold text-blue-600 mt-0.5">{stats.computed}</p>
+              <p className="text-xs font-medium text-slate-500">Computed / Ready</p>
+              <p className="text-2xl font-bold text-[#0f766e] mt-0.5">{stats.computed}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600">
+            <div className="p-2.5 rounded-lg bg-[#f0fdfa] text-[#0f766e]">
               <Play className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Validated</p>
-              <p className="text-2xl font-bold text-indigo-600 mt-0.5">{stats.validated}</p>
+              <p className="text-2xl font-bold text-[#0f766e] mt-0.5">{stats.validated}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600">
+            <div className="p-2.5 rounded-lg bg-[#f0fdfa] text-[#0f766e]">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Disbursed / Paid</p>
               <p className="text-2xl font-bold text-emerald-600 mt-0.5">{stats.paid}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
+            <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600">
               <DollarSign className="w-5 h-5" />
             </div>
           </CardContent>
@@ -315,3 +312,4 @@ export default function PayrunsListPage() {
     </div>
   );
 }
+

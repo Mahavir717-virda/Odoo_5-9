@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { motion } from "framer-motion";
 import {
   Calendar,
   Plus,
@@ -17,8 +18,27 @@ import {
 } from "lucide-react";
 
 import api from "../../services/api";
+import DataTable from "../../components/common/DataTable";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const STAGGER_CONTAINER_VARIANTS = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.06,
+    },
+  },
+};
+
+const CARD_ANIMATION_VARIANTS = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.25, ease: "easeOut" },
+  },
+};
+
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const fmt = (n) => Number(n || 0).toFixed(1).replace(".0", "");
 
@@ -29,10 +49,10 @@ const ROLE_BADGE = {
   employee: { label: "Employee", cls: "bg-slate-100 text-slate-600" },
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function TimeOffAllocationsPage() {
-  // ── Data State ──────────────────────────────────────────────────────────────
+  // â”€â”€ Data State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [allocations, setAllocations] = useState([]);
   const [types, setTypes] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -40,32 +60,32 @@ export default function TimeOffAllocationsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  // ── Filters ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Filters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [empFilter, setEmpFilter] = useState("all");
 
-  // ── Pagination ───────────────────────────────────────────────────────────────
+  // â”€â”€ Pagination â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 12;
 
-  // ── Modal ────────────────────────────────────────────────────────────────────
+  // â”€â”€ Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [modalOpen, setModalOpen] = useState(false);
   const [editingAlloc, setEditingAlloc] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
 
-  // ── Form ─────────────────────────────────────────────────────────────────────
+  // â”€â”€ Form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [form, setForm] = useState({ empId: "", typeId: "", days: "20" });
 
-  // ── Toast ────────────────────────────────────────────────────────────────────
+  // â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [toast, setToast] = useState({ show: false, msg: "", type: "success" });
   const showToast = (msg, type = "success") => {
     setToast({ show: true, msg, type });
     setTimeout(() => setToast({ show: false, msg: "", type: "success" }), 3500);
   };
 
-  // ── Fetch Data ───────────────────────────────────────────────────────────────
+  // â”€â”€ Fetch Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
@@ -114,7 +134,7 @@ export default function TimeOffAllocationsPage() {
     loadData();
   }, [loadData]);
 
-  // ── Filtered & Paginated Data ─────────────────────────────────────────────
+  // â”€â”€ Filtered & Paginated Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     return allocations.filter((a) => {
@@ -135,7 +155,7 @@ export default function TimeOffAllocationsPage() {
   // Reset page when filters change
   useEffect(() => setPage(1), [search, typeFilter, empFilter]);
 
-  // ── KPI Stats ─────────────────────────────────────────────────────────────
+  // â”€â”€ KPI Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const stats = useMemo(() => {
     const totalAlloc = allocations.reduce((s, a) => s + a.allocated, 0);
     const totalTaken = allocations.reduce((s, a) => s + a.taken, 0);
@@ -144,7 +164,7 @@ export default function TimeOffAllocationsPage() {
     return { count: allocations.length, totalAlloc, totalTaken, totalRemaining, utilPct };
   }, [allocations]);
 
-  // ── Modal Helpers ──────────────────────────────────────────────────────────
+  // â”€â”€ Modal Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const openCreate = () => {
     setEditingAlloc(null);
     setForm({
@@ -169,7 +189,7 @@ export default function TimeOffAllocationsPage() {
     setFormError(null);
   };
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError(null);
@@ -203,11 +223,11 @@ export default function TimeOffAllocationsPage() {
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="space-y-6 pb-16 max-w-7xl mx-auto px-1">
 
-      {/* ── Toast ── */}
+      {/* â”€â”€ Toast â”€â”€ */}
       {toast.show && (
         <div
           className={`fixed top-5 right-5 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-xl text-sm font-medium transition-all animate-in slide-in-from-top-2 ${
@@ -225,18 +245,18 @@ export default function TimeOffAllocationsPage() {
         </div>
       )}
 
-      {/* ── Page Header ── */}
+      {/* â”€â”€ Page Header â”€â”€ */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+            <div className="p-2 rounded-xl bg-[#f0fdfa] text-[#0f766e]">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                 Leave Allocations
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Manage employee leave quotas, annual balances, and entitlement pools
               </p>
             </div>
@@ -246,14 +266,14 @@ export default function TimeOffAllocationsPage() {
           <button
             onClick={() => loadData(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition shadow-sm"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin text-indigo-500" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin text-[#0f766e]" : ""}`} />
             Refresh
           </button>
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 dark:shadow-none transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Plus className="w-4 h-4" />
             Grant Allocation
@@ -261,52 +281,57 @@ export default function TimeOffAllocationsPage() {
         </div>
       </div>
 
-      {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+      {/* â”€â”€ KPI Cards â”€â”€ */}
+      <motion.div
+        variants={STAGGER_CONTAINER_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+      >
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Allocations</p>
-            <p className="text-2xl font-bold mt-1 text-indigo-600 dark:text-indigo-400">{stats.count}</p>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Active Allocations</p>
+            <p className="text-2xl font-bold mt-1 text-[#0f766e]">{stats.count}</p>
           </div>
-          <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+          <div className="p-3 rounded-xl bg-[#f0fdfa] text-[#0f766e]">
             <Layers className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Days Granted</p>
-            <p className="text-2xl font-bold mt-1 text-blue-600 dark:text-blue-400">{fmt(stats.totalAlloc)}</p>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Days Granted</p>
+            <p className="text-2xl font-bold mt-1 text-blue-600">{fmt(stats.totalAlloc)}</p>
           </div>
-          <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+          <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
             <Calendar className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Days Utilized</p>
-            <p className="text-2xl font-bold mt-1 text-amber-600 dark:text-amber-400">{fmt(stats.totalTaken)}</p>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Days Utilized</p>
+            <p className="text-2xl font-bold mt-1 text-amber-600">{fmt(stats.totalTaken)}</p>
             <p className="text-[11px] text-slate-400 mt-0.5">{stats.utilPct}% utilization</p>
           </div>
-          <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+          <div className="p-3 rounded-xl bg-amber-50 text-amber-600">
             <PieChart className="w-5 h-5" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Remaining Balance</p>
-            <p className="text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">{fmt(stats.totalRemaining)}</p>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Remaining Balance</p>
+            <p className="text-2xl font-bold mt-1 text-emerald-600">{fmt(stats.totalRemaining)}</p>
           </div>
-          <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+          <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600">
             <CheckCircle2 className="w-5 h-5" />
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* ── Filters ── */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+      {/* ––– Filters ––– */}
+      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -314,14 +339,14 @@ export default function TimeOffAllocationsPage() {
             placeholder="Search by employee, leave type or department..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           />
         </div>
         <div className="flex gap-3 flex-wrap sm:flex-nowrap">
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           >
             <option value="all">All Leave Types</option>
             {types.map((t) => (
@@ -333,7 +358,7 @@ export default function TimeOffAllocationsPage() {
           <select
             value={empFilter}
             onChange={(e) => setEmpFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           >
             <option value="all">All Employees</option>
             {employees.map((e) => (
@@ -345,7 +370,7 @@ export default function TimeOffAllocationsPage() {
           {(search || typeFilter !== "all" || empFilter !== "all") && (
             <button
               onClick={() => { setSearch(""); setTypeFilter("all"); setEmpFilter("all"); }}
-              className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+              className="px-3 py-2 text-sm text-slate-500 hover:text-slate-700 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 transition"
             >
               Clear
             </button>
@@ -353,182 +378,141 @@ export default function TimeOffAllocationsPage() {
         </div>
       </div>
 
-      {/* ── Table ── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="py-20 text-center">
-            <RefreshCw className="w-8 h-8 animate-spin text-indigo-500 mx-auto mb-3" />
-            <p className="text-sm text-slate-500">Loading leave allocations from database...</p>
-          </div>
-        ) : error ? (
-          <div className="py-16 text-center">
-            <AlertCircle className="w-10 h-10 text-rose-400 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">Failed to load data</p>
-            <p className="text-xs text-slate-400 mb-4">{error}</p>
-            <button
-              onClick={() => loadData()}
-              className="px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition"
-            >
-              Retry
-            </button>
-          </div>
-        ) : paged.length === 0 ? (
-          <div className="py-20 text-center">
-            <Calendar className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-700 dark:text-slate-200 mb-1">
-              {filtered.length === 0 && allocations.length === 0 ? "No Allocations Yet" : "No Results Found"}
-            </h3>
-            <p className="text-sm text-slate-400 max-w-sm mx-auto mb-5">
-              {allocations.length === 0
-                ? "Grant leave allocations to employees to get started."
-                : "Try adjusting your search filters."}
-            </p>
-            {allocations.length === 0 && (
+      {/* Table Section */}
+      <DataTable
+        columns={[
+          {
+            key: "employeeName",
+            header: "Employee",
+            sortable: true,
+            render: (a) => (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#ccfbf1] text-[#0f766e] font-bold text-xs flex items-center justify-center shrink-0">
+                  {a.employeeName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900 text-xs">{a.employeeName}</p>
+                  <p className="text-[11px] text-slate-400">{a.department}</p>
+                </div>
+              </div>
+            ),
+          },
+          {
+            key: "typeName",
+            header: "Leave Type",
+            sortable: true,
+            render: (a) => (
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {a.typeName}
+                </span>
+                {a.affectsPayroll && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                    Payroll
+                  </span>
+                )}
+              </div>
+            ),
+          },
+          {
+            key: "allocated",
+            header: "Allocated",
+            sortable: true,
+            align: "center",
+            render: (a) => (
+              <span className="text-xs font-mono font-bold text-slate-800">
+                {fmt(a.allocated)} <span className="font-normal text-slate-400">{a.unit}</span>
+              </span>
+            ),
+          },
+          {
+            key: "taken",
+            header: "Used",
+            sortable: true,
+            align: "center",
+            render: (a) => (
+              <span className="text-xs font-mono text-slate-600">
+                {fmt(a.taken)} <span className="text-slate-400">{a.unit}</span>
+              </span>
+            ),
+          },
+          {
+            key: "remaining",
+            header: "Remaining",
+            sortable: true,
+            align: "center",
+            render: (a) => (
+              <span className={`text-xs font-mono font-bold ${a.remaining > 0 ? "text-emerald-600" : "text-rose-500"}`}>
+                {fmt(a.remaining)} <span className="font-normal text-slate-400">{a.unit}</span>
+              </span>
+            ),
+          },
+          {
+            key: "utilization",
+            header: "Utilization",
+            align: "center",
+            render: (a) => {
+              const usedPct = a.allocated > 0 ? Math.round((a.taken / a.allocated) * 100) : 0;
+              const barColor =
+                usedPct >= 90 ? "bg-rose-500" : usedPct >= 65 ? "bg-amber-500" : "bg-emerald-500";
+              return (
+                <div className="flex items-center gap-2 justify-center">
+                  <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${barColor}`}
+                      style={{ width: `${Math.min(100, usedPct)}%` }}
+                    />
+                  </div>
+                  <span className="text-[11px] text-slate-500 font-mono w-8 text-right">{usedPct}%</span>
+                </div>
+              );
+            },
+          },
+          {
+            key: "actions",
+            header: "Actions",
+            align: "right",
+            render: (a) => (
               <button
-                onClick={openCreate}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openEdit(a);
+                }}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-[#0f766e] hover:bg-slate-100 transition"
+                title="Edit allocation"
               >
-                <Plus className="w-4 h-4" /> Grant First Allocation
+                <Pencil className="w-3.5 h-3.5" />
               </button>
-            )}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  <th className="py-3.5 px-4 pl-6">Employee</th>
-                  <th className="py-3.5 px-4">Leave Type</th>
-                  <th className="py-3.5 px-4 text-center">Allocated</th>
-                  <th className="py-3.5 px-4 text-center">Used</th>
-                  <th className="py-3.5 px-4 text-center">Remaining</th>
-                  <th className="py-3.5 px-4 text-center">Utilization</th>
-                  <th className="py-3.5 px-4 pr-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
-                {paged.map((a) => {
-                  const usedPct = a.allocated > 0 ? Math.round((a.taken / a.allocated) * 100) : 0;
-                  const barColor =
-                    usedPct >= 90 ? "bg-rose-500" : usedPct >= 65 ? "bg-amber-500" : "bg-emerald-500";
+            ),
+          },
+        ]}
+        data={filtered}
+        loading={loading}
+        error={error}
+        onRetry={loadData}
+        emptyState={{
+          icon: Calendar,
+          title: filtered.length === 0 && allocations.length === 0 ? "No Allocations Yet" : "No Results Found",
+          description: allocations.length === 0 ? "Grant leave allocations to employees to get started." : "Try adjusting your search filters.",
+          actionLabel: allocations.length === 0 ? "Grant First Allocation" : undefined,
+          onAction: allocations.length === 0 ? openCreate : undefined,
+        }}
+      />
+      {/* Modal */}
 
-                  return (
-                    <tr key={a.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-700/30 transition group">
-                      <td className="py-3.5 px-4 pl-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center shrink-0">
-                            {a.employeeName.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-900 dark:text-white text-xs">{a.employeeName}</p>
-                            <p className="text-[11px] text-slate-400">{a.department}</p>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
-                            <Calendar className="w-3 h-3" />
-                            {a.typeName}
-                          </span>
-                          {a.affectsPayroll && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                              Payroll
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-100">
-                          {fmt(a.allocated)} <span className="font-normal text-slate-400">{a.unit}</span>
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        <span className="text-xs font-mono text-slate-600 dark:text-slate-300">
-                          {fmt(a.taken)} <span className="text-slate-400">{a.unit}</span>
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        <span className={`text-xs font-mono font-bold ${a.remaining > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"}`}>
-                          {fmt(a.remaining)} <span className="font-normal text-slate-400">{a.unit}</span>
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2 justify-center">
-                          <div className="w-20 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all ${barColor}`}
-                              style={{ width: `${Math.min(100, usedPct)}%` }}
-                            />
-                          </div>
-                          <span className="text-[11px] text-slate-500 font-mono w-8 text-right">{usedPct}%</span>
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 pr-6 text-right">
-                        <button
-                          onClick={() => openEdit(a)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
-                          title="Edit allocation"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* ── Pagination ── */}
-      {!loading && !error && filtered.length > PAGE_SIZE && (
-        <div className="flex items-center justify-between text-sm">
-          <p className="text-slate-500 dark:text-slate-400 text-xs">
-            Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of{" "}
-            <strong>{filtered.length}</strong> allocations
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 transition"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-xs text-slate-600 dark:text-slate-300 px-2">
-              Page {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 transition"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Grant / Edit Modal ── */}
+      {/* â”€â”€ Grant / Edit Modal â”€â”€ */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-700 animate-in zoom-in-95">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 animate-in zoom-in-95">
             {/* Header */}
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+                <div className="p-2 rounded-xl bg-[#f0fdfa] text-[#0f766e]">
                   <Calendar className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-base font-bold text-slate-900">
                     {editingAlloc ? "Edit Leave Allocation" : "Grant Leave Allocation"}
                   </h3>
                   <p className="text-[11px] text-slate-400">
@@ -540,7 +524,7 @@ export default function TimeOffAllocationsPage() {
               </div>
               <button
                 onClick={closeModal}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -550,7 +534,7 @@ export default function TimeOffAllocationsPage() {
             <form onSubmit={handleSubmit}>
               <div className="p-5 space-y-4">
                 {formError && (
-                  <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400 text-xs">
+                  <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{formError}</span>
                   </div>
@@ -558,19 +542,19 @@ export default function TimeOffAllocationsPage() {
 
                 {/* Employee Select */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Employee <span className="text-rose-500">*</span>
                   </label>
                   <select
                     value={form.empId}
                     onChange={(e) => setForm({ ...form, empId: e.target.value })}
                     disabled={Boolean(editingAlloc)}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    <option value="">— Select employee —</option>
+                    <option value="">â€” Select employee â€”</option>
                     {employees.map((emp) => (
                       <option key={emp.id} value={String(emp.id)}>
-                        {emp.name} {emp.department ? `• ${emp.department}` : ""}
+                        {emp.name} {emp.department ? `â€¢ ${emp.department}` : ""}
                       </option>
                     ))}
                   </select>
@@ -581,16 +565,16 @@ export default function TimeOffAllocationsPage() {
 
                 {/* Leave Type Select */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Leave Type <span className="text-rose-500">*</span>
                   </label>
                   <select
                     value={form.typeId}
                     onChange={(e) => setForm({ ...form, typeId: e.target.value })}
                     disabled={Boolean(editingAlloc)}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    <option value="">— Select leave type —</option>
+                    <option value="">â€” Select leave type â€”</option>
                     {types.map((t) => (
                       <option key={t.id} value={String(t.id)}>
                         {t.name} ({t.unit})
@@ -601,7 +585,7 @@ export default function TimeOffAllocationsPage() {
 
                 {/* Days Input */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Allocated {types.find((t) => String(t.id) === form.typeId)?.unit === "hours" ? "Hours" : "Days"}{" "}
                     <span className="text-rose-500">*</span>
                   </label>
@@ -611,7 +595,7 @@ export default function TimeOffAllocationsPage() {
                     min="0.5"
                     value={form.days}
                     onChange={(e) => setForm({ ...form, days: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm font-mono rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full px-3.5 py-2 text-sm font-mono rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
                   />
                   <p className="mt-1 text-[11px] text-slate-400">
                     Enter the number of leave days/hours to allocate. Half-day increments (0.5) are supported.
@@ -620,17 +604,17 @@ export default function TimeOffAllocationsPage() {
 
                 {/* Preview if editing */}
                 {editingAlloc && (
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
-                    <p className="font-semibold text-slate-700 dark:text-slate-300">Current Balance</p>
+                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                    <p className="font-semibold text-slate-700">Current Balance</p>
                     <div className="flex justify-between text-slate-500">
                       <span>Allocated</span>
-                      <span className="font-mono font-medium text-slate-700 dark:text-slate-200">{fmt(editingAlloc.allocated)} {editingAlloc.unit}</span>
+                      <span className="font-mono font-medium text-slate-700">{fmt(editingAlloc.allocated)} {editingAlloc.unit}</span>
                     </div>
                     <div className="flex justify-between text-slate-500">
                       <span>Used</span>
                       <span className="font-mono font-medium text-amber-600">{fmt(editingAlloc.taken)} {editingAlloc.unit}</span>
                     </div>
-                    <div className="flex justify-between text-slate-500 border-t border-slate-200 dark:border-slate-700 pt-1.5">
+                    <div className="flex justify-between text-slate-500 border-t border-slate-200 pt-1.5">
                       <span>Remaining</span>
                       <span className="font-mono font-bold text-emerald-600">{fmt(editingAlloc.remaining)} {editingAlloc.unit}</span>
                     </div>
@@ -639,18 +623,18 @@ export default function TimeOffAllocationsPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-3 p-5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20 rounded-b-2xl">
+              <div className="flex items-center justify-end gap-3 p-5 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                  className="px-4 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 dark:shadow-none transition disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition disabled:opacity-50"
                 >
                   {submitting ? (
                     <>
@@ -671,3 +655,4 @@ export default function TimeOffAllocationsPage() {
     </div>
   );
 }
+

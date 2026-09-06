@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import {
@@ -40,7 +40,7 @@ export default function FilterBar({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-3 w-full bg-card p-3 rounded-lg border border-border shadow-xs",
+        "flex flex-wrap items-center gap-3 w-full bg-card p-3 rounded-lg border border-border shadow-sm",
         className
       )}
     >
@@ -116,3 +116,4 @@ export default function FilterBar({
     </div>
   );
 }
+

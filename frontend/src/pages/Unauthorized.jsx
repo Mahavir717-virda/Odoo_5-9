@@ -7,26 +7,26 @@ export default function Unauthorized() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="max-w-md w-full bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 text-center border border-gray-200 dark:border-gray-700">
-        <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 mb-4">
-          <ShieldAlert className="w-8 h-8" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4">
+      <div className="max-w-sm w-full bg-white shadow-xs rounded-2xl p-8 text-center border border-slate-200">
+        <div className="mx-auto flex items-center justify-center w-14 h-14 rounded-full bg-red-50 text-red-600 mb-5 border border-red-100">
+          <ShieldAlert className="w-7 h-7" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          Access Restricted
-        </h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-          Your current role (
-          <span className="font-semibold text-gray-800 dark:text-gray-200">
-            {user?.role || "Guest"}
-          </span>
-          ) does not have permission to view this page. Contact an administrator if you believe this is an error.
+        <h1 className="text-xl font-bold text-slate-900 mb-2">Access Restricted</h1>
+        <p className="text-sm text-slate-500 mb-2 leading-relaxed">
+          Your current role
+        </p>
+        <span className="inline-block px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-700 rounded-full mb-4">
+          {user?.role || "Guest"}
+        </span>
+        <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+          does not have permission to view this page. Contact your administrator if you believe this is an error.
         </p>
         <button
           onClick={() => navigate("/dashboard")}
-          className="w-full py-2 px-4 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          className="w-full py-2.5 px-4 text-sm font-semibold text-white bg-teal-700 rounded-lg hover:bg-teal-800 active:bg-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-1 transition-colors shadow-sm cursor-pointer"
         >
-          Go to Dashboard
+          Return to Dashboard
         </button>
       </div>
     </div>

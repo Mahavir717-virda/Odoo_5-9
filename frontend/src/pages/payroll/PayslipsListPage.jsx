@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   FileText,
   Search,
@@ -18,7 +19,6 @@ import {
   Download,
 } from "lucide-react";
 import { listPayslips, listPayruns } from "../../services/payrollManagerService";
-import { downloadPayslipPDF } from "../../utils/payslipPdfGenerator";
 
 export default function PayslipsListPage() {
   const navigate = useNavigate();
@@ -86,7 +86,7 @@ export default function PayslipsListPage() {
     const s = (status || "draft").toLowerCase();
     if (s === "paid") {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
           <CheckCircle2 className="w-3.5 h-3.5" />
           Paid
         </span>
@@ -94,7 +94,7 @@ export default function PayslipsListPage() {
     }
     if (s === "validated" || s === "verify" || s === "done") {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 border border-blue-500/20">
           <Clock className="w-3.5 h-3.5" />
           Validated
         </span>
@@ -102,14 +102,14 @@ export default function PayslipsListPage() {
     }
     if (s === "cancelled") {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 border border-rose-500/20">
           <AlertCircle className="w-3.5 h-3.5" />
           Cancelled
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 border border-amber-500/20">
         <Clock className="w-3.5 h-3.5" />
         Draft
       </span>
@@ -122,14 +122,14 @@ export default function PayslipsListPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Employee Payslips
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
               {totalCount} Generated
             </span>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Review detailed salary disbursements, tax breakdowns, deductions, and itemized wage slips.
           </p>
         </div>
@@ -138,14 +138,14 @@ export default function PayslipsListPage() {
           <button
             onClick={fetchData}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition shadow-sm"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-indigo-600" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#0f766e]" : ""}`} />
             Refresh
           </button>
           <Link
             to="/payroll/payruns"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 dark:shadow-none transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Layers className="w-4 h-4" />
             Manage Payruns
@@ -154,78 +154,83 @@ export default function PayslipsListPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+      <motion.div
+        variants={STAGGER_CONTAINER_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      >
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Total Net Payout
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">
               ${totalNet.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Disbursed net wage sum</p>
           </div>
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-emerald-600 dark:text-emerald-400">
+          <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <DollarSign className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Total Gross Wages
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">
               ${totalGross.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Pre-tax & deductions</p>
           </div>
-          <div className="p-3 bg-blue-50 dark:bg-blue-950/40 rounded-xl text-blue-600 dark:text-blue-400">
+          <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
             <TrendingUp className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Paid Slips
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{paidCount}</h3>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">{paidCount}</h3>
+            <p className="text-xs text-emerald-600 mt-0.5 font-medium">
               Completed transactions
             </p>
           </div>
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-emerald-600 dark:text-emerald-400">
+          <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <CheckCircle2 className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <motion.div variants={CARD_ANIMATION_VARIANTS} className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Draft / Pending
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{draftCount}</h3>
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5 font-medium">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">{draftCount}</h3>
+            <p className="text-xs text-amber-600 mt-0.5 font-medium">
               Awaiting computation/payment
             </p>
           </div>
-          <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl text-amber-600 dark:text-amber-400">
+          <div className="p-3 bg-amber-50 rounded-xl text-amber-600">
             <Clock className="w-6 h-6" />
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 flex items-center gap-3 text-rose-700 dark:text-rose-400 text-sm">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-3 text-rose-700 text-sm">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Filters and Search Bar */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -233,7 +238,7 @@ export default function PayslipsListPage() {
             placeholder="Search employee, ID, or slip reference..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           />
         </div>
 
@@ -243,7 +248,7 @@ export default function PayslipsListPage() {
             <select
               value={payrunFilter}
               onChange={(e) => setPayrunFilter(e.target.value)}
-              className="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+              className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
             >
               <option value="all">All Payruns</option>
               {payruns.map((pr) => (
@@ -257,7 +262,7 @@ export default function PayslipsListPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] text-slate-900"
           >
             <option value="all">All Statuses</option>
             <option value="draft">Draft</option>
@@ -381,37 +386,13 @@ export default function PayslipsListPage() {
                       </td>
 
                       <td className="py-3.5 px-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Link
-                            to={`/payroll/payslips/${slip.id}`}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            Details
-                          </Link>
-                          <button
-                            onClick={() =>
-                              downloadPayslipPDF({
-                                employeeName: empName,
-                                employeeCode: empCode,
-                                department: slip.department || "General",
-                                period: slip.payrun_name || "Monthly Cycle",
-                                payslipNumber: slip.number || `SLIP-${slip.id}`,
-                                paymentDate: slip.paid_at || slip.period_end,
-                                basicSalary: basicWage,
-                                grossEarnings: grossWage,
-                                totalDeductions: totalDeductions,
-                                netPay: netWage,
-                                status: slip.status || "Paid",
-                                lines: slip.lines || [],
-                              })
-                            }
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition cursor-pointer"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                            PDF
-                          </button>
-                        </div>
+                        <Link
+                          to={`/payroll/payslips/${slip.id}`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          Details
+                        </Link>
                       </td>
                     </tr>
                   );

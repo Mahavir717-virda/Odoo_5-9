@@ -5,6 +5,9 @@
  * CRITICAL RULE:
  * `weeklyHours` is NOT stored statically in data records; it is always derived
  * dynamically from `weeklyPattern` using `calculateWeeklyHours`.
+ *
+ * NOTE: Actively imported by services/scheduleService.js as its local store.
+ * TODO: Replace with live API calls when backend is ready.
  */
 
 export const mockSchedules = [

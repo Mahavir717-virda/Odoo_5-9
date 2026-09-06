@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 
@@ -63,57 +63,86 @@ function ChangePassword() {
           </p>
         </div>
 
-        <form onSubmit={handleChangePassword} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@company.com"
-              className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
-            />
-          </div>
+        {step === 1 && (
+          <form onSubmit={handleSendOtp} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">
+                Enter your email address
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="you@company.com"
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
+            >
+              Send OTP
+            </button>
+          </form>
+        )}
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">
-              New Password
-            </label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
-            />
-          </div>
+        {step === 2 && (
+          <form onSubmit={handleVerifyOtp} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">
+                Enter OTP sent to {email}
+              </label>
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Demo OTP: 123456"
+                required
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors text-center tracking-widest font-mono text-base"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition-colors"
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
+              >
+                Verify OTP
+              </button>
+            </div>
+          </form>
+        )}
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">
-              Confirm New Password
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-          >
-            {loading ? "Changing Password..." : "Change Password"}
-          </button>
-        </form>
+        {step === 3 && (
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1">
+                Enter New Password
+              </label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
+            >
+              Change Password
+            </button>
+          </form>
+        )}
 
         {message && (
           <div
@@ -138,3 +167,4 @@ function ChangePassword() {
 }
 
 export default ChangePassword;
+

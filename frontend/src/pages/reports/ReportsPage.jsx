@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import {
   BarChart3,
   DollarSign,
@@ -124,14 +124,14 @@ export default function ReportsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Payroll Reports & Analytics
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#115e59] border border-indigo-100">
               Live BI Metrics
             </span>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Real-time financial disbursements, department cost allocations, and compliance summaries.
           </p>
         </div>
@@ -140,14 +140,14 @@ export default function ReportsPage() {
           <button
             onClick={fetchReports}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition shadow-sm"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-indigo-600" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#0f766e]" : ""}`} />
             Refresh
           </button>
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 dark:shadow-none transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-[#0f766e] hover:bg-[#115e59] text-white shadow-sm shadow-teal-100 transition"
           >
             <Printer className="w-4 h-4" />
             Print / Export Report
@@ -156,36 +156,36 @@ export default function ReportsPage() {
       </div>
 
       {/* Date Filter Bar */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm print:hidden">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm print:hidden">
         <form onSubmit={handleApplyFilter} className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-slate-400" />
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Period From:</span>
+            <span className="text-xs font-semibold text-slate-700">Period From:</span>
             <input
               type="date"
               value={periodStart}
               onChange={(e) => setPeriodStart(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+              className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900"
             />
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">To:</span>
+            <span className="text-xs font-semibold text-slate-700">To:</span>
             <input
               type="date"
               value={periodEnd}
               onChange={(e) => setPeriodEnd(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+              className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900"
             />
           </div>
 
           {deptCostData.length > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Department:</span>
+              <span className="text-xs font-semibold text-slate-700">Department:</span>
               <select
                 value={deptFilter}
                 onChange={(e) => setDeptFilter(e.target.value)}
-                className="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900"
               >
                 <option value="all">All Departments</option>
                 {deptCostData.map((d, i) => (
@@ -199,7 +199,7 @@ export default function ReportsPage() {
 
           <button
             type="submit"
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-sm"
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#0f766e] hover:bg-[#115e59] text-white transition shadow-sm"
           >
             Filter Analytics
           </button>
@@ -208,7 +208,7 @@ export default function ReportsPage() {
             <button
               type="button"
               onClick={handleResetFilter}
-              className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline"
+              className="text-xs text-slate-500 hover:text-slate-700 underline"
             >
               Reset Dates
             </button>
@@ -218,7 +218,7 @@ export default function ReportsPage() {
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 flex items-center gap-3 text-rose-700 dark:text-rose-400 text-sm">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-3 text-rose-700 text-sm">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -226,77 +226,77 @@ export default function ReportsPage() {
 
       {/* KPI Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Total Disbursed Net
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">
               ${totalNet.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">Net Take-Home Sum</p>
+            <p className="text-xs text-emerald-600 mt-0.5 font-medium">Net Take-Home Sum</p>
           </div>
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-emerald-600 dark:text-emerald-400">
+          <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <DollarSign className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Total Gross Payroll
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">
               ${totalGross.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Pre-deduction wage cost</p>
           </div>
-          <div className="p-3 bg-blue-50 dark:bg-blue-950/40 rounded-xl text-blue-600 dark:text-blue-400">
+          <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
             <TrendingUp className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Total Deductions & Tax
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">
               ${totalDeductions.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
-            <p className="text-xs text-rose-600 dark:text-rose-400 mt-0.5 font-medium">Withheld amounts</p>
+            <p className="text-xs text-rose-600 mt-0.5 font-medium">Withheld amounts</p>
           </div>
-          <div className="p-3 bg-rose-50 dark:bg-rose-950/40 rounded-xl text-rose-600 dark:text-rose-400">
+          <div className="p-3 bg-rose-50 rounded-xl text-rose-600">
             <PieChart className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
               Average Net / Slip
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            <h3 className="text-2xl font-bold text-slate-900 mt-1">
               ${avgSalary.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
-            <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-0.5 font-medium">
+            <p className="text-xs text-[#0f766e] mt-0.5 font-medium">
               Across {totalPayslips} generated payslips
             </p>
           </div>
-          <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl text-indigo-600 dark:text-indigo-400">
+          <div className="p-3 bg-[#f0fdfa] rounded-xl text-[#0f766e]">
             <Users className="w-6 h-6" />
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-700 print:hidden">
+      <div className="flex border-b border-slate-200 print:hidden">
         <button
           onClick={() => setActiveTab("summary")}
           className={`pb-3 px-4 text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
             activeTab === "summary"
-              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              ? "border-indigo-600 text-[#0f766e]"
+              : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
           <BarChart3 className="w-4 h-4" />
@@ -307,8 +307,8 @@ export default function ReportsPage() {
           onClick={() => setActiveTab("department")}
           className={`pb-3 px-4 text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
             activeTab === "department"
-              ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              ? "border-indigo-600 text-[#0f766e]"
+              : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
           <Building2 className="w-4 h-4" />
@@ -320,8 +320,8 @@ export default function ReportsPage() {
       {activeTab === "summary" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Wage Cost Breakdown Card */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
+          <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
+            <h3 className="text-base font-bold text-slate-900 mb-1">
               Wage Disbursement Distribution
             </h3>
             <p className="text-xs text-slate-500 mb-6">
@@ -331,12 +331,12 @@ export default function ReportsPage() {
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-emerald-700 dark:text-emerald-400">Net Take-Home Payout</span>
-                  <span className="text-slate-900 dark:text-white">
+                  <span className="text-emerald-700">Net Take-Home Payout</span>
+                  <span className="text-slate-900">
                     ${totalNet.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
-                <div className="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                     style={{
@@ -348,12 +348,12 @@ export default function ReportsPage() {
 
               <div>
                 <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-rose-700 dark:text-rose-400">Taxes, Insurance & Deductions</span>
-                  <span className="text-slate-900 dark:text-white">
+                  <span className="text-rose-700">Taxes, Insurance & Deductions</span>
+                  <span className="text-slate-900">
                     ${totalDeductions.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
-                <div className="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full bg-rose-500 rounded-full transition-all duration-500"
                     style={{
@@ -364,25 +364,25 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            <div className="mt-8 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 text-xs space-y-2">
+            <div className="mt-8 p-4 rounded-xl bg-slate-50 border border-slate-100 text-xs space-y-2">
               <div className="flex justify-between text-slate-500">
                 <span>Total Batches Executed:</span>
-                <span className="font-semibold text-slate-900 dark:text-white">
+                <span className="font-semibold text-slate-900">
                   {summaryData?.payrun_count || summaryData?.total_payruns || "1"} Payrun(s)
                 </span>
               </div>
               <div className="flex justify-between text-slate-500">
                 <span>Period Range:</span>
-                <span className="font-semibold text-slate-900 dark:text-white">
-                  {periodStart || "All Recorded"} → {periodEnd || "Present"}
+                <span className="font-semibold text-slate-900">
+                  {periodStart || "All Recorded"} â†’ {periodEnd || "Present"}
                 </span>
               </div>
             </div>
           </div>
 
           {/* Quick Metrics & Compliance Snapshot */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-sm">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
+          <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
+            <h3 className="text-base font-bold text-slate-900 mb-1">
               Compliance & Operational Metrics
             </h3>
             <p className="text-xs text-slate-500 mb-6">
@@ -390,28 +390,28 @@ export default function ReportsPage() {
             </p>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-xs text-slate-500">Total Slips Generated</span>
-                <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">{totalPayslips}</p>
+                <p className="text-xl font-bold text-slate-900 mt-1">{totalPayslips}</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-xs text-slate-500">Paid Transactions</span>
-                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                <p className="text-xl font-bold text-emerald-600 mt-1">
                   {summaryData?.paid_count || summaryData?.paid_payslips || totalPayslips}
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-xs text-slate-500">Draft / Reviewing</span>
-                <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+                <p className="text-xl font-bold text-amber-600 mt-1">
                   {summaryData?.draft_count || 0}
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-xs text-slate-500">Avg Cost / Worker</span>
-                <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+                <p className="text-xl font-bold text-[#0f766e] mt-1">
                   ${(totalGross > 0 && totalPayslips > 0 ? totalGross / totalPayslips : 0).toLocaleString("en-US", {
                     maximumFractionDigits: 0,
                   })}
@@ -429,9 +429,9 @@ export default function ReportsPage() {
 
       {/* Tab Content 2: Department Cost Report */}
       {activeTab === "department" && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100 dark:border-slate-700">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-slate-100">
+            <h3 className="text-base font-bold text-slate-900">
               Department Payroll Cost Allocation
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -441,13 +441,13 @@ export default function ReportsPage() {
 
           {loading ? (
             <div className="p-12 text-center">
-              <RefreshCw className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-3" />
+              <RefreshCw className="w-8 h-8 animate-spin text-[#0f766e] mx-auto mb-3" />
               <p className="text-sm text-slate-500">Loading department cost breakdown...</p>
             </div>
           ) : filteredDeptCostData.length === 0 ? (
             <div className="p-12 text-center">
-              <Building2 className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-              <h4 className="text-base font-semibold text-slate-900 dark:text-white">
+              <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <h4 className="text-base font-semibold text-slate-900">
                 No department cost records
               </h4>
               <p className="text-xs text-slate-500 mt-1">
@@ -458,7 +458,7 @@ export default function ReportsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/75 dark:bg-slate-900/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <tr className="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-500">
                     <th className="py-3.5 px-4 pl-6">Department Name</th>
                     <th className="py-3.5 px-4 text-center">Headcount</th>
                     <th className="py-3.5 px-4 text-right">Total Gross Cost ($)</th>
@@ -467,7 +467,7 @@ export default function ReportsPage() {
                     <th className="py-3.5 px-4 pr-6 text-right">% of Total Payroll</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
+                <tbody className="divide-y divide-slate-100 text-sm">
                   {filteredDeptCostData.map((dept, idx) => {
                     const deptGross = parseFloat(dept.total_gross_cost || dept.gross_wages || dept.total_gross || 0);
                     const deptNet = parseFloat(dept.total_net_cost || dept.net_wages || dept.total_net || 0);
@@ -476,29 +476,29 @@ export default function ReportsPage() {
                     const percent = totalGross > 0 ? ((deptGross / totalGross) * 100).toFixed(1) : "0.0";
 
                     return (
-                      <tr key={dept.department_id || idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-700/30">
-                        <td className="py-3.5 px-4 pl-6 font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                      <tr key={dept.department_id || idx} className="hover:bg-slate-50/80">
+                        <td className="py-3.5 px-4 pl-6 font-semibold text-slate-900 flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-[#0f766e] flex-shrink-0" />
                           {dept.department_name || dept.name || "General"}
                         </td>
 
-                        <td className="py-3.5 px-4 text-center font-medium text-slate-700 dark:text-slate-300">
+                        <td className="py-3.5 px-4 text-center font-medium text-slate-700">
                           {headcount}
                         </td>
 
-                        <td className="py-3.5 px-4 text-right font-medium text-slate-900 dark:text-white">
+                        <td className="py-3.5 px-4 text-right font-medium text-slate-900">
                           ${deptGross.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                         </td>
 
-                        <td className="py-3.5 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                        <td className="py-3.5 px-4 text-right font-bold text-emerald-600">
                           ${deptNet.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                         </td>
 
-                        <td className="py-3.5 px-4 text-right font-medium text-slate-600 dark:text-slate-300">
+                        <td className="py-3.5 px-4 text-right font-medium text-slate-600">
                           ${avgCost.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                         </td>
 
-                        <td className="py-3.5 px-4 pr-6 text-right font-bold text-indigo-600 dark:text-indigo-400">
+                        <td className="py-3.5 px-4 pr-6 text-right font-bold text-[#0f766e]">
                           {percent}%
                         </td>
                       </tr>
@@ -513,3 +513,4 @@ export default function ReportsPage() {
     </div>
   );
 }
+

@@ -94,7 +94,7 @@ export default function MyAttendancePage() {
         header: "Date",
         sortable: true,
         render: (row) => {
-          if (!row.date) return "—";
+          if (!row.date) return "â€”";
           const dateStr = String(row.date).includes("T") ? row.date : `${row.date}T00:00:00`;
           const d = new Date(dateStr);
           return (
@@ -182,28 +182,28 @@ export default function MyAttendancePage() {
       />
 
       {/* Tab Switcher */}
-      <div className="flex items-center gap-2 p-1 bg-[#F7EFE5] rounded-xl border border-[#C3ACD0]/30 w-fit">
+      <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 w-fit">
         <button
           onClick={() => setActiveTab("my-logs")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             activeTab === "my-logs"
-              ? "bg-[#7743DB] text-white shadow-sm"
+              ? "bg-white text-teal-800 shadow-xs border border-slate-200"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <Clock className="w-4 h-4" />
+          <Clock className="w-4 h-4 text-teal-700" />
           My Punch Logs & Shifts
         </button>
 
         <button
           onClick={() => setActiveTab("leaderboard")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             activeTab === "leaderboard"
-              ? "bg-[#7743DB] text-white shadow-sm"
+              ? "bg-white text-teal-800 shadow-xs border border-slate-200"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <Trophy className="w-4 h-4 text-amber-300" />
+          <Trophy className="w-4 h-4 text-amber-500" />
           Company Leaderboard & Perks
         </button>
       </div>
@@ -213,10 +213,10 @@ export default function MyAttendancePage() {
       ) : (
         <>
           {/* Clock In / Out Interactive Hub */}
-          <Card className="border-border bg-gradient-to-r from-slate-900 to-indigo-950 text-white shadow-sm overflow-hidden">
+          <Card className="border-slate-800 bg-slate-900 text-white shadow-sm overflow-hidden">
         <CardContent className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-blue-400 shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-teal-400 shrink-0">
               <Clock className="w-6 h-6" />
             </div>
             <div>
@@ -245,7 +245,7 @@ export default function MyAttendancePage() {
               </h2>
               {punchState?.lastShiftText && (
                 <p className="text-xs text-slate-300 mt-1 flex items-center gap-1.5 font-mono">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400" />
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-teal-400" />
                   {punchState.lastShiftText}
                 </p>
               )}
@@ -293,7 +293,7 @@ export default function MyAttendancePage() {
                 size="sm"
                 disabled={punchLoading}
                 onClick={() => handlePunch("clock-in")}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs gap-1.5 font-semibold shadow-xs px-5"
+                className="bg-teal-700 hover:bg-teal-800 text-white text-xs gap-1.5 font-semibold shadow-sm px-5 cursor-pointer"
               >
                 <Play className="w-3.5 h-3.5 fill-white" />
                 Clock In Now
@@ -305,7 +305,7 @@ export default function MyAttendancePage() {
 
       {/* Monthly Summary Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Total Hours</p>
@@ -316,13 +316,13 @@ export default function MyAttendancePage() {
                 Avg: {monthlySummary?.averageDailyHours || "0h"}/day
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600">
+            <div className="p-2.5 rounded-lg bg-teal-50 text-teal-700">
               <Clock className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Days Present</p>
@@ -335,41 +335,41 @@ export default function MyAttendancePage() {
                 <span>{monthlySummary?.totalDays > 0 ? Math.round(((monthlySummary.presentDays + (monthlySummary.lateDays || 0)) / monthlySummary.totalDays) * 100) : 0}% Attendance</span>
               </div>
             </div>
-            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
+            <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600">
               <Calendar className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Late Arrivals</p>
               <p className="text-xl font-bold text-foreground mt-1">
                 {monthlySummary?.lateDays ?? 0}
               </p>
-              <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5">
+              <p className="text-[11px] text-amber-600 mt-0.5">
                 Within acceptable threshold
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600">
+            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600">
               <AlertTriangle className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Overtime Hours</p>
               <p className="text-xl font-bold text-foreground mt-1">
                 {monthlySummary?.overtimeHours || "0h 00m"}
               </p>
-              <p className="text-[11px] text-purple-600 dark:text-purple-400 mt-0.5">
+              <p className="text-[11px] text-teal-700 mt-0.5 font-medium">
                 Compensable
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600">
+            <div className="p-2.5 rounded-lg bg-teal-50 text-teal-700">
               <TrendingUp className="w-5 h-5" />
             </div>
           </CardContent>
@@ -419,3 +419,4 @@ export default function MyAttendancePage() {
     </div>
   );
 }
+

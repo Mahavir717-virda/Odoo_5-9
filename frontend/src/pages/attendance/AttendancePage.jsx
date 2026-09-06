@@ -254,7 +254,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono">
             {row.check_in
               ? new Date(row.check_in).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-              : "—"}
+              : "â€”"}
           </span>
         ),
       },
@@ -266,7 +266,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono text-muted-foreground">
             {row.check_out
               ? new Date(row.check_out).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-              : "—"}
+              : "â€”"}
           </span>
         ),
       },
@@ -278,7 +278,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono font-medium">
             {row.worked_hours !== null && row.worked_hours !== undefined
               ? `${Number(row.worked_hours).toFixed(1)}h`
-              : "—"}
+              : "â€”"}
           </span>
         ),
       },
@@ -335,28 +335,28 @@ export default function AttendancePage() {
       />
 
       {/* Tab Switcher */}
-      <div className="flex items-center gap-2 p-1 bg-[#F7EFE5] rounded-xl border border-[#C3ACD0]/30 w-fit">
+      <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 w-fit">
         <button
           onClick={() => setActiveTab("logs")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             activeTab === "logs"
-              ? "bg-[#7743DB] text-white shadow-sm"
+              ? "bg-white text-teal-800 shadow-xs border border-slate-200"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <Clock className="w-4 h-4" />
+          <Clock className="w-4 h-4 text-teal-700" />
           Daily Attendance Logs
         </button>
 
         <button
           onClick={() => setActiveTab("leaderboard")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             activeTab === "leaderboard"
-              ? "bg-[#7743DB] text-white shadow-sm"
+              ? "bg-white text-teal-800 shadow-xs border border-slate-200"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <Trophy className="w-4 h-4 text-amber-300" />
+          <Trophy className="w-4 h-4 text-amber-500" />
           Monthly Leaderboard & Perks
         </button>
       </div>
@@ -509,7 +509,7 @@ export default function AttendancePage() {
                     <SelectContent>
                       {employees.map((emp) => (
                         <SelectItem key={emp.id} value={String(emp.id)} className="text-xs">
-                          {emp.name || `${emp.firstName} ${emp.lastName}`} • {emp.department}
+                          {emp.name || `${emp.firstName} ${emp.lastName}`} â€¢ {emp.department}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -584,3 +584,4 @@ export default function AttendancePage() {
     </div>
   );
 }
+

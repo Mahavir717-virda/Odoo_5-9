@@ -15,21 +15,21 @@ export default function PageHeader({ title, subtitle, actions, className }) {
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60",
+        "flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#e2e8f0]",
         className
       )}
     >
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+        <h1 className="text-xl font-bold tracking-tight text-[#0f172a]">
           {title}
         </h1>
         {subtitle && (
-          <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
+          <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>
         )}
       </div>
 
       {actions && (
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           {actions}
         </div>
       )}

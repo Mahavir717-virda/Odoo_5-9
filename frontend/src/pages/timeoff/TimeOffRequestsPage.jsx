@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import {
   Calendar,
   CheckCircle2,
@@ -210,9 +210,9 @@ export default function TimeOffRequestsPage() {
         sortable: true,
         render: (row) => (
           <div className="text-xs text-foreground font-mono">
-            <span>{row.start_date ? row.start_date.split("T")[0] : "—"}</span>
-            <span className="text-muted-foreground mx-1">→</span>
-            <span>{row.end_date ? row.end_date.split("T")[0] : "—"}</span>
+            <span>{row.start_date ? row.start_date.split("T")[0] : "â€”"}</span>
+            <span className="text-muted-foreground mx-1">â†’</span>
+            <span>{row.end_date ? row.end_date.split("T")[0] : "â€”"}</span>
           </div>
         ),
       },
@@ -234,7 +234,7 @@ export default function TimeOffRequestsPage() {
         header: "Reason",
         render: (row) => (
           <span className="text-xs text-muted-foreground line-clamp-1 max-w-xs" title={row.reason}>
-            {row.reason || "—"}
+            {row.reason || "â€”"}
           </span>
         ),
       },
@@ -268,7 +268,7 @@ export default function TimeOffRequestsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setRejectingId(row.id)}
-                className="h-7 px-2.5 text-xs gap-1 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 border-rose-200"
+                className="h-7 px-2.5 text-xs gap-1 text-rose-600 hover:bg-rose-50 border-rose-200"
               >
                 <XCircle className="w-3.5 h-3.5" />
                 Reject
@@ -287,7 +287,7 @@ export default function TimeOffRequestsPage() {
         title="Time Off Requests"
         subtitle="Review, approve, and manage employee leave applications across departments."
         actions={
-          <Button onClick={() => setIsModalOpen(true)} size="sm" className="gap-1.5 shadow-xs">
+          <Button onClick={() => setIsModalOpen(true)} size="sm" className="gap-1.5 shadow-sm">
             <Plus className="w-4 h-4" />
             New Request
           </Button>
@@ -295,7 +295,7 @@ export default function TimeOffRequestsPage() {
       />
 
       {toastMessage && (
-        <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
+        <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>{toastMessage}</span>
         </div>
@@ -303,49 +303,49 @@ export default function TimeOffRequestsPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Pending Requests</p>
               <p className="text-2xl font-bold text-amber-600 mt-0.5">{stats.pending}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600">
+            <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600">
               <Clock className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Approved</p>
               <p className="text-2xl font-bold text-emerald-600 mt-0.5">{stats.approved}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
+            <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Rejected</p>
               <p className="text-2xl font-bold text-rose-600 mt-0.5">{stats.rejected}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600">
+            <div className="p-2.5 rounded-lg bg-rose-50 text-rose-600">
               <XCircle className="w-5 h-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card shadow-2xs">
+        <Card className="border-border bg-card shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground">Total History</p>
               <p className="text-2xl font-bold text-foreground mt-0.5">{stats.total}</p>
             </div>
-            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600">
+            <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600">
               <Calendar className="w-5 h-5" />
             </div>
           </CardContent>
@@ -477,7 +477,7 @@ export default function TimeOffRequestsPage() {
                     <SelectContent>
                       {employees.map((emp) => (
                         <SelectItem key={emp.id} value={String(emp.id)} className="text-xs">
-                          {emp.name || `${emp.firstName} ${emp.lastName}`} • {emp.department}
+                          {emp.name || `${emp.firstName} ${emp.lastName}`} â€¢ {emp.department}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -551,3 +551,4 @@ export default function TimeOffRequestsPage() {
     </div>
   );
 }
+

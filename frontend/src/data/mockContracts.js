@@ -1,3 +1,10 @@
+/**
+ * Mock Contracts Dataset
+ *
+ * NOTE: This file is actively imported by services/contractService.js
+ * as the local in-memory data store for contract CRUD operations.
+ * TODO: Replace with live API calls when backend is ready.
+ */
 import { mockEmployees } from "./mockEmployees";
 
 const empMap = new Map(

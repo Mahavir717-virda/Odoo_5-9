@@ -9,13 +9,9 @@ import {
   Clock,
   Calendar,
   Building2,
-  ChevronRight,
   TrendingUp,
   Gift,
-  CheckCircle2,
   AlertCircle,
-  HelpCircle,
-  User,
   Search,
 } from "lucide-react";
 
@@ -198,20 +194,20 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
   return (
     <div className="space-y-6">
       {/* Controls & Filter Bar */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-4 rounded-xl border border-[#C3ACD0]/30 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7743DB] to-[#9667E0] flex items-center justify-center text-white shadow-md shadow-[#7743DB]/20">
+          <div className="w-10 h-10 rounded-xl bg-teal-700 flex items-center justify-center text-white shadow-sm">
             <Trophy className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-[#1F1728]">
+              <h2 className="text-base font-bold text-slate-900">
                 Attendance Champions & Perks
               </h2>
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                   isWsConnected
-                    ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                     : "bg-slate-100 text-slate-500"
                 }`}
               >
@@ -233,7 +229,7 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
         <div className="flex flex-wrap items-center gap-2">
           {/* Month Selector */}
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[130px] h-9 border-[#C3ACD0]/40 bg-[#FFFBF5] text-xs font-semibold">
+            <SelectTrigger className="w-[130px] h-9 border-slate-200 bg-white text-xs font-semibold">
               <SelectValue placeholder="Month" />
             </SelectTrigger>
             <SelectContent>
@@ -247,7 +243,7 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
 
           {/* Year Selector */}
           <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="w-[95px] h-9 border-[#C3ACD0]/40 bg-[#FFFBF5] text-xs font-semibold">
+            <SelectTrigger className="w-[95px] h-9 border-slate-200 bg-white text-xs font-semibold">
               <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent>
@@ -260,9 +256,9 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
             variant="outline"
             size="sm"
             onClick={() => setShowPerksInfo(!showPerksInfo)}
-            className="h-9 border-[#7743DB]/30 text-[#7743DB] hover:bg-[#7743DB]/10 text-xs font-semibold gap-1.5"
+            className="h-9 border-teal-200 text-teal-800 hover:bg-teal-50 text-xs font-semibold gap-1.5"
           >
-            <Gift className="w-3.5 h-3.5" />
+            <Gift className="w-3.5 h-3.5 text-teal-700" />
             Perks Ladder
           </Button>
         </div>
@@ -276,12 +272,12 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
             <button
               key={dept.id}
               onClick={() => setSelectedDept(dept.id)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 shadow-xs ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
                 isSelected
-                  ? "bg-[#7743DB] text-white shadow-md shadow-[#7743DB]/20 scale-102"
+                  ? "bg-teal-700 text-white shadow-sm"
                   : dept.isMyDept
-                  ? "bg-amber-50 text-amber-900 border border-amber-300/80 hover:bg-amber-100"
-                  : "bg-white text-slate-600 border border-[#C3ACD0]/30 hover:bg-[#FFFBF5] hover:text-slate-900"
+                  ? "bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100"
+                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <span>{dept.label}</span>
@@ -292,13 +288,13 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
 
       {/* Inter-Department Competition Battle Scoreboard (when viewing All Company) */}
       {selectedDept === "all" && departmentStandings.length > 0 && (
-        <Card className="border border-[#7743DB]/30 bg-gradient-to-r from-[#FFFBF5] via-white to-[#F7EFE5] shadow-sm rounded-2xl overflow-hidden">
-          <CardHeader className="py-3 px-4 border-b border-[#C3ACD0]/20 flex flex-row items-center justify-between">
-            <CardTitle className="text-xs font-bold text-[#1F1728] uppercase tracking-wider flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-[#7743DB]" />
+        <Card className="border border-slate-200/80 bg-white shadow-xs rounded-2xl overflow-hidden">
+          <CardHeader className="py-3 px-4 border-b border-slate-100 flex flex-row items-center justify-between bg-slate-50/50">
+            <CardTitle className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-teal-700" />
               Inter-Department Championship Standings
             </CardTitle>
-            <span className="text-[11px] font-semibold text-slate-500">
+            <span className="text-[11px] font-medium text-slate-500">
               Ranked by Avg Hours / Member
             </span>
           </CardHeader>
@@ -310,17 +306,17 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
                   <div
                     key={dept.department}
                     onClick={() => setSelectedDept(dept.department)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer hover:shadow-md ${
+                    className={`p-3.5 rounded-xl border transition-all cursor-pointer hover:shadow-xs ${
                       isLeading
-                        ? "bg-amber-500/10 border-amber-300 shadow-xs"
-                        : "bg-white/80 border-slate-200 hover:border-[#7743DB]/40"
+                        ? "bg-amber-50 border-amber-300 text-amber-900"
+                        : "bg-white border-slate-200 hover:border-teal-500"
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                         {isLeading ? "🏆 #1" : `#${dept.rank}`} {dept.department}
                       </span>
-                      <span className="text-[11px] font-bold text-[#7743DB]">
+                      <span className="text-[11px] font-bold text-teal-700">
                         {dept.avg_hours_per_member}h <span className="text-[10px] font-normal text-slate-500">/ avg</span>
                       </span>
                     </div>
@@ -338,12 +334,12 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
 
       {/* Perks Explanation Modal / Expandable Card */}
       {showPerksInfo && (
-        <Card className="border border-[#7743DB]/30 bg-gradient-to-br from-[#FFFBF5] to-[#F7EFE5] shadow-md animate-in fade-in slide-in-from-top-2 duration-300">
-          <CardHeader className="pb-3 border-b border-[#C3ACD0]/30">
+        <Card className="border border-slate-200 bg-white shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
+          <CardHeader className="pb-3 border-b border-slate-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Gift className="w-5 h-5 text-[#7743DB]" />
-                <CardTitle className="text-base font-bold text-[#1F1728]">
+                <Gift className="w-5 h-5 text-teal-700" />
+                <CardTitle className="text-base font-bold text-slate-900">
                   Monthly Attendance Perks & Rewards Policy
                 </CardTitle>
               </div>
@@ -358,40 +354,40 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
             </div>
           </CardHeader>
           <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-            <div className="p-3 bg-amber-500/10 border border-amber-300/40 rounded-xl space-y-1">
-              <div className="flex items-center gap-1.5 font-bold text-amber-800">
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-amber-900">
                 <Crown className="w-4 h-4 text-amber-500 fill-amber-500" />
                 Rank 1: Champion Tier
               </div>
-              <p className="text-slate-600 font-semibold">$150 Monthly Cash Bonus</p>
+              <p className="text-slate-700 font-semibold">$150 Monthly Cash Bonus</p>
               <p className="text-slate-500 text-[11px]">+ 1 Extra Floating Paid Day Off</p>
               <p className="text-slate-500 text-[11px]">+ Executive Spotlight on Portal</p>
             </div>
 
-            <div className="p-3 bg-slate-400/10 border border-slate-300 rounded-xl space-y-1">
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
               <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                <Medal className="w-4 h-4 text-slate-400" />
+                <Medal className="w-4 h-4 text-slate-500" />
                 Rank 2: Silver Pillar
               </div>
-              <p className="text-slate-600 font-semibold">$100 Monthly Cash Bonus</p>
+              <p className="text-slate-700 font-semibold">$100 Monthly Cash Bonus</p>
               <p className="text-slate-500 text-[11px]">+ Team Lunch & Coffee Voucher</p>
             </div>
 
-            <div className="p-3 bg-amber-700/10 border border-amber-600/30 rounded-xl space-y-1">
+            <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-xl space-y-1">
               <div className="flex items-center gap-1.5 font-bold text-amber-900">
                 <Award className="w-4 h-4 text-amber-700" />
                 Rank 3: Bronze Vanguard
               </div>
-              <p className="text-slate-600 font-semibold">$50 Perk Voucher</p>
+              <p className="text-slate-700 font-semibold">$50 Perk Voucher</p>
               <p className="text-slate-500 text-[11px]">+ Wellness & Beverage Perk</p>
             </div>
 
-            <div className="p-3 bg-[#7743DB]/10 border border-[#7743DB]/30 rounded-xl space-y-1">
-              <div className="flex items-center gap-1.5 font-bold text-[#7743DB]">
-                <Sparkles className="w-4 h-4" />
+            <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-teal-900">
+                <Sparkles className="w-4 h-4 text-teal-700" />
                 Rank 4–10: Star Contributors
               </div>
-              <p className="text-slate-600 font-semibold">250 Reward Points</p>
+              <p className="text-slate-700 font-semibold">250 Reward Points</p>
               <p className="text-slate-500 text-[11px]">+ Certificate of Attendance Commendation</p>
             </div>
           </CardContent>
@@ -427,8 +423,8 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end max-w-4xl mx-auto">
                 {/* 2nd Place (Silver) */}
                 {second && (
-                  <div className="order-2 md:order-1 flex flex-col items-center bg-white/90 backdrop-blur-sm border-2 border-slate-300 rounded-2xl p-5 shadow-lg relative transition-all hover:scale-[1.02]">
-                    <div className="absolute -top-4 px-3 py-0.5 bg-slate-500 text-white rounded-full text-xs font-bold shadow-md flex items-center gap-1">
+                  <div className="order-2 md:order-1 flex flex-col items-center bg-white border-2 border-slate-300 rounded-2xl p-5 shadow-sm relative transition-all hover:shadow-md">
+                    <div className="absolute -top-4 px-3 py-0.5 bg-slate-600 text-white rounded-full text-xs font-bold shadow-xs flex items-center gap-1">
                       <Medal className="w-3.5 h-3.5" /> 2nd Place
                     </div>
                     <div className="w-16 h-16 rounded-full border-4 border-slate-300 overflow-hidden bg-slate-100 flex items-center justify-center text-xl font-bold text-slate-700 shadow-inner mt-2">
@@ -438,13 +434,13 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
                         <span>{second.employee_name.charAt(0)}</span>
                       )}
                     </div>
-                    <h3 className="mt-3 font-bold text-sm text-[#1F1728] text-center line-clamp-1">
+                    <h3 className="mt-3 font-bold text-sm text-slate-900 text-center line-clamp-1">
                       {second.employee_name}
                     </h3>
                     <p className="text-[11px] text-slate-500 mb-2">{second.department}</p>
                     
-                    <div className="w-full bg-[#F7EFE5] rounded-xl p-2.5 text-center my-2 space-y-1">
-                      <div className="text-xl font-black text-slate-700">
+                    <div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center my-2 space-y-1">
+                      <div className="text-xl font-black text-slate-800">
                         {second.total_worked_hours} <span className="text-xs font-normal text-slate-500">hrs</span>
                       </div>
                       <div className="text-[11px] text-slate-600 font-medium">
@@ -460,30 +456,30 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
 
                 {/* 1st Place (Gold - Tallest Center) */}
                 {first && (
-                  <div className="order-1 md:order-2 flex flex-col items-center bg-gradient-to-b from-amber-50/90 to-white border-2 border-amber-400 rounded-2xl p-6 shadow-xl relative transition-all hover:scale-[1.03] -mt-2">
-                    <div className="absolute -top-5 px-4 py-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-full text-xs font-black shadow-lg flex items-center gap-1.5 tracking-wider uppercase">
+                  <div className="order-1 md:order-2 flex flex-col items-center bg-gradient-to-b from-amber-50 to-white border-2 border-amber-400 rounded-2xl p-6 shadow-md relative transition-all hover:shadow-lg -mt-2">
+                    <div className="absolute -top-5 px-4 py-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full text-xs font-black shadow-md flex items-center gap-1.5 tracking-wider uppercase">
                       <Crown className="w-4 h-4 fill-white text-white" /> Champion
                     </div>
                     
                     <div className="relative mt-2">
-                      <div className="w-20 h-20 rounded-full border-4 border-amber-400 overflow-hidden bg-amber-100 flex items-center justify-center text-2xl font-black text-amber-700 shadow-md">
+                      <div className="w-20 h-20 rounded-full border-4 border-amber-400 overflow-hidden bg-amber-100 flex items-center justify-center text-2xl font-black text-amber-800 shadow-sm">
                         {first.avatar_url ? (
                           <img src={first.avatar_url} alt={first.employee_name} className="w-full h-full object-cover" />
                         ) : (
                           <span>{first.employee_name.charAt(0)}</span>
                         )}
                       </div>
-                      <div className="absolute -bottom-1 -right-1 bg-amber-500 text-white p-1 rounded-full shadow">
+                      <div className="absolute -bottom-1 -right-1 bg-amber-500 text-white p-1 rounded-full shadow-xs">
                         <Flame className="w-3.5 h-3.5 fill-white" />
                       </div>
                     </div>
 
-                    <h3 className="mt-3 font-extrabold text-base text-[#1F1728] text-center line-clamp-1">
+                    <h3 className="mt-3 font-extrabold text-base text-slate-900 text-center line-clamp-1">
                       {first.employee_name}
                     </h3>
                     <p className="text-xs text-amber-800 font-medium mb-2">{first.job_position} • {first.department}</p>
                     
-                    <div className="w-full bg-amber-100/70 border border-amber-200 rounded-xl p-3 text-center my-2 space-y-1 shadow-inner">
+                    <div className="w-full bg-amber-50 border border-amber-200 rounded-xl p-3 text-center my-2 space-y-1">
                       <div className="text-2xl font-black text-amber-900">
                         {first.total_worked_hours} <span className="text-xs font-medium text-amber-700">hrs logged</span>
                       </div>
@@ -492,7 +488,7 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
                       </div>
                     </div>
 
-                    <div className="text-center w-full px-2.5 py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20">
+                    <div className="text-center w-full px-2.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl text-xs font-bold shadow-sm">
                       👑 {first.perks.perkText}
                     </div>
                   </div>
@@ -500,23 +496,23 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
 
                 {/* 3rd Place (Bronze) */}
                 {third && (
-                  <div className="order-3 flex flex-col items-center bg-white/90 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-5 shadow-lg relative transition-all hover:scale-[1.02]">
-                    <div className="absolute -top-4 px-3 py-0.5 bg-amber-800 text-white rounded-full text-xs font-bold shadow-md flex items-center gap-1">
+                  <div className="order-3 flex flex-col items-center bg-white border-2 border-amber-600/30 rounded-2xl p-5 shadow-sm relative transition-all hover:shadow-md">
+                    <div className="absolute -top-4 px-3 py-0.5 bg-amber-800 text-white rounded-full text-xs font-bold shadow-xs flex items-center gap-1">
                       <Award className="w-3.5 h-3.5" /> 3rd Place
                     </div>
-                    <div className="w-16 h-16 rounded-full border-4 border-amber-700/40 overflow-hidden bg-amber-50 flex items-center justify-center text-xl font-bold text-amber-900 shadow-inner mt-2">
+                    <div className="w-16 h-16 rounded-full border-4 border-amber-600/40 overflow-hidden bg-amber-50 flex items-center justify-center text-xl font-bold text-amber-900 shadow-inner mt-2">
                       {third.avatar_url ? (
                         <img src={third.avatar_url} alt={third.employee_name} className="w-full h-full object-cover" />
                       ) : (
                         <span>{third.employee_name.charAt(0)}</span>
                       )}
                     </div>
-                    <h3 className="mt-3 font-bold text-sm text-[#1F1728] text-center line-clamp-1">
+                    <h3 className="mt-3 font-bold text-sm text-slate-900 text-center line-clamp-1">
                       {third.employee_name}
                     </h3>
                     <p className="text-[11px] text-slate-500 mb-2">{third.department}</p>
                     
-                    <div className="w-full bg-[#F7EFE5] rounded-xl p-2.5 text-center my-2 space-y-1">
+                    <div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center my-2 space-y-1">
                       <div className="text-xl font-black text-amber-900">
                         {third.total_worked_hours} <span className="text-xs font-normal text-slate-500">hrs</span>
                       </div>
@@ -525,7 +521,7 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
                       </div>
                     </div>
 
-                    <div className="text-center w-full px-2 py-1.5 bg-amber-100/70 text-amber-900 rounded-lg text-[11px] font-semibold border border-amber-200">
+                    <div className="text-center w-full px-2 py-1.5 bg-amber-50 text-amber-900 rounded-lg text-[11px] font-semibold border border-amber-200">
                       🥉 {third.perks.perkText}
                     </div>
                   </div>
@@ -533,9 +529,9 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
               </div>
             </div>
           ) : (
-            <div className="p-8 bg-white border border-[#C3ACD0]/30 rounded-2xl text-center">
-              <Calendar className="w-10 h-10 mx-auto text-[#C3ACD0] mb-2" />
-              <h3 className="text-base font-bold text-slate-700">No attendance records found</h3>
+            <div className="p-8 bg-white border border-slate-200 rounded-2xl text-center">
+              <Calendar className="w-10 h-10 mx-auto text-slate-400 mb-2" />
+              <h3 className="text-base font-bold text-slate-800">No attendance records found</h3>
               <p className="text-xs text-slate-500 mt-1">
                 No employees have logged attendance for {periodName || "this period"}.
               </p>
@@ -544,13 +540,13 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
 
           {/* User's Personal Standing (if authenticated) */}
           {myRank && (
-            <div className="bg-gradient-to-r from-[#7743DB] to-[#9667E0] text-white p-4 rounded-2xl shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="bg-teal-800 text-white p-4 rounded-2xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center font-black text-xl border border-white/30">
+                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center font-black text-xl border border-white/20">
                   #{myRank.rank}
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-white/80 uppercase tracking-wider">
+                  <div className="text-xs font-medium text-teal-100 uppercase tracking-wider">
                     Your Current Standing ({selectedDept === "all" ? "Organization-Wide" : selectedDept})
                   </div>
                   <div className="text-base font-bold text-white">
@@ -565,22 +561,22 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
               </div>
 
               <div className="flex items-center gap-3 text-center">
-                <div className="px-3 py-1 bg-white/15 rounded-xl border border-white/20">
+                <div className="px-3 py-1 bg-white/10 rounded-xl border border-white/20">
                   <div className="text-lg font-black">{myRank.total_worked_hours}h</div>
-                  <div className="text-[10px] text-white/80">Hours Logged</div>
+                  <div className="text-[10px] text-teal-100">Hours Logged</div>
                 </div>
-                <div className="px-3 py-1 bg-white/15 rounded-xl border border-white/20">
+                <div className="px-3 py-1 bg-white/10 rounded-xl border border-white/20">
                   <div className="text-lg font-black">{myRank.days_present}</div>
-                  <div className="text-[10px] text-white/80">Days Present</div>
+                  <div className="text-[10px] text-teal-100">Days Present</div>
                 </div>
-                <div className="px-3 py-1 bg-white/15 rounded-xl border border-white/20">
+                <div className="px-3 py-1 bg-white/10 rounded-xl border border-white/20">
                   <div className="text-lg font-black">{myRank.punctuality_rate}%</div>
-                  <div className="text-[10px] text-white/80">Punctuality</div>
+                  <div className="text-[10px] text-teal-100">Punctuality</div>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-2">
-                <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-white text-[#7743DB] shadow-sm">
+                <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-white text-teal-800 shadow-sm">
                   {myRank.perks.badge}
                 </span>
 
@@ -589,7 +585,7 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
                     size="sm"
                     variant="outline"
                     onClick={() => setSelectedDept(selectedDept === myDepartment ? "all" : myDepartment)}
-                    className="h-7 text-[11px] font-bold bg-white/10 hover:bg-white/20 text-white border-white/30"
+                    className="h-7 text-[11px] font-bold bg-white/10 hover:bg-white/20 text-white border-white/30 cursor-pointer"
                   >
                     {selectedDept === myDepartment ? "View All Company" : `View ${myDepartment} Only`}
                   </Button>
@@ -599,10 +595,10 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
           )}
 
           {/* Full Ranked Table */}
-          <Card className="border border-[#C3ACD0]/30 shadow-sm bg-white overflow-hidden rounded-2xl">
+          <Card className="border border-slate-200 shadow-xs bg-white overflow-hidden rounded-2xl">
             <CardHeader className="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <CardTitle className="text-base font-bold text-[#1F1728] flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[#7743DB]" />
+              <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-teal-700" />
                 Complete Monthly Rankings ({filteredRankings.length} Employees)
               </CardTitle>
               <div className="relative w-full sm:w-64">
@@ -617,7 +613,7 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
             </CardHeader>
             <CardContent className="p-0 overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#FFFBF5] border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                   <tr>
                     <th className="py-3 px-4 w-16 text-center">Rank</th>
                     <th className="py-3 px-4">Employee</th>
@@ -637,23 +633,23 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
                     return (
                       <tr
                         key={emp.employee_id}
-                        className={`hover:bg-[#FFFBF5]/70 transition-colors ${
-                          emp.employee_id === myRank?.employee_id ? "bg-[#7743DB]/5 font-semibold" : ""
+                        className={`hover:bg-slate-50 transition-colors ${
+                          emp.employee_id === myRank?.employee_id ? "bg-teal-50/50 font-semibold" : ""
                         }`}
                       >
                         <td className="py-3.5 px-4 text-center">
                           {isTop1 && (
-                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-500 text-white font-black shadow-sm">
+                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-500 text-white font-black shadow-xs">
                               1
                             </span>
                           )}
                           {isTop2 && (
-                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-400 text-white font-black shadow-sm">
+                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-400 text-white font-black shadow-xs">
                               2
                             </span>
                           )}
                           {isTop3 && (
-                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-700 text-white font-black shadow-sm">
+                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-700 text-white font-black shadow-xs">
                               3
                             </span>
                           )}
@@ -663,7 +659,7 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
                         </td>
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-[#F7EFE5] border border-[#C3ACD0]/40 flex items-center justify-center font-bold text-slate-700 text-xs">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 text-xs">
                               {emp.employee_name.charAt(0)}
                             </div>
                             <div>
