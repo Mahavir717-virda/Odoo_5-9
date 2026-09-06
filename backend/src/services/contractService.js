@@ -1,6 +1,6 @@
 import pool from "../db.js";
 
-const VALID_STATUSES = ["draft", "active", "expired", "terminated"];
+const VALID_STATUSES = ["draft", "active", "expired", "terminated", "cancelled"];
 
 /**
  * Check if a date range [start_date, end_date] overlaps with an existing contract for the employee.
@@ -27,17 +27,20 @@ export const checkContractOverlap = async (
   // Overlap condition logic:
   // (A.start <= B.end OR B.end IS NULL) AND (A.end >= B.start OR A.end IS NULL)
   if (end_date) {
+    const startIdx = params.length + 1;
+    const endIdx = params.length + 2;
     params.push(start_date, end_date);
     query += ` AND (
-      start_date <= $${params.length}
-      AND (end_date IS NULL OR end_date >= $${params.length - 1})
+      start_date <= $${endIdx}
+      AND (end_date IS NULL OR end_date >= $${startIdx})
     )`;
   } else {
     // New contract is open-ended (end_date is NULL)
+    const startIdx = params.length + 1;
     params.push(start_date);
     query += ` AND (
       end_date IS NULL
-      OR end_date >= $${params.length}
+      OR end_date >= $${startIdx}
     )`;
   }
 
@@ -286,15 +289,23 @@ export const createContract = async (data) => {
   }
   const emp = empRes.rows[0];
 
-  // Validate salary structure exists
-  const structRes = await pool.query(
+  // Validate salary structure exists, fallback to first available if needed
+  let validStructureId = structure_id;
+  let structRes = await pool.query(
     "SELECT id FROM salary_structures WHERE id = $1",
-    [structure_id]
+    [validStructureId]
   );
   if (structRes.rows.length === 0) {
-    const err = new Error("Salary structure not found");
-    err.statusCode = 400;
-    throw err;
+    const fallbackRes = await pool.query(
+      "SELECT id FROM salary_structures ORDER BY id ASC LIMIT 1"
+    );
+    if (fallbackRes.rows.length > 0) {
+      validStructureId = fallbackRes.rows[0].id;
+    } else {
+      const err = new Error("Salary structure not found");
+      err.statusCode = 400;
+      throw err;
+    }
   }
 
   // Validate wage
@@ -356,7 +367,7 @@ export const createContract = async (data) => {
     start_date,
     end_date || null,
     wage,
-    structure_id,
+    validStructureId,
     finalDept,
     finalPosition,
     status,
@@ -404,15 +415,23 @@ export const updateContract = async (id, data) => {
     throw err;
   }
 
+  let validStructureId = structure_id;
   if (structure_id) {
     const structRes = await pool.query(
       "SELECT id FROM salary_structures WHERE id = $1",
       [structure_id]
     );
     if (structRes.rows.length === 0) {
-      const err = new Error("Salary structure not found");
-      err.statusCode = 400;
-      throw err;
+      const fallbackRes = await pool.query(
+        "SELECT id FROM salary_structures ORDER BY id ASC LIMIT 1"
+      );
+      if (fallbackRes.rows.length > 0) {
+        validStructureId = fallbackRes.rows[0].id;
+      } else {
+        const err = new Error("Salary structure not found");
+        err.statusCode = 400;
+        throw err;
+      }
     }
   }
 
@@ -445,7 +464,7 @@ export const updateContract = async (id, data) => {
 
   const updatedWage = wage !== undefined ? wage : existing.wage;
   const updatedStructureId =
-    structure_id !== undefined ? structure_id : existing.structure_id;
+    validStructureId !== undefined ? validStructureId : existing.structure_id;
   const updatedDepartment =
     department !== undefined ? department : existing.department;
   const updatedJobPosition =

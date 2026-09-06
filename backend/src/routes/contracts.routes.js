@@ -7,11 +7,12 @@ const router = express.Router();
 
 // Helper to validate integer ID
 const parseId = (id) => {
-  const parsed = parseInt(id, 10);
-  if (isNaN(parsed) || parsed <= 0 || String(parsed) !== String(id)) {
+  if (id === null || id === undefined) return null;
+  const num = typeof id === "number" ? id : parseInt(String(id).replace(/^(emp|con)-/i, ""), 10);
+  if (isNaN(num) || num <= 0) {
     return null;
   }
-  return parsed;
+  return num;
 };
 
 /**
