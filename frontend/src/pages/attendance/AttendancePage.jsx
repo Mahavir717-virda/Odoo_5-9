@@ -254,7 +254,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono">
             {row.check_in
               ? new Date(row.check_in).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-              : "â€”"}
+              : "—"}
           </span>
         ),
       },
@@ -266,7 +266,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono text-muted-foreground">
             {row.check_out
               ? new Date(row.check_out).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-              : "â€”"}
+              : "—"}
           </span>
         ),
       },
@@ -278,7 +278,7 @@ export default function AttendancePage() {
           <span className="text-xs font-mono font-medium">
             {row.worked_hours !== null && row.worked_hours !== undefined
               ? `${Number(row.worked_hours).toFixed(1)}h`
-              : "â€”"}
+              : "—"}
           </span>
         ),
       },
@@ -509,7 +509,7 @@ export default function AttendancePage() {
                     <SelectContent>
                       {employees.map((emp) => (
                         <SelectItem key={emp.id} value={String(emp.id)} className="text-xs">
-                          {emp.name || `${emp.firstName} ${emp.lastName}`} â€¢ {emp.department}
+                          {emp.name || `${emp.firstName} ${emp.lastName}`} • {emp.department}
                         </SelectItem>
                       ))}
                     </SelectContent>

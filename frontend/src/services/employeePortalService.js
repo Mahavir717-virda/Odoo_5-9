@@ -59,13 +59,16 @@ export const getEmployeeDashboardData = async () => {
     const from_date = `${currentYear}-${String(currentMonth).padStart(2, "0")}-01`;
     const to_date = `${currentYear}-${String(currentMonth).padStart(2, "0")}-${String(lastDayCurrentMonth).padStart(2, "0")}`;
 
-    const [attRes, allocRes, reqRes, payRes] = await Promise.all([
+    const [profileRes, attRes, allocRes, reqRes, payRes] = await Promise.all([
+      api.get("/employees/me").catch(() => ({ data: { data: null } })),
       api.get(`/attendance/me?from_date=${from_date}&to_date=${to_date}&limit=50`).catch(() => ({ data: { data: [] } })),
       api.get("/time-off/allocations/me").catch(() => ({ data: { data: [] } })),
       api.get("/time-off/requests/me?limit=5").catch(() => ({ data: { data: [] } })),
       api.get("/payslips/me?limit=1").catch(() => ({ data: { data: [] } })),
     ]);
 
+    const profile = profileRes.data?.data;
+    const isInactive = profile?.status && profile.status.toLowerCase() !== "active";
     const attendanceRecords = Array.isArray(attRes.data?.data) ? attRes.data.data : [];
     const allocations = Array.isArray(allocRes.data?.data) ? allocRes.data.data : [];
     const rawRequests = Array.isArray(reqRes.data?.data) ? reqRes.data.data : [];
@@ -151,6 +154,8 @@ export const getEmployeeDashboardData = async () => {
       : "100%";
 
     return {
+      profile,
+      isInactive,
       punchState: {
         isClockedIn,
         clockInTime,

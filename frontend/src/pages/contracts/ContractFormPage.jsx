@@ -400,7 +400,7 @@ export default function ContractFormPage() {
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
             {/* Monthly Wage */}
             <FormField
-              label="Monthly Wage (â‚¹ INR)"
+              label="Monthly Wage (₹ INR)"
               required
               error={errors.wage}
               hint="Gross monthly base compensation"

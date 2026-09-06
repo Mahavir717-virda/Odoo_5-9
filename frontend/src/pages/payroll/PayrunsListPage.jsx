@@ -133,9 +133,9 @@ export default function PayrunsListPage() {
         sortable: true,
         render: (row) => (
           <div className="text-xs text-foreground font-mono">
-            <span>{row.period_start ? row.period_start.split("T")[0] : "â€”"}</span>
-            <span className="text-muted-foreground mx-1">â†’</span>
-            <span>{row.period_end ? row.period_end.split("T")[0] : "â€”"}</span>
+            <span>{row.period_start ? row.period_start.split("T")[0] : "—"}</span>
+            <span className="text-muted-foreground mx-1">→</span>
+            <span>{row.period_end ? row.period_end.split("T")[0] : "—"}</span>
           </div>
         ),
       },

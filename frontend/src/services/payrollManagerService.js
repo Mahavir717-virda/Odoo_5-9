@@ -158,10 +158,11 @@ export const recalculatePayslip = async (id) => {
 // 5. REPORTS
 // ==========================================
 
-export const getPayrollSummaryReport = async ({ period_start, period_end } = {}) => {
+export const getPayrollSummaryReport = async ({ period_start, period_end, department } = {}) => {
   const params = new URLSearchParams();
   if (period_start) params.append("period_start", period_start);
   if (period_end) params.append("period_end", period_end);
+  if (department && department !== "all") params.append("department", department);
 
   const response = await api.get(`/reports/payroll-summary?${params.toString()}`);
   return response.data?.data;
