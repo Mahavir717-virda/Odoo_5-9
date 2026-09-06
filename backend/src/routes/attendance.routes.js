@@ -130,11 +130,23 @@ router.get("/leaderboard", authenticate, async (req, res, next) => {
       }
     }
 
+    // If non-admin, restrict departmentStandings and availableDepartments to only their own department
+    let filteredStandings = leaderboard.departmentStandings || [];
+    let filteredAvailableDepts = leaderboard.availableDepartments || [];
+    if (!isPrivilegedAdmin && myDepartment) {
+      filteredStandings = filteredStandings.filter(
+        (d) => d.department?.toLowerCase().trim() === myDepartment.toLowerCase().trim()
+      );
+      filteredAvailableDepts = [myDepartment];
+    }
+
     return res.status(200).json({
       success: true,
       message: "Monthly attendance leaderboard retrieved successfully",
       data: {
         ...leaderboard,
+        departmentStandings: filteredStandings,
+        availableDepartments: filteredAvailableDepts,
         myRank,
         myDepartment,
         myDepartmentRank,

@@ -155,37 +155,27 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
   });
 
   const { user } = useAuth();
-  const isPrivilegedAdmin = ["admin", "hr_manager", "hr_payroll_manager"].includes(user?.role);
+  const isPrivilegedAdmin = ["ADMIN", "HR_MANAGER", "HR_PAYROLL_MANAGER"].includes(user?.role?.toUpperCase());
 
-  // Dynamic department tabs based on role:
-  // - Admin/HR/Payroll Manager: All Company + My Dept + all company departments
-  // - Department Employee / User: All Company + My Department only
-  const allDeptNames = Array.from(
-    new Set([
-      ...(myDepartment ? [myDepartment] : []),
-      ...availableDepartments,
-      "Engineering",
-      "HR",
-      "Finance",
-      "Sales",
-      "Marketing",
-    ])
-  ).filter(Boolean);
+  // Dynamic department tabs:
+  // - Admin/HR/Payroll Manager: All Company + My Dept + all other company departments
+  // - Regular Department Employee: ONLY 'All Company' + 'My Department' (e.g. Engineering)
+  const userDept = myDepartment || user?.department || "";
 
   const DEPARTMENT_TABS = [
     { id: "all", label: "🏢 All Company", isMyDept: false },
-    ...(myDepartment
+    ...(userDept
       ? [
           {
-            id: myDepartment,
-            label: `⭐ My Dept (${myDepartment})`,
+            id: userDept,
+            label: `⭐ ${userDept} Department`,
             isMyDept: true,
           },
         ]
       : []),
     ...(isPrivilegedAdmin
-      ? allDeptNames
-          .filter((d) => d !== myDepartment)
+      ? availableDepartments
+          .filter((d) => d && d.toLowerCase() !== userDept.toLowerCase())
           .map((d) => ({
             id: d,
             label: `${d}`,
