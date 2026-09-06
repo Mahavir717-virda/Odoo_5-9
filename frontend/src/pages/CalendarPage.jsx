@@ -130,6 +130,7 @@ export default function CalendarPage() {
     <div className="space-y-6 pb-16 max-w-6xl mx-auto">
       <PageHeader
         title="Attendance & Leave Calendar"
+        icon={CalendarIcon}
         subtitle={
           isPrivileged
             ? "Company-wide attendance status and approved leave calendar"
