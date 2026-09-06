@@ -12,6 +12,7 @@ import timeOffRoutes from "./timeOff.routes.js";
 import reportRoutes from "./reports.routes.js";
 import workingScheduleRoutes from "./workingSchedules.routes.js";
 import notificationRoutes from "./notifications.routes.js";
+import calendarRoutes from "./calendar.routes.js";
 
 const router = express.Router();
 
@@ -32,6 +33,9 @@ router.use("/contracts", contractRoutes);
 
 // Attendance routes
 router.use("/attendance", attendanceRoutes);
+
+// Calendar routes (/api/v1/calendar)
+router.use("/calendar", calendarRoutes);
 
 // Salary Rule routes (/api/v1/salary-rules)
 router.use("/salary-rules", salaryRulesRoutes);

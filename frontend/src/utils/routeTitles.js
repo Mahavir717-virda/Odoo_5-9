@@ -27,6 +27,7 @@ export function getPageTitle(pathname) {
     "/my-attendance": "My Attendance",
     "/my-time-off": "My Time Off",
     "/my-payslips": "My Payslips",
+    "/calendar": "Attendance & Leave Calendar",
     "/profile": "User Profile",
     "/change-password": "Change Password",
   };
