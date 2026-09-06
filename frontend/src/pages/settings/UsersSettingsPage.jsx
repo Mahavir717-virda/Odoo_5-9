@@ -20,11 +20,13 @@ import {
   UserCheck,
   ChevronLeft,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 import {
   listUsers,
   createUser,
   updateUser,
+  deleteUser,
   toggleUserStatus,
   updateUserRole,
 } from "../../services/settingsService";
@@ -162,7 +164,7 @@ export default function UsersSettingsPage() {
       name: user.name,
       department: user.department,
       jobPosition: user.jobPosition,
-      phone: user.phone !== "â€”" ? user.phone : "",
+      phone: user.phone !== "—" ? user.phone : "",
       status: user.status,
       role: user.role,
     });
@@ -203,6 +205,19 @@ export default function UsersSettingsPage() {
       fetchUsers();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to toggle user status.");
+    }
+  };
+
+  const handleDeleteUser = async (user) => {
+    if (!window.confirm(`Are you sure you want to permanently delete user account ${user.email}? This action cannot be undone.`)) return;
+
+    try {
+      await deleteUser(user.userId || user.id);
+      setSuccessMsg(`User ${user.email} deleted successfully.`);
+      setTimeout(() => setSuccessMsg(""), 4000);
+      fetchUsers();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete user account.");
     }
   };
 
@@ -469,13 +484,20 @@ export default function UsersSettingsPage() {
                       </button>
                     </td>
 
-                    <td className="py-3.5 px-4 pr-6 text-right">
+                    <td className="py-3.5 px-4 pr-6 text-right flex items-center justify-end gap-1">
                       <button
                         onClick={() => openEditModal(u)}
                         className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition"
                         title="Edit User"
                       >
                         <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteUser(u)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition"
+                        title="Delete User"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
@@ -546,7 +568,7 @@ export default function UsersSettingsPage() {
                 <input
                   type="password"
                   required
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                  placeholder="••••••••••••"
                   value={createForm.password}
                   onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
@@ -733,7 +755,7 @@ export default function UsersSettingsPage() {
                 </div>
               </div>
 
-              {/* Security Role â€” Admin-Only Change */}
+              {/* Security Role — Admin-Only Change */}
               <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                 <div className="flex items-center gap-2 mb-2">
                   <Shield className="w-4 h-4 text-amber-600" />
@@ -749,16 +771,16 @@ export default function UsersSettingsPage() {
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
                   className="w-full px-3.5 py-2 rounded-xl bg-white border border-amber-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-medium"
                 >
-                  <option value="EMPLOYEE">ðŸ‘¤ Employee (Self-Service Portal)</option>
-                  <option value="HR_PAYROLL_USER">ðŸ“‹ HR Payroll User</option>
-                  <option value="HR_PAYROLL_MANAGER">ðŸ’¼ HR Payroll Manager</option>
+                  <option value="EMPLOYEE">👤 Employee (Self-Service Portal)</option>
+                  <option value="HR_PAYROLL_USER">📋 HR Payroll User</option>
+                  <option value="HR_PAYROLL_MANAGER">💼 HR Payroll Manager</option>
                   <option value="HR_MANAGER">ðŸ¢ HR Manager</option>
                   <option value="ADMIN">ðŸ›¡ï¸ Administrator (Full Access)</option>
                 </select>
                 {editForm.role !== editingUser?.role && (
                   <p className="mt-2 text-[11px] text-amber-700 flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5" />
-                    Role will change from <strong>{editingUser?.role}</strong> â†’ <strong>{editForm.role}</strong>
+                    Role will change from <strong>{editingUser?.role}</strong> → <strong>{editForm.role}</strong>
                   </p>
                 )}
               </div>

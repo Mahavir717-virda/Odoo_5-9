@@ -208,10 +208,15 @@ export const createAttendance = async (data) => {
     throw err;
   }
 
-  // Validate employee exists
+  // Validate employee exists and is active
   const empRes = await pool.query("SELECT id, status FROM employees WHERE id = $1", [employee_id]);
   if (empRes.rows.length === 0) {
     const err = new Error("Employee not found");
+    err.statusCode = 400;
+    throw err;
+  }
+  if (empRes.rows[0].status && empRes.rows[0].status.toLowerCase() !== "active") {
+    const err = new Error("Cannot record attendance for a deactivated employee.");
     err.statusCode = 400;
     throw err;
   }
@@ -357,11 +362,17 @@ export const updateAttendance = async (id, data) => {
  * Check In an employee
  */
 export const checkIn = async (employeeId, date = null) => {
-  // Validate employee exists
-  const empRes = await pool.query("SELECT id FROM employees WHERE id = $1", [employeeId]);
+  // Validate employee exists and is active
+  const empRes = await pool.query("SELECT id, status FROM employees WHERE id = $1", [employeeId]);
   if (empRes.rows.length === 0) {
     const err = new Error("Employee not found");
     err.statusCode = 404;
+    throw err;
+  }
+
+  if (empRes.rows[0].status && empRes.rows[0].status.toLowerCase() !== "active") {
+    const err = new Error("Employee account is deactivated. Attendance check-in is stopped.");
+    err.statusCode = 403;
     throw err;
   }
 
@@ -425,11 +436,17 @@ export const checkIn = async (employeeId, date = null) => {
  * Check Out an employee and calculate worked_hours
  */
 export const checkOut = async (employeeId, date = null) => {
-  // Validate employee exists
-  const empRes = await pool.query("SELECT id FROM employees WHERE id = $1", [employeeId]);
+  // Validate employee exists and is active
+  const empRes = await pool.query("SELECT id, status FROM employees WHERE id = $1", [employeeId]);
   if (empRes.rows.length === 0) {
     const err = new Error("Employee not found");
     err.statusCode = 404;
+    throw err;
+  }
+
+  if (empRes.rows[0].status && empRes.rows[0].status.toLowerCase() !== "active") {
+    const err = new Error("Employee account is deactivated. Attendance is stopped.");
+    err.statusCode = 403;
     throw err;
   }
 

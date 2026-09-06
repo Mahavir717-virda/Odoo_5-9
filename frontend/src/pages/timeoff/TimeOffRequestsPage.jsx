@@ -210,9 +210,9 @@ export default function TimeOffRequestsPage() {
         sortable: true,
         render: (row) => (
           <div className="text-xs text-foreground font-mono">
-            <span>{row.start_date ? row.start_date.split("T")[0] : "â€”"}</span>
-            <span className="text-muted-foreground mx-1">â†’</span>
-            <span>{row.end_date ? row.end_date.split("T")[0] : "â€”"}</span>
+            <span>{row.start_date ? row.start_date.split("T")[0] : "—"}</span>
+            <span className="text-muted-foreground mx-1">→</span>
+            <span>{row.end_date ? row.end_date.split("T")[0] : "—"}</span>
           </div>
         ),
       },
@@ -234,7 +234,7 @@ export default function TimeOffRequestsPage() {
         header: "Reason",
         render: (row) => (
           <span className="text-xs text-muted-foreground line-clamp-1 max-w-xs" title={row.reason}>
-            {row.reason || "â€”"}
+            {row.reason || "—"}
           </span>
         ),
       },
@@ -477,7 +477,7 @@ export default function TimeOffRequestsPage() {
                     <SelectContent>
                       {employees.map((emp) => (
                         <SelectItem key={emp.id} value={String(emp.id)} className="text-xs">
-                          {emp.name || `${emp.firstName} ${emp.lastName}`} â€¢ {emp.department}
+                          {emp.name || `${emp.firstName} ${emp.lastName}`} • {emp.department}
                         </SelectItem>
                       ))}
                     </SelectContent>

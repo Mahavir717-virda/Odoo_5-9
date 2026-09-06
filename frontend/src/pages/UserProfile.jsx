@@ -213,7 +213,7 @@ export default function UserProfile() {
                   <StatusBadge status={profile?.status || "Active"} />
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5 font-medium">
-                  {profile?.jobPosition || "Employee"} â€¢{" "}
+                  {profile?.jobPosition || "Employee"} •{" "}
                   <span className="text-foreground/80">{profile?.department || "Engineering"}</span>
                 </p>
                 <p className="text-xs text-muted-foreground/80 font-mono mt-0.5">
@@ -474,7 +474,7 @@ export default function UserProfile() {
                 </span>
                 <div className="flex items-center gap-2 mt-1 text-sm font-mono font-medium text-foreground bg-muted/40 p-2 rounded-md border border-border/40">
                   <Building className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>{profile?.bankAccount || "â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 4892 (Chase Bank)"}</span>
+                  <span>{profile?.bankAccount || "•••• •••• •••• 4892 (Chase Bank)"}</span>
                 </div>
               </div>
 

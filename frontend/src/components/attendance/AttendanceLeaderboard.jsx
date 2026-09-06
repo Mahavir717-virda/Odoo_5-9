@@ -27,6 +27,7 @@ import {
 } from "../ui/select";
 import { Skeleton } from "../ui/skeleton";
 import * as managerAttendanceService from "../../services/managerAttendanceService";
+import { useAuth } from "../../context/AuthContext";
 
 const MONTHS = [
   { value: "1", label: "January" },
@@ -153,7 +154,12 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
     );
   });
 
-  // Dynamic department tabs including "All Company" + "My Department" + other active departments
+  const { user } = useAuth();
+  const isPrivilegedAdmin = ["admin", "hr_manager", "hr_payroll_manager"].includes(user?.role);
+
+  // Dynamic department tabs based on role:
+  // - Admin/HR/Payroll Manager: All Company + My Dept + all company departments
+  // - Department Employee / User: All Company + My Department only
   const allDeptNames = Array.from(
     new Set([
       ...(myDepartment ? [myDepartment] : []),
@@ -177,13 +183,15 @@ export default function AttendanceLeaderboard({ showHeader = true }) {
           },
         ]
       : []),
-    ...allDeptNames
-      .filter((d) => d !== myDepartment)
-      .map((d) => ({
-        id: d,
-        label: `${d}`,
-        isMyDept: false,
-      })),
+    ...(isPrivilegedAdmin
+      ? allDeptNames
+          .filter((d) => d !== myDepartment)
+          .map((d) => ({
+            id: d,
+            label: `${d}`,
+            isMyDept: false,
+          }))
+      : []),
   ];
 
   // Podium sorting: 2nd (Silver, index 1), 1st (Gold, index 0), 3rd (Bronze, index 2)

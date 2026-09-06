@@ -38,7 +38,7 @@ const CARD_ANIMATION_VARIANTS = {
   },
 };
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const fmt = (n) => Number(n || 0).toFixed(1).replace(".0", "");
 
@@ -49,10 +49,10 @@ const ROLE_BADGE = {
   employee: { label: "Employee", cls: "bg-slate-100 text-slate-600" },
 };
 
-// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function TimeOffAllocationsPage() {
-  // â”€â”€ Data State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Data State ──────────────────────────────────────────────────────────────
   const [allocations, setAllocations] = useState([]);
   const [types, setTypes] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -60,32 +60,32 @@ export default function TimeOffAllocationsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  // â”€â”€ Filters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Filters ─────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [empFilter, setEmpFilter] = useState("all");
 
-  // â”€â”€ Pagination â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Pagination ───────────────────────────────────────────────────────────────
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 12;
 
-  // â”€â”€ Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Modal ────────────────────────────────────────────────────────────────────
   const [modalOpen, setModalOpen] = useState(false);
   const [editingAlloc, setEditingAlloc] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
 
-  // â”€â”€ Form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Form ─────────────────────────────────────────────────────────────────────
   const [form, setForm] = useState({ empId: "", typeId: "", days: "20" });
 
-  // â”€â”€ Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Toast ────────────────────────────────────────────────────────────────────
   const [toast, setToast] = useState({ show: false, msg: "", type: "success" });
   const showToast = (msg, type = "success") => {
     setToast({ show: true, msg, type });
     setTimeout(() => setToast({ show: false, msg: "", type: "success" }), 3500);
   };
 
-  // â”€â”€ Fetch Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Fetch Data ───────────────────────────────────────────────────────────────
   const loadData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
@@ -134,7 +134,7 @@ export default function TimeOffAllocationsPage() {
     loadData();
   }, [loadData]);
 
-  // â”€â”€ Filtered & Paginated Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Filtered & Paginated Data ─────────────────────────────────────────────
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     return allocations.filter((a) => {
@@ -155,7 +155,7 @@ export default function TimeOffAllocationsPage() {
   // Reset page when filters change
   useEffect(() => setPage(1), [search, typeFilter, empFilter]);
 
-  // â”€â”€ KPI Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── KPI Stats ─────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const totalAlloc = allocations.reduce((s, a) => s + a.allocated, 0);
     const totalTaken = allocations.reduce((s, a) => s + a.taken, 0);
@@ -164,7 +164,7 @@ export default function TimeOffAllocationsPage() {
     return { count: allocations.length, totalAlloc, totalTaken, totalRemaining, utilPct };
   }, [allocations]);
 
-  // â”€â”€ Modal Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Modal Helpers ──────────────────────────────────────────────────────────
   const openCreate = () => {
     setEditingAlloc(null);
     setForm({
@@ -189,7 +189,7 @@ export default function TimeOffAllocationsPage() {
     setFormError(null);
   };
 
-  // â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Submit ─────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError(null);
@@ -223,11 +223,11 @@ export default function TimeOffAllocationsPage() {
     }
   };
 
-  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6 pb-16 max-w-7xl mx-auto px-1">
 
-      {/* â”€â”€ Toast â”€â”€ */}
+      {/* ── Toast ── */}
       {toast.show && (
         <div
           className={`fixed top-5 right-5 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-xl text-sm font-medium transition-all animate-in slide-in-from-top-2 ${
@@ -245,7 +245,7 @@ export default function TimeOffAllocationsPage() {
         </div>
       )}
 
-      {/* â”€â”€ Page Header â”€â”€ */}
+      {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
@@ -281,7 +281,7 @@ export default function TimeOffAllocationsPage() {
         </div>
       </div>
 
-      {/* â”€â”€ KPI Cards â”€â”€ */}
+      {/* ── KPI Cards ── */}
       <motion.div
         variants={STAGGER_CONTAINER_VARIANTS}
         initial="hidden"
@@ -501,7 +501,7 @@ export default function TimeOffAllocationsPage() {
       />
       {/* Modal */}
 
-      {/* â”€â”€ Grant / Edit Modal â”€â”€ */}
+      {/* ── Grant / Edit Modal ── */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 animate-in zoom-in-95">
@@ -551,10 +551,10 @@ export default function TimeOffAllocationsPage() {
                     disabled={Boolean(editingAlloc)}
                     className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    <option value="">â€” Select employee â€”</option>
+                    <option value="">— Select employee —</option>
                     {employees.map((emp) => (
                       <option key={emp.id} value={String(emp.id)}>
-                        {emp.name} {emp.department ? `â€¢ ${emp.department}` : ""}
+                        {emp.name} {emp.department ? `• ${emp.department}` : ""}
                       </option>
                     ))}
                   </select>
@@ -574,7 +574,7 @@ export default function TimeOffAllocationsPage() {
                     disabled={Boolean(editingAlloc)}
                     className="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    <option value="">â€” Select leave type â€”</option>
+                    <option value="">— Select leave type —</option>
                     {types.map((t) => (
                       <option key={t.id} value={String(t.id)}>
                         {t.name} ({t.unit})

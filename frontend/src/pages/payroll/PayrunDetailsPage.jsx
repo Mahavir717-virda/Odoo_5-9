@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   DollarSign,
@@ -28,15 +28,7 @@ import { Input } from "../../components/ui/input";
 import { Separator } from "../../components/ui/separator";
 
 import * as payrollManagerService from "../../services/payrollManagerService";
-
-function formatCurrency(amount) {
-  if (amount == null) return "â€”";
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from "../../utils/formatters";
 
 export default function PayrunDetailsPage() {
   const { id } = useParams();
@@ -417,14 +409,14 @@ export default function PayrunDetailsPage() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-3">
                   <span className="font-mono">PR-{String(payrun.id).padStart(4, "0")}</span>
-                  <span>â€¢</span>
+                  <span>•</span>
                   <span>Structure: <strong className="text-foreground">{payrun.structure_name || "Standard Structure"}</strong></span>
-                  <span>â€¢</span>
+                  <span>•</span>
                   <span>
                     Period:{" "}
                     <strong className="text-foreground">
-                      {payrun.period_start ? payrun.period_start.split("T")[0] : "â€”"} to{" "}
-                      {payrun.period_end ? payrun.period_end.split("T")[0] : "â€”"}
+                      {payrun.period_start ? payrun.period_start.split("T")[0] : "—"} to{" "}
+                      {payrun.period_end ? payrun.period_end.split("T")[0] : "—"}
                     </strong>
                   </span>
                 </p>

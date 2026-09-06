@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -22,36 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Skeleton } from "../../components/ui/skeleton";
 import * as contractService from "../../services/contractService";
 import { isSameId } from "../../services/contractService";
-
-/**
- * Format currency to Indian Rupee (INR)
- */
-function formatCurrency(amount) {
-  if (amount == null) return "â€”";
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-/**
- * Format ISO date string into readable format (e.g. "Jan 15, 2024")
- */
-function formatDate(dateString) {
-  if (!dateString) return "â€”";
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return dateString;
-  }
-}
+import { formatCurrency, formatDate } from "../../utils/formatters";
 
 /**
  * InfoItem helper component matching EmployeeDetailsPage Overview tab styling
@@ -74,10 +45,10 @@ function InfoItem({ label, value, icon: Icon, isLink, to }) {
               to={to}
               className="text-primary hover:underline font-semibold"
             >
-              {value || "â€”"}
+              {value || "—"}
             </Link>
           ) : (
-            value || "â€”"
+            value || "—"
           )}
         </div>
       </div>
@@ -419,7 +390,7 @@ export default function ContractDetailsPage() {
                           </div>
 
                           <p className="text-xs text-muted-foreground">
-                            {c.jobPosition} â€¢ {c.department}
+                            {c.jobPosition} • {c.department}
                           </p>
                         </div>
 

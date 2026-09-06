@@ -94,7 +94,7 @@ export default function MyAttendancePage() {
         header: "Date",
         sortable: true,
         render: (row) => {
-          if (!row.date) return "â€”";
+          if (!row.date) return "—";
           const dateStr = String(row.date).includes("T") ? row.date : `${row.date}T00:00:00`;
           const d = new Date(dateStr);
           return (
